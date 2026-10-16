@@ -9,7 +9,7 @@ export function HeroActions() {
         <a className="button" href="#contact">Get in touch <Mail size={16} aria-hidden="true" /></a>
       </div>
       <div className="hero-socials">
-        <a className="text-link" href={profile.links[1].href}>LinkedIn <ArrowUpRight size={14} aria-hidden="true" /></a>
+        {profile.links.map((link) => <a key={link.label} className="text-link" href={link.href}>{link.label} <ArrowUpRight size={14} aria-hidden="true" /></a>)}
       </div>
     </div>
   );

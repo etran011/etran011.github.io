@@ -1,8 +1,9 @@
+import { ArrowDown } from "lucide-react";
 import { HeroActions } from "./hero-actions";
+import { HeroProject } from "./hero-project";
 import { Container } from "@/components/ui/container";
 import { profile } from "@/data/portfolio";
 import { HeroMotion } from "./hero-motion";
-import { SignalGraphic } from "./signal-graphic";
 
 export function Hero() {
   return (
@@ -10,17 +11,17 @@ export function Hero() {
       <Container>
         <div className="hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow hero-kicker"><span aria-hidden="true" />{profile.name} / Data &amp; software</p>
-            <h1 id="hero-heading">Turning data<br />into <span>useful</span><br />experiences.</h1>
-            <p className="hero-description">I’m Erik, a Data Science student at William &amp; Mary. I build at the intersection of software, machine learning, and thoughtful design.</p>
+            <p className="eyebrow hero-kicker"><span aria-hidden="true" />Hello, I’m</p>
+            <h1 id="hero-heading">{profile.name}<span>.</span></h1>
+            <p className="hero-role">{profile.institution} <span aria-hidden="true">·</span> {profile.discipline} <span aria-hidden="true">·</span> Class of {profile.graduationYear}</p>
+            <p className="hero-headline"><span>Building intelligent systems,</span><span>one idea at a time.</span></p>
             <HeroActions />
           </div>
-          <HeroMotion><SignalGraphic /></HeroMotion>
+          <HeroMotion><HeroProject /></HeroMotion>
         </div>
         <div className="hero-baseline">
-          <p><span className="eyebrow">Currently</span><br />{profile.discipline} · {profile.institution}</p>
-          <p><span className="eyebrow">Looking ahead</span><br />Class of {profile.graduationYear}</p>
-          <span className="eyebrow hero-note">Curiosity, made practical.</span>
+          <p><span className="eyebrow">Interested in</span><br />Software engineering · AI &amp; machine learning · Financial technology</p>
+          <a className="hero-note text-link" href="#about">A little about me <ArrowDown size={16} aria-hidden="true" /></a>
         </div>
       </Container>
     </section>
