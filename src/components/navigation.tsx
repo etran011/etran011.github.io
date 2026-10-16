@@ -22,12 +22,17 @@ export function Navigation() {
   const [active, setActive] = useState("home");
   const pathname = usePathname();
   const progress = useRef<HTMLDivElement>(null);
+  const header = useRef<HTMLElement>(null);
   const activeHref = pathname === "/" ? `/#${active}` : pathname.startsWith("/projects/") ? "/#projects" : undefined;
 
   useEffect(() => {
     let frame = 0;
+    let visible = pathname !== "/";
     const update = () => {
       frame = 0;
+      // Separate thresholds keep small reversals from flickering the header.
+      visible = pathname !== "/" || (visible ? window.scrollY > 48 : window.scrollY > 120);
+      if (header.current) header.current.dataset.navVisible = String(visible);
       const maximum = document.documentElement.scrollHeight - window.innerHeight;
       if (progress.current) progress.current.style.transform = `scaleX(${maximum > 0 ? Math.min(1, Math.max(0, window.scrollY / maximum)) : 0})`;
       if (pathname !== "/") return;
@@ -46,7 +51,6 @@ export function Navigation() {
     return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); };
   }, [pathname]);
   const toggle = useRef<HTMLButtonElement>(null);
-  const header = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -71,7 +75,7 @@ export function Navigation() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <header ref={header} className="site-header">
+      <header ref={header} className="site-header" data-home={pathname === "/" ? "true" : undefined} data-menu-open={open ? "true" : undefined}>
         <div className="nav-bar">
           <Link className="brand" href="/#home" onClick={() => setOpen(false)}>
             <span className="brand-mark" aria-hidden="true">et<span>.</span></span>
@@ -90,7 +94,7 @@ export function Navigation() {
           {links.map((link) => <a key={link.label} href={link.href} aria-current={activeHref === link.href ? "location" : undefined} onClick={() => setOpen(false)}>{link.label}<ArrowUpRight size={16} aria-hidden="true" /></a>)}
         </nav>
         <noscript>
-          <style>{"@media(max-width:1023px){.menu-toggle{display:none}.site-header{position:relative;top:0}}"}</style>
+          <style>{".site-header[data-home]{opacity:1;transform:none;pointer-events:auto}@media(max-width:1023px){.menu-toggle{display:none}.site-header{position:relative;top:0;left:auto;translate:none;margin:1rem auto 0}}"}</style>
           <nav className="mobile-nav" aria-label="Section navigation">
             {links.map((link) => <a key={link.label} href={link.href}>{link.label}</a>)}
           </nav>
