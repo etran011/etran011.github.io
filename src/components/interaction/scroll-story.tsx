@@ -1,6 +1,7 @@
 "use client";
 
 import { scroll } from "motion";
+import { createStoryPacer } from "@/lib/story-pacer";
 import { useEffect, useRef, type ReactNode } from "react";
 
 type StoryKind = "hero" | "about" | "project";
@@ -20,8 +21,38 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
     let stop: (() => void) | undefined;
     let frame = 0;
     let signature = "";
+    let pacingFrame = 0;
+    let target = 0;
+    let visible = false;
+    const pacer = createStoryPacer(steps);
+    const render = (progress: number) => {
+      const phase = progress * (steps - 1);
+      element.style.setProperty("--story-progress", progress.toFixed(4));
+      for (let i = 0; i < steps; i++) {
+        const weight = Math.max(0, Math.min(1, (0.88 - Math.abs(phase - i)) / 0.76));
+        element.style.setProperty(`--story-weight-${i}`, weight.toFixed(4));
+      }
+      const current = element.dataset.activeStep;
+      const step = current === undefined || Math.abs(phase - Number(current)) > 0.58 ? String(Math.round(phase)) : current;
+      if (element.dataset.activeStep !== step) {
+        element.dataset.activeStep = step;
+        element.dispatchEvent(new CustomEvent("story-step", { detail: { step: Number(step) } }));
+      }
+    };
+    const settle = () => { cancelAnimationFrame(pacingFrame); pacingFrame = 0; if (element.dataset.pinned) render(pacer.snap(target)); };
+    const animate = () => {
+      if (pacingFrame) return;
+      let previous = performance.now();
+      const tick = (now: number) => {
+        const value = pacer.advance(target, now - previous);
+        previous = now;
+        render(value);
+        pacingFrame = value === target ? 0 : requestAnimationFrame(tick);
+      };
+      pacingFrame = requestAnimationFrame(tick);
+    };
     const reset = () => {
-      stop?.(); stop = undefined;
+      stop?.(); stop = undefined; cancelAnimationFrame(pacingFrame); pacingFrame = 0;
       delete element.dataset.pinned; delete element.dataset.activeStep;
       element.style.removeProperty("--scene-height"); element.style.removeProperty("--scene-travel"); element.style.removeProperty("--story-progress");
       for (let i = 0; i < steps; i++) element.style.removeProperty(`--story-weight-${i}`);
@@ -43,24 +74,23 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
       stop = scroll((progress) => {
         if (Math.abs(progress - previous) < 0.0001) return;
         previous = progress;
-        const phase = progress * (steps - 1);
-        element.style.setProperty("--story-progress", progress.toFixed(4));
-        for (let i = 0; i < steps; i++) element.style.setProperty(`--story-weight-${i}`, Math.max(0, 1 - Math.abs(phase - i) * 1.8).toFixed(4));
-        const step = String(Math.round(phase));
-        if (element.dataset.activeStep !== step) {
-          element.dataset.activeStep = step;
-          element.dispatchEvent(new CustomEvent("story-step", { detail: { step: Number(step) } }));
-        }
+        target = progress;
+        if (!visible || document.hidden) settle();
+        else animate();
       }, { target: element, offset: [`start ${top}px`, `end ${height + top}px`] });
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
+    const visibility = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (!visible) settle(); });
+    visibility.observe(element);
+    const onVisibility = () => { if (document.hidden) settle(); };
+    document.addEventListener("visibilitychange", onVisibility);
     const observer = new ResizeObserver(schedule);
     observer.observe(content);
     for (const query of [desktop, reduce, coarse, forced]) query.addEventListener("change", schedule);
     window.addEventListener("resize", schedule);
     schedule();
     return () => {
-      cancelAnimationFrame(frame); reset(); observer.disconnect();
+      cancelAnimationFrame(frame); reset(); observer.disconnect(); visibility.disconnect(); document.removeEventListener("visibilitychange", onVisibility);
       for (const query of [desktop, reduce, coarse, forced]) query.removeEventListener("change", schedule);
       window.removeEventListener("resize", schedule);
     };
