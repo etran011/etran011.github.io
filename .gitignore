@@ -9,3 +9,6 @@ coverage/
 *.log
 .vercel/
 tmp/
+
+# Résumé source documents are private and are not portfolio assets.
+/public/**/*[Rr]esume*.pdf

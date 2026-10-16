@@ -4,7 +4,7 @@ A personal portfolio connecting data science and software engineering.
 
 ## Status
 
-Phase 5: interactive features complete. The portfolio includes cursor-responsive hero depth, progressive scroll reveals, swipeable and zoomable screenshot galleries, and navigation with active-section feedback and reading progress. Existing project showcases and professional background remain intact. Deployment and further phases remain deferred until requested.
+Phase 6: final sections complete. The portfolio includes a responsive contact section, a shared footer, page-specific search and sharing metadata, favicon variants, and accessibility improvements. Résumé downloads and the public PDF were removed at the user’s request. Deployment and further phases remain deferred until requested.
 
 Target hosting: https://etran011.github.io/ (not deployed yet).
 
@@ -43,7 +43,7 @@ GitHub Actions deployment and Pages activation are deferred to a deployment phas
 - `src/components/ui/`: reusable layout and interface primitives.
 - `src/data/portfolio.ts`: verified profile and project content.
 - `src/types/portfolio.ts`: shared content contracts.
-- `public/`: future screenshots and downloadable assets.
+- `public/`: project screenshots, icons, and social sharing artwork.
 - `docs/`: content provenance and development notes.
 
 Use `@/` imports, semantic HTML, server components by default, and client components only for browser interactions. Colors, typography, spacing, radii, and motion values live in `globals.css`; Tailwind exposes the semantic tokens. Geist and Geist Mono are self-hosted through Fontsource, with system fallbacks. The hero uses CSS entrance animations and Motion springs for subtle pointer response; reduced-motion preferences disable both.
@@ -90,3 +90,14 @@ Swipe horizontally across a project screenshot to change images. In the enlarged
 Navigation highlights the current section (Projects on case-study routes), displays reading progress, and animates mobile-menu entry. Reduced-motion preferences suppress entry and reveal animations.
 
 See [Phase 5 validation](docs/phase-5-validation.md) for checks performed.
+
+
+## Final sections and metadata
+
+Contact links use the verified profile email, GitHub, and LinkedIn URLs from `src/data/portfolio.ts`. The Contact navigation item and hero CTA lead to `#contact`; the shared footer appears on home and case-study pages. No résumé download or phone number is published in current portfolio files. `.gitignore` prevents résumé PDFs from being added under `public/`.
+
+`src/lib/site-metadata.ts` defines the production URL and shared social metadata. Case studies supply their own title, description, and canonical path. `src/app/sitemap.ts` derives static project URLs from the project data; `src/app/robots.ts` points to that sitemap. Update the site URL if the hosting domain changes. The social preview PNG is rendered from `public/social-card.svg`; the SVG favicon also has PNG and Apple touch variants.
+
+Accessibility includes a skip link, semantic landmarks, visible focus, reduced-motion support, mobile navigation without JavaScript, and keyboard-operable screenshot viewers. Text can wrap at enlarged sizes, and selected screenshot controls retain an outline in forced-colors mode.
+
+See [Phase 6 validation](docs/phase-6-validation.md) for test coverage and the outstanding GitHub cache removal follow-up.
