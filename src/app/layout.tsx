@@ -1,3 +1,4 @@
+import { HoverEffects } from "@/components/interaction/hover-effects";
 import { SmoothScroll } from "@/components/interaction/smooth-scroll";
 import { CustomCursor } from "@/components/interaction/custom-cursor";
 import { pageMetadata, site } from "@/lib/site-metadata";
@@ -23,5 +24,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-scroll-behavior="smooth"><body><SmoothScroll /><CustomCursor /><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
+  return <html lang="en" data-scroll-behavior="smooth"><body><HoverEffects /><SmoothScroll /><CustomCursor /><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }
