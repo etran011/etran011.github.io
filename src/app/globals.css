@@ -478,6 +478,8 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 
 .gallery-story-hint { display: none; }
 @media(min-width: 1024px) {
+ [data-scroll-story="project"] .project-scene-heading { margin-bottom: clamp(1.5rem, 3vh, 2rem); }
+ [data-scroll-story="project"] .project-scene-heading .eyebrow { margin-bottom: 0.75rem; }
  [data-scroll-story="project"] .project-featured { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
  [data-scroll-story="project"] .project-card-copy { display: block; padding: clamp(1.5rem, 3vw, 2.5rem); }
  [data-scroll-story="project"] .project-card h3 { font-size: clamp(2rem, 3vw, 2.5rem); }
@@ -487,6 +489,11 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
  [data-scroll-story="project"] .screenshot-gallery { align-self: center; min-width: 0; padding-top: 1.5rem; }
  [data-scroll-story="project"] .project-preview { padding-inline: 1.5rem; }
  [data-scroll-story="project"] .gallery-story-hint { display: block; visibility: hidden; margin-top: 0.75rem; font-size: 0.65rem; color: var(--muted); }
+}
+/* Compact the composition before measuring it; eligibility never changes its layout. */
+@media(min-width: 1024px) and (max-height: 850px) {
+ [data-scroll-story="project"] .project-card-copy { padding: 1.5rem; }
+ [data-scroll-story="project"] .project-details { margin-top: 1rem; padding-top: 1rem; }
 }
 [data-scroll-story="project"][data-pinned] .gallery-story-hint { visibility: visible; }
 [data-scroll-story="project"][data-pinned] .project-featured { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }

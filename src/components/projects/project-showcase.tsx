@@ -1,17 +1,24 @@
 import { Container } from "@/components/ui/container";
 import { projects } from "@/data/portfolio";
 import { ProjectCard } from "./project-card";
+import { ScrollStory } from "@/components/interaction/scroll-story";
 
 export function ProjectShowcase() {
+  const [leading, ...remaining] = projects;
+  const storytelling = leading?.featured && leading.screenshots.length > 1;
+  const heading = (
+    <div className="section-heading project-scene-heading">
+      <div><p className="eyebrow">Selected work / 02</p><h2 id="projects-heading">Ideas, put to work.</h2></div>
+      <p>Exploring financial models and machine learning through software you can understand.</p>
+    </div>
+  );
+  const introduction = <>{heading}{leading && <ProjectCard project={leading} index={0} scrollLinked={storytelling} />}</>;
   return (
     <section id="projects" className="project-section" aria-labelledby="projects-heading">
       <Container>
-        <div className="section-heading">
-          <div><p className="eyebrow">Selected work / 02</p><h2 id="projects-heading">Ideas, put to work.</h2></div>
-          <p>Exploring financial models and machine learning through software you can understand.</p>
-        </div>
         <div className="project-list">
-          {projects.map((project, index) => <ProjectCard key={project.slug} project={project} index={index} />)}
+          {storytelling ? <ScrollStory kind="project" steps={leading.screenshots.length}>{introduction}</ScrollStory> : <div>{introduction}</div>}
+          {remaining.map((project, index) => <ProjectCard key={project.slug} project={project} index={index + 1} />)}
         </div>
       </Container>
     </section>
