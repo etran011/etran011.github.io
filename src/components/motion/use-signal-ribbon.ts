@@ -3,6 +3,7 @@
 import { useEffect, type RefObject } from "react";
 import type { AtmospherePose, AtmosphereRenderer } from "@/lib/atmosphere-renderer";
 import { poseKeys, resolveAtmospherePose, type AtmosphereContext } from "@/lib/atmosphere-scene";
+import { chooseAtmosphereQuality, createAtmosphereBudget } from "@/lib/atmosphere-budget";
 
 /** The SSR vector remains visible until a complete WebGL frame has rendered. */
 export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, rootRef: RefObject<HTMLDivElement | null>, input: RefObject<AtmosphereContext>) {
@@ -18,10 +19,11 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
     let pose: AtmospherePose | undefined, basePose: AtmospherePose | undefined, targetPose: AtmospherePose | undefined;
     const pointer = { x: 0, y: 0 };
     const targetPointer = { x: 0, y: 0 };
-    let frame = 0, generation = 0, previous = 0, time = 0;
+    let frame = 0, generation = 0, previous = 0, previousFrame = 0, time = 0;
+    let budget = createAtmosphereBudget("medium");
     let disposed = false, lost = false, needsResize = true;
     const eligible = () => desktop.matches && !reduce.matches && !forced.matches && !coarse.matches && navigator.maxTouchPoints === 0;
-    const pause = () => { cancelAnimationFrame(frame); frame = 0; previous = 0; root.dataset.playing = "false"; };
+    const pause = () => { cancelAnimationFrame(frame); frame = 0; previous = 0; previousFrame = 0; root.dataset.playing = "false"; };
     const fallback = () => { pause(); renderer?.destroy(); renderer = undefined; root.dataset.renderer = "static"; };
     const tick = (now: number) => {
       frame = 0;
@@ -30,6 +32,10 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
       // observes the new media state, particularly following context restoration.
       if (!eligible()) { fallback(); return; }
       if (document.hidden) { pause(); return; }
+      if (previousFrame) budget.observe(now - previousFrame);
+      previousFrame = now;
+      const cadence = input.current.scene === "quiet" || input.current.scene === "projects" ? 30 : budget.frameRate;
+      if (cadence === 30 && previous && now - previous < 1000 / 30 - 1) { frame = requestAnimationFrame(tick); return; }
       const delta = previous ? Math.min(50, now - previous) / 1000 : 1 / 60;
       time += previous ? delta : 0; previous = now;
       const follow = 1 - Math.exp(-delta / 0.18);
@@ -43,6 +49,9 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
         pose.lightX = pointer.x; pose.lightY = pointer.y;
       }
       try {
+        if (root.dataset.quality !== budget.quality) {
+          renderer.setQuality(budget.quality); root.dataset.quality = budget.quality; needsResize = true;
+        }
         if (needsResize) { renderer.resize(innerWidth, innerHeight); needsResize = false; }
         if (!renderer.render(time, pose)) { fallback(); return; }
         if (root.dataset.renderer !== "webgl") root.dataset.renderer = "webgl";
@@ -60,7 +69,10 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
         if (current !== generation || !eligible() || lost || disposed || document.hidden) return;
         const hex = getComputedStyle(root).getPropertyValue("--accent").trim();
         const color = /^#[0-9a-f]{6}$/i.test(hex) ? [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16) / 255) : [0.533, 0.678, 0.961];
-        renderer = createAtmosphereRenderer(canvas, "medium", color);
+        const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData ?? false;
+        const quality = chooseAtmosphereQuality(navigator.hardwareConcurrency || 4, saveData);
+        budget = createAtmosphereBudget(quality);
+        renderer = createAtmosphereRenderer(canvas, quality, color); root.dataset.quality = quality;
         basePose = { ...restingPose }; pose = { ...restingPose }; targetPose = { ...restingPose };
         needsResize = true; start();
       } catch { if (current === generation) fallback(); }
