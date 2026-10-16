@@ -21,9 +21,9 @@ export function ScrollReveals({ children }: { children: ReactNode }) {
         observer.unobserve(entry.target);
         if (preference.matches || entry.target.contains(document.activeElement)) continue;
         const animation = entry.target.animate([
-          { opacity: 0.45, transform: "translateY(16px)" },
+          { opacity: 0.92, transform: "translateY(20px)" },
           { opacity: 1, transform: "translateY(0)" },
-        ], { duration: 550, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" });
+        ], { duration: 650, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" });
         animations.set(entry.target, animation);
         animation.onfinish = () => { animations.delete(entry.target); };
       }

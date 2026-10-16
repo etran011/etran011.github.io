@@ -28,6 +28,7 @@ export function Hero() {
         </div>
         <div className="hero-baseline">
           <p><span className="eyebrow">Interested in</span><br />Software engineering · AI &amp; machine learning · Financial technology</p>
+          <span className="story-scroll-cue eyebrow" aria-hidden="true">Scroll to explore<span /></span>
           <a className="hero-note text-link" href="#about">A little about me <ArrowDown size={16} aria-hidden="true" /></a>
         </div>
       </Container></ScrollStory>

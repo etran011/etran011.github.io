@@ -494,3 +494,10 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
  .gallery-stage:hover img { scale: 1.015; }
 }
 @media(forced-colors: active) { .project-card::before, .hero-project::before { display: none; } }
+
+.story-scroll-cue { display: none; }
+[data-scroll-story="hero"][data-pinned] .story-scroll-cue { display: inline-flex; align-items: center; gap: 0.75rem; color: var(--muted); font-size: 0.55rem; white-space: nowrap; }
+.story-scroll-cue > span { display: block; width: 3rem; height: 1px; background: var(--border); position: relative; }
+.story-scroll-cue > span::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--story-progress, 0)); }
+[data-scroll-story="hero"][data-pinned] .hero-grid { scale: calc(1 - var(--story-progress, 0) * 0.012); transform-origin: center top; }
+[data-scroll-story="project"][data-pinned] .screenshot-gallery { translate: 0 calc(var(--story-progress, 0) * -6px); }
