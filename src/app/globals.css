@@ -313,7 +313,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 
 .hero-motion { position: relative; isolation: isolate; }
 .hero-pointer-glow { position: absolute; z-index: -1; inset: 15% 5%; border-radius: 50%; background: radial-gradient(ellipse, #5183d529, transparent 68%); opacity: 0; transition: opacity 350ms ease; pointer-events: none; }
-@media (hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+@media (hover: hover) and (pointer: fine) and (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
  .hero-motion:hover .hero-pointer-glow { opacity: 1; }
 }
 
@@ -480,14 +480,14 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 
 .button { transition: background var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast), translate 160ms var(--ease-standard), scale 100ms ease; }
 .button:active { scale: 0.98; }
-.project-card, .hero-project { position: relative; isolation: isolate; }
-.project-card::before, .hero-project::before { content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none; opacity: 0; background: radial-gradient(320px circle at var(--light-x, 50%) var(--light-y, 50%), color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%); transition: opacity 240ms ease; }
+.project-card, .hero-project { position: relative; isolation: isolate; overflow: clip; }
+.project-card::before, .hero-project::before { content: ""; position: absolute; top: 0; left: 0; width: 640px; height: 640px; z-index: 0; border-radius: 50%; pointer-events: none; opacity: 0; background: radial-gradient(circle, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%); transform: translate3d(calc(var(--light-x, 0px) - 320px), calc(var(--light-y, 0px) - 320px), 0); transition: opacity 240ms ease; }
 .project-card > *, .hero-project > * { position: relative; z-index: 1; }
 .gallery-stage { overflow: hidden; }
 @media(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
  .button { translate: var(--magnet-x, 0px) var(--magnet-y, 0px); }
  .button:focus-visible { translate: none; }
- [data-pointer-light]::before { opacity: 1; }
+ [data-pointer-light]::before { opacity: 1; will-change: transform; }
  .case-link .lucide-arrow-up-right, .text-link .lucide-arrow-up-right { transition: translate 180ms ease; }
  .case-link:hover .lucide-arrow-up-right, .text-link:hover .lucide-arrow-up-right { translate: 2px -2px; }
  .gallery-stage img { transition: scale 350ms var(--ease-standard); }
@@ -501,3 +501,5 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 .story-scroll-cue > span::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--story-progress, 0)); }
 [data-scroll-story="hero"][data-pinned] .hero-grid { scale: calc(1 - var(--story-progress, 0) * 0.012); transform-origin: center top; }
 [data-scroll-story="project"][data-pinned] .screenshot-gallery { translate: 0 calc(var(--story-progress, 0) * -6px); }
+
+@media(prefers-reduced-motion: reduce), (forced-colors: active) { .button:active { scale: none; } }

@@ -9,12 +9,13 @@ export function SmoothScroll() {
   const pathname = usePathname();
   useEffect(() => {
     const desktop = matchMedia("(min-width: 1024px) and (hover: hover) and (pointer: fine)");
+    const forced = matchMedia("(forced-colors: active)");
     const coarse = matchMedia("(any-pointer: coarse)");
     const reduce = matchMedia("(prefers-reduced-motion: reduce)");
     let instance: Lenis | undefined;
     let generation = 0;
     let disposed = false;
-    const eligible = () => desktop.matches && !coarse.matches && navigator.maxTouchPoints === 0 && !reduce.matches;
+    const eligible = () => desktop.matches && !coarse.matches && !forced.matches && navigator.maxTouchPoints === 0 && !reduce.matches;
     const modalState = () => {
       if (!instance) return;
       if (document.body.style.overflow === "hidden" || document.querySelector("dialog[open]")) { instance.stop(); }
@@ -26,15 +27,15 @@ export function SmoothScroll() {
       delete document.documentElement.dataset.weightedScroll;
       if (!eligible()) return;
       try {
-      const { default: Lenis } = await import("lenis");
-      if (disposed || current !== generation || !eligible()) return;
-      instance = new Lenis({
-        autoRaf: true, lerp: 0.115, wheelMultiplier: 1, syncTouch: false,
-        anchors: false, stopInertiaOnNavigate: true,
-        prevent: (node) => Boolean(node.closest("dialog, .mobile-nav, input, textarea, select, [contenteditable], [data-lenis-prevent]")),
-      });
-      document.documentElement.dataset.weightedScroll = "true";
-      modalState();
+        const { default: Lenis } = await import("lenis");
+        if (disposed || current !== generation || !eligible()) return;
+        instance = new Lenis({
+          autoRaf: true, lerp: 0.115, wheelMultiplier: 1, syncTouch: false,
+          anchors: false, stopInertiaOnNavigate: true,
+          prevent: (node) => Boolean(node.closest("dialog, .mobile-nav, input, textarea, select, [contenteditable], [data-lenis-prevent]")),
+        });
+        document.documentElement.dataset.weightedScroll = "true";
+        modalState();
       } catch {
         if (current === generation) { instance?.destroy(); instance = undefined; delete document.documentElement.dataset.weightedScroll; }
       }
@@ -61,7 +62,7 @@ export function SmoothScroll() {
     const keyboard = (event: KeyboardEvent) => { if (["Tab", "ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) interrupt(); };
     const observer = new MutationObserver(modalState);
     observer.observe(document.body, { attributes: true, attributeFilter: ["style"] });
-    for (const query of [desktop, coarse, reduce]) query.addEventListener("change", configure);
+    for (const query of [desktop, coarse, reduce, forced]) query.addEventListener("change", configure);
     document.addEventListener("click", anchor);
     document.addEventListener("keydown", keyboard);
     document.addEventListener("focusin", interrupt);
@@ -73,7 +74,7 @@ export function SmoothScroll() {
       disposed = true; generation++;
       instance?.destroy(); delete document.documentElement.dataset.weightedScroll;
       observer.disconnect();
-      for (const query of [desktop, coarse, reduce]) query.removeEventListener("change", configure);
+      for (const query of [desktop, coarse, reduce, forced]) query.removeEventListener("change", configure);
       document.removeEventListener("click", anchor);
       document.removeEventListener("keydown", keyboard); document.removeEventListener("focusin", interrupt);
       document.removeEventListener("toggle", modalState, true);

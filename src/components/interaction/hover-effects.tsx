@@ -29,7 +29,7 @@ export function HoverEffects() {
         button.style.setProperty("--magnet-x", `${clamp((x - buttonRect.left - buttonRect.width / 2) * 0.08)}px`);
         button.style.setProperty("--magnet-y", `${clamp((y - buttonRect.top - buttonRect.height / 2) * 0.08)}px`);
       }
-      if (card && cardRect) { card.dataset.pointerLight = "true"; card.style.setProperty("--light-x", `${x - cardRect.left}px`); card.style.setProperty("--light-y", `${y - cardRect.top}px`); }
+      if (card && cardRect) { if (!card.dataset.pointerLight) card.dataset.pointerLight = "true"; card.style.setProperty("--light-x", `${x - cardRect.left}px`); card.style.setProperty("--light-y", `${y - cardRect.top}px`); }
     };
     const update = (event: PointerEvent) => {
       const target = event.target instanceof Element ? event.target : null;
