@@ -1,7 +1,7 @@
 import { atmosphereQuality, createRibbonGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
 
-export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; }
-export const restingPose: AtmospherePose = { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.64, centerX: 0.58, centerY: 0.02, detail: 1 };
+export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; }
+export const restingPose: AtmospherePose = { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.64, centerX: 0.58, centerY: 0.02, detail: 1, lightX: 0, lightY: 0 };
 
 const vertexSource = `
 attribute vec3 aPosition;
@@ -9,6 +9,7 @@ uniform float uTime;
 uniform vec3 uRotation;
 uniform vec4 uProjection;
 uniform float uRatio;
+uniform vec2 uLight;
 varying float vLight;
 void main() {
   vec3 p = aPosition;
@@ -25,6 +26,8 @@ void main() {
   projected.x /= uProjection.y;
   gl_Position = vec4(projected + uProjection.zw, 0.0, 1.0);
   vLight = mix(0.1, 0.66, clamp((1.8 - p.z) / 3.6, 0.0, 1.0));
+  vec2 distanceToLight = projected + uProjection.zw - uLight;
+  vLight *= 1.0 + exp(-dot(distanceToLight, distanceToLight) * 8.0) * 0.22;
   gl_PointSize = clamp(2.0 * perspective * uRatio, 1.0, 4.0);
 }`;
 const fragmentSource = `
@@ -70,7 +73,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -111,6 +114,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform3f(uniforms.uRotation, pose.yaw + time * 0.025, pose.pitch + Math.sin(time * 0.12) * 0.06, pose.roll + Math.sin(time * 0.08) * 0.05);
         gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
+        gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES);
         if (pose.detail > 0.01) { gl.uniform1f(uniforms.uPoint, 1); draw(points, gl.POINTS); }
         return true;
