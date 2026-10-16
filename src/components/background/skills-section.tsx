@@ -4,9 +4,9 @@ import { TechnologyIcon } from "./technology-icon";
 
 export function SkillsSection() {
   return (
-    <section id="skills" className="background-section" aria-labelledby="skills-heading">
-      <Container>
-        <div className="section-heading">
+    <section id="skills" className="background-section skills-section" aria-labelledby="skills-heading">
+      <Container className="skills-layout">
+        <div className="section-heading skills-heading">
           <div><p className="eyebrow">Technical skills / 04</p><h2 id="skills-heading">From exploration<br />to implementation.</h2></div>
           <p>The languages, methods, and tools I use across data analysis, machine learning, and software projects.</p>
         </div>

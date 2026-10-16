@@ -300,6 +300,15 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .skill-category li { display: inline-flex; align-items: center; gap: 0.45rem; }
 .technology-icon { display: inline-block; width: 1.1rem; height: 1.1rem; flex: 0 0 auto; color: var(--accent); }
 .technology-initials { display: inline-grid; place-items: center; font-family: var(--font-code); font-size: 0.5rem; letter-spacing: -0.04em; border: 1px solid var(--border); border-radius: 0.2rem; }
+.skills-section { padding-block: clamp(3.5rem, 6vw, 6rem); }
+.skills-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; gap: clamp(2rem, 4vw, 4rem); }
+.skills-heading { display: block; margin-bottom: 0; }
+.skills-heading > p { margin-top: 1.25rem; }
+.skills-section .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.skills-section .skill-category { padding: clamp(1.25rem, 2vw, 1.75rem); }
+.skills-section .skill-category h3 { margin-block: 0.75rem 1rem; }
+@media(max-width: 1023px) { .skills-layout { grid-template-columns: 1fr; gap: 1.75rem; } }
+@media(max-width: 599px) { .skills-section .skills-grid { grid-template-columns: 1fr; } }
 @media(max-width: 1023px) { .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media(max-width: 599px) { .skills-grid { grid-template-columns: 1fr; } }
 
