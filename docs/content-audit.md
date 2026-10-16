@@ -15,7 +15,7 @@ Reviewed the supplied resume PDF, OptionLab repository README, and project_imple
 
 ## Assets and evidence gaps
 
-No standalone project screenshots were supplied or found in the provided OptionLab repository. The notebook includes eight embedded chart images; these are analysis figures, not app screenshots. Preserve original aspect ratios when assets are integrated in a later phase.
+Three OptionLab screenshots were subsequently supplied and inspected: pricing-dashboard.png (2940 × 1670), sensitivity-charts.png (2248 × 1626), and implied-volatility.png (2508 × 766). Original files are preserved unchanged in public/images/projects/optionlab/ for integration in a later phase. The notebook also includes eight embedded chart images; these are analysis figures, not app screenshots. Preserve original aspect ratios when integrating assets.
 
 Application Atlas, Email Scam Classifier, and Amazon Fresh appear only as suggestions in the brief, not in the supplied resume or project evidence. Omit until substantiated. No live project URLs were supplied.
 
