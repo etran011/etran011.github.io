@@ -370,6 +370,12 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .about-intro .case-link { margin-top: 2rem; }
 .about-copy > p { color: var(--muted); font-size: 0.95rem; line-height: 1.9; margin-bottom: 1.25rem; }
 .about-copy > p:first-child { color: var(--foreground); }
+.about-chapter + .about-chapter { margin-top: 1.5rem; }
+.about-chapter > .eyebrow { color: var(--accent); font-size: 0.6rem; margin-bottom: 0.5rem; }
+.about-chapter h3 { font-size: 1.2rem; margin-bottom: 0.65rem; letter-spacing: -0.025em; font-weight: 450; }
+.about-chapter-body { color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
+.about-evidence, .about-project-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.25rem; margin-top: 0.65rem; font-size: 0.7rem; }
+.about-evidence:is(a), .about-project-links a { display: inline-flex; align-items: center; gap: 0.3rem; min-height: 32px; }
 .about-interests { border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem; }
 .about-interests h3 { font-size: 0.65rem; color: var(--accent); margin-bottom: 1rem; }
 .about-interests ul { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-size: 0.8rem; }

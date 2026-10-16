@@ -89,14 +89,23 @@ export const skillCategories = [
   { id: "tools", name: "Tools & environments", items: ["Git", "Linux", "AWS EC2", "Tableau", "Excel", "Stata"] },
 ] as const satisfies readonly SkillCategory[];
 
-export interface About { paragraphs: readonly string[]; interests: readonly string[]; }
+export interface AboutChapter { id: string; word: string; label: string; title: string; body: string; }
+export interface About { chapters: readonly AboutChapter[]; }
 
-// First-person copy grounded in the supplied brief, résumé, and project materials.
+// First-person copy grounded in the supplied résumé and audited project materials.
 export const about = {
-  paragraphs: [
-    "I’m Erik, a Data Science student at William & Mary, graduating in 2028. I’m interested in software engineering, AI, and machine learning, especially where they meet financial technology.",
-    "My projects let me work from the calculation to the interface. In OptionLab, I developed the Python pricing backend and reviewed the AI-assisted frontend. PlatePredict gave me practice preparing data, comparing regression models, and checking how results are evaluated.",
-    "I also work in campus IT support, where explaining a solution clearly matters as much as finding it. I’m building on that experience through coursework and projects, with the goal of making technical tools easier to understand and use.",
+  chapters: [
+    {
+      id: "background", word: "Learn", label: "Who I am", title: "A foundation in data.",
+      body: "I’m Erik, a Data Science student at William & Mary, graduating in 2028. Coursework gives me the foundations; projects give me a way to test what I’m learning.",
+    },
+    {
+      id: "building", word: "Build", label: "What I build", title: "From model to interface.",
+      body: "I like working from the calculation to the interface. I built OptionLab’s Python pricing backend and reviewed its AI-assisted frontend. In PlatePredict, I prepared nutritional data and compared regression models.",
+    },
+    {
+      id: "approach", word: "Explain", label: "How I approach problems", title: "Make the result understandable.",
+      body: "In campus IT support, explaining a solution clearly matters as much as finding it. I bring that same care to software: check the result, make assumptions visible, and give people something they can use.",
+    },
   ],
-  interests: ["Software engineering", "Artificial intelligence", "Machine learning", "Financial technology", "Data visualization"],
 } as const satisfies About;
