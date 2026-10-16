@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/site-metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = projects.find((item) => item.slug === slug);
   if (!project) notFound();
-  return { title: `${project.title} | Erik Tran`, description: project.summary };
+  return pageMetadata({ title: `${project.title} | Erik Tran`, description: project.summary, path: `/projects/${project.slug}/` });
 }
 
 export default async function ProjectPage({ params }: Props) {

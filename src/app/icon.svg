@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#0b0d12"/>
-  <path d="M16 18h16v6H22v5h9v6h-9v5h10v6H16zm20 0h18v6h-6v22h-6V24h-6z" fill="#88adf5"/>
+  <title>Erik Tran</title>
+  <rect width="64" height="64" rx="14" fill="#0b0d12"/>
+  <path d="M12 18h16v6H18v5h9v6h-9v5h10v6H12zm20 0h18v6h-6v22h-6V24h-6z" fill="#f5f5f7"/>
+  <circle cx="53" cy="43" r="3" fill="#88adf5"/>
 </svg>
