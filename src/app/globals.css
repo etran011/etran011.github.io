@@ -390,7 +390,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 }
 @media(max-width: 767px) {
  .about-layout { grid-template-columns: 1fr; gap: 2rem; }
- .about-chapters { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+ .about-chapters { grid-template-columns: repeat(auto-fit, minmax(min(100%, max(5rem, (100% - 2rem) / 3)), 1fr)); gap: 1rem; }
  .about-chapters li { align-items: start; flex-direction: column; gap: 0.65rem; }
  .about-chapters strong { font-size: 1rem; }
  .about-chapters small { font-size: 0.6rem; }
