@@ -58,3 +58,25 @@ export const experience = [
     ],
   },
 ] as const satisfies readonly Experience[];
+
+export interface Education {
+  institution: string;
+  location: string;
+  degree: string;
+  graduation: string;
+  gpa: string;
+  coursework: readonly string[];
+}
+
+export const education = {
+  institution: "College of William & Mary",
+  location: "Williamsburg, Virginia",
+  degree: "B.S. Data Science",
+  graduation: "Expected 2028",
+  gpa: "3.92 / 4.00",
+  coursework: [
+    "Applied Machine Learning", "Data Visualization", "Databases", "Designing AI Agents",
+    "Linear Algebra", "Probability & Statistics for Scientists", "Data Structures",
+    "Statistical Data Analysis", "Ethics in Data Science", "Linux for Ethical Hackers",
+  ],
+} as const satisfies Education;
