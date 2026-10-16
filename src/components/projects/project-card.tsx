@@ -1,10 +1,12 @@
+import { ScrollStory } from "@/components/interaction/scroll-story";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ScreenshotGallery } from "./screenshot-gallery";
 import type { Project } from "@/types/portfolio";
 
 export function ProjectCard({ project, index }: { project: Project; index: number }) {
-  return (
+  const storytelling = project.featured && project.screenshots.length > 1;
+  const card = (
     <article className={`project-card ${project.featured ? "project-featured" : "project-secondary"}`} aria-labelledby={`project-${project.slug}`}>
       <div className="project-card-copy">
         <div className="project-intro">
@@ -23,7 +25,8 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         </ul>
         </div>
       </div>
-      <ScreenshotGallery screenshots={project.screenshots} title={project.title} />
+      <ScreenshotGallery screenshots={project.screenshots} title={project.title} scrollLinked={storytelling} />
     </article>
   );
+  return storytelling ? <ScrollStory kind="project" steps={project.screenshots.length}>{card}</ScrollStory> : card;
 }
