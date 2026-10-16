@@ -100,6 +100,7 @@ export function SmoothScroll() {
       } });
     };
     const keyboard = (event: KeyboardEvent) => { if (["Tab", "ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) interrupt(); };
+    const visibility = () => { if (document.hidden) cancelHeroRelease(); };
     const observer = new MutationObserver(modalState);
     observer.observe(document.body, { attributes: true, attributeFilter: ["style"] });
     for (const query of [desktop, coarse, reduce, forced]) query.addEventListener("change", configure);
@@ -107,6 +108,8 @@ export function SmoothScroll() {
     document.addEventListener("keydown", keyboard);
     document.addEventListener("focusin", interrupt);
     document.addEventListener("toggle", modalState, true);
+    document.addEventListener("pointerdown", cancelHeroRelease, { passive: true });
+    document.addEventListener("visibilitychange", visibility);
     window.addEventListener("popstate", interrupt);
     window.addEventListener("hashchange", interrupt);
     window.addEventListener("blur", cancelHeroRelease);
@@ -120,6 +123,8 @@ export function SmoothScroll() {
       document.removeEventListener("click", anchor);
       document.removeEventListener("keydown", keyboard); document.removeEventListener("focusin", interrupt);
       document.removeEventListener("toggle", modalState, true);
+      document.removeEventListener("pointerdown", cancelHeroRelease);
+      document.removeEventListener("visibilitychange", visibility);
       window.removeEventListener("popstate", interrupt); window.removeEventListener("hashchange", interrupt);
       window.removeEventListener("blur", cancelHeroRelease);
     };

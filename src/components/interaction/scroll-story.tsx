@@ -10,6 +10,7 @@ type StoryKind = "hero" | "about" | "project";
 export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps: number; children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const typeScale = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const element = root.current;
     const content = stage.current;
@@ -87,6 +88,8 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
     document.addEventListener("visibilitychange", onVisibility);
     const observer = new ResizeObserver(schedule);
     observer.observe(content);
+    // A full-height stage may keep its size when root text grows; observe rem size too.
+    if (typeScale.current) observer.observe(typeScale.current);
     for (const query of [desktop, reduce, coarse, forced]) query.addEventListener("change", schedule);
     window.addEventListener("resize", schedule);
     schedule();
@@ -96,5 +99,5 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
       window.removeEventListener("resize", schedule);
     };
   }, [kind, steps]);
-  return <div ref={root} className="scroll-story" data-scroll-story={kind}><div ref={stage} className="story-stage">{children}</div></div>;
+  return <div ref={root} className="scroll-story" data-scroll-story={kind}><span ref={typeScale} className="story-type-probe" aria-hidden="true" /><div ref={stage} className="story-stage">{children}</div></div>;
 }

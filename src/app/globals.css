@@ -450,6 +450,7 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 
 /* Brief, opt-in desktop scenes. All base content stays in normal document flow. */
 .scroll-story { position: relative; }
+.story-type-probe { position: absolute; width: 1rem; height: 1rem; visibility: hidden; pointer-events: none; }
 .scroll-story[data-pinned] { height: calc(var(--scene-height) + var(--scene-travel)); }
 .scroll-story[data-pinned] > .story-stage { position: sticky; top: 7rem; }
 .hero-narrative { position: relative; }

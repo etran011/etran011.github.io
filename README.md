@@ -46,7 +46,7 @@ GitHub Actions deployment and Pages activation are deferred to a deployment phas
 - `public/`: project screenshots, icons, and social sharing artwork.
 - `docs/`: content provenance and development notes.
 
-Use `@/` imports, semantic HTML, server components by default, and client components only for browser interactions. Colors, typography, spacing, radii, and motion values live in `globals.css`; Tailwind exposes the semantic tokens. Geist and Geist Mono are self-hosted through Fontsource, with system fallbacks. The hero uses CSS entrance animations and Motion springs for subtle pointer response; reduced-motion preferences disable both.
+Use `@/` imports, semantic HTML, server components by default, and client components only for browser interactions. Colors, typography, spacing, radii, and motion values live in `globals.css`; Tailwind exposes the semantic tokens. Geist and Geist Mono are self-hosted through Fontsource, with system fallbacks. The hero uses CSS entrance animations and a bounded scroll timeline; Motion springs drive the cursor and ambient depth. Reduced-motion preferences disable these enhancements.
 
 Add future projects to the typed data file and their real screenshots to `public/`. Keep unsupported URLs absent and screenshot arrays empty until assets are supplied. Do not invent achievements or model metrics.
 
@@ -83,7 +83,7 @@ See [Phase 4 validation](docs/phase-4-validation.md) for checks performed.
 
 ## Interaction behavior
 
-Hero depth follows fine-pointer movement. Scroll reveals run once per section mount and cancel when reduced motion is enabled or focus enters an animating section. Content stays visible without JavaScript.
+The desktop cursor and project lighting follow fine-pointer movement. Scroll reveals run once per section mount and cancel when reduced motion is enabled or focus enters an animating section. Content stays visible without JavaScript.
 
 Swipe horizontally across a project screenshot to change images. In the enlarged viewer, select Zoom screenshot to explore a larger image and Fit screenshot to reset it. Focus the zoomed image region to pan with keyboard arrows; elsewhere, arrows select screenshots. Escape closes the viewer and restores focus.
 
@@ -92,6 +92,8 @@ Navigation highlights the current section (Projects on case-study routes), displ
 See [Phase 5 validation](docs/phase-5-validation.md) for checks performed.
 
 The cinematic interaction update adds a contextual desktop cursor, weighted wheel scrolling, and three short scroll stories for the hero, About, and OptionLab. Mobile, reduced-motion, and accessibility fallbacks retain natural navigation and readable content. See [interaction behavior and validation](docs/cinematic-interactions.md) for implementation details and browser coverage.
+
+The subsequent refinement makes the hero a minimal full-screen scene, reveals navigation on scroll, bounds visual story pacing, raises and animates the skill stack, and adds a shared atmospheric background. See [refinement behavior and validation](docs/animation-refinement-validation.md). Run `npm test` for the permanent timeline regression tests.
 
 
 ## Final sections and metadata

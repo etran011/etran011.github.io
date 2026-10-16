@@ -32,7 +32,7 @@ export function Navigation() {
       frame = 0;
       // Separate thresholds keep small reversals from flickering the header.
       visible = pathname !== "/" || (visible ? window.scrollY > 48 : window.scrollY > 120);
-      if (header.current) header.current.dataset.navVisible = String(visible);
+      if (header.current && header.current.dataset.navVisible !== String(visible)) header.current.dataset.navVisible = String(visible);
       const maximum = document.documentElement.scrollHeight - window.innerHeight;
       if (progress.current) progress.current.style.transform = `scaleX(${maximum > 0 ? Math.min(1, Math.max(0, window.scrollY / maximum)) : 0})`;
       if (pathname !== "/") return;
