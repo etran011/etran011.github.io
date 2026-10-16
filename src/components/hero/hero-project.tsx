@@ -12,7 +12,7 @@ export function HeroProject() {
   return (
     <Link className="hero-project surface-panel" href={`/projects/${project.slug}/`}>
       <div className="hero-project-label"><span className="eyebrow">Currently building</span><ArrowUpRight size={18} aria-hidden="true" /></div>
-      {screenshot && <div className="hero-project-image"><Image src={screenshot.src} alt="" width={screenshot.width} height={screenshot.height} sizes="(max-width: 767px) 280px, 320px" /></div>}
+      {screenshot && <div className="hero-project-image"><Image src={screenshot.src} alt="" loading="eager" width={screenshot.width} height={screenshot.height} sizes="(max-width: 767px) 280px, 320px" /></div>}
       <div className="hero-project-copy"><p className="hero-project-title">{project.title}</p><p>{project.summary}</p><span className="hero-project-cta">Explore the case study <ArrowUpRight size={14} aria-hidden="true" /></span></div>
     </Link>
   );
