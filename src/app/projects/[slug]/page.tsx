@@ -35,8 +35,8 @@ export default async function ProjectPage({ params }: Props) {
           <p className="case-summary">{project.summary}</p>
           <div className="case-meta"><p>{project.period}</p><ul className="technology-list" aria-label="Technologies">{project.technologies.map((technology) => <li key={technology}>{technology}</li>)}</ul></div>
           {(project.repositoryUrl || project.demoUrl) && <div className="hero-buttons">
-            {project.repositoryUrl && <a className="button" href={project.repositoryUrl}>Source code <ArrowUpRight size={16} /></a>}
-            {project.demoUrl && <a className="button" href={project.demoUrl}>Live demo <ArrowUpRight size={16} /></a>}
+            {project.repositoryUrl && <a className="button" href={project.repositoryUrl}>Source code <ArrowUpRight size={16} aria-hidden="true" /></a>}
+            {project.demoUrl && <a className="button" href={project.demoUrl}>Live demo <ArrowUpRight size={16} aria-hidden="true" /></a>}
           </div>}
         </header>
         {project.screenshots.length > 0 && <div className="case-gallery surface-panel"><ScreenshotGallery screenshots={project.screenshots} title={project.title} /></div>}

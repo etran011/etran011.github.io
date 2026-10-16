@@ -39,7 +39,7 @@ export function ScreenshotGallery({ screenshots, title }: { screenshots: Project
   return (
     <div className="screenshot-gallery" role="region" aria-label={`${title} screenshots`}>
       <figure className="project-preview">
-        <button ref={expandButton} className="gallery-stage" aria-label={`Expand ${title} screenshot: ${shot.caption}`} onClick={() => { if (swiped.current) { swiped.current = false; return; } setZoomed(false); setExpanded(true); }}
+        <button ref={expandButton} className="gallery-stage" aria-label={`Enlarge ${title} screenshot: ${shot.caption}`} onClick={() => { if (swiped.current) { swiped.current = false; return; } setZoomed(false); setExpanded(true); }}
           onPointerDown={(event) => { swiped.current = false; if (event.pointerType === "touch") { gesture.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); } }}
           onPointerCancel={() => { gesture.current = null; }}
           onPointerUp={(event) => {
@@ -57,10 +57,10 @@ export function ScreenshotGallery({ screenshots, title }: { screenshots: Project
           <div className="gallery-selectors">
             {screenshots.map((image, index) => <button key={image.src} aria-pressed={selected === index} onClick={() => select(index)}>{image.caption.split(" · ")[0]}</button>)}
           </div>
-          {screenshots.length > 1 && <div className="gallery-arrows"><button aria-label="Previous screenshot" onClick={() => move(-1)}><ChevronLeft size={18} /></button><span aria-hidden="true">{selected + 1} / {screenshots.length}</span><button aria-label="Next screenshot" onClick={() => move(1)}><ChevronRight size={18} /></button></div>}
+          {screenshots.length > 1 && <div className="gallery-arrows"><button aria-label="Previous screenshot" onClick={() => move(-1)}><ChevronLeft size={18} aria-hidden="true" /></button><span aria-hidden="true">{selected + 1} / {screenshots.length}</span><button aria-label="Next screenshot" onClick={() => move(1)}><ChevronRight size={18} aria-hidden="true" /></button></div>}
         </div>
       </figure>
-      <dialog ref={dialog} className="gallery-dialog" aria-labelledby={`${id}-title`} onCancel={() => setExpanded(false)} onClose={() => setExpanded(false)} onClick={(event) => { if (event.target === event.currentTarget) setExpanded(false); }} onKeyDown={(event) => {
+      <dialog ref={dialog} className="gallery-dialog" aria-labelledby={`${id}-title`} aria-describedby={`${id}-help`} onCancel={() => setExpanded(false)} onClose={() => setExpanded(false)} onClick={(event) => { if (event.target === event.currentTarget) setExpanded(false); }} onKeyDown={(event) => {
         if (event.key === "Tab") {
           const controls = event.currentTarget.querySelectorAll<HTMLElement>("button:not([disabled]), [tabindex='0']");
           const first = controls[0];
@@ -73,11 +73,12 @@ export function ScreenshotGallery({ screenshots, title }: { screenshots: Project
         if (event.key === "ArrowRight") { event.preventDefault(); move(1); }
       }}>
         <div className="gallery-dialog-content">
-          <div className="gallery-dialog-header"><h2 id={`${id}-title`}>{title} / Screenshots</h2><button className="zoom-toggle" aria-pressed={zoomed} aria-label={zoomed ? "Fit screenshot" : "Zoom screenshot"} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOut size={20} /> : <ZoomIn size={20} />}</button><button aria-label="Close screenshot viewer" onClick={() => setExpanded(false)}><X size={22} /></button></div>
-          <div ref={viewport} className={`gallery-viewport ${zoomed ? "is-zoomed" : ""}`} tabIndex={zoomed ? 0 : -1} role="region" aria-label={zoomed ? "Zoomed screenshot; scroll to explore" : "Full screenshot"}>
+          <div className="gallery-dialog-header"><h2 id={`${id}-title`}>{title} / Screenshots</h2><button className="zoom-toggle" aria-pressed={zoomed} aria-label={zoomed ? "Fit screenshot" : "Zoom screenshot"} onClick={() => setZoomed(!zoomed)}>{zoomed ? <ZoomOut size={20} aria-hidden="true" /> : <ZoomIn size={20} aria-hidden="true" />}</button><button aria-label="Close screenshot viewer" onClick={() => setExpanded(false)}><X size={22} aria-hidden="true" /></button></div>
+          <div ref={viewport} className={`gallery-viewport ${zoomed ? "is-zoomed" : ""}`} tabIndex={zoomed ? 0 : -1} role="region" aria-label={zoomed ? "Zoomed screenshot; scroll to explore" : "Full screenshot"} aria-describedby={zoomed ? `${id}-help` : undefined}>
             <div className="gallery-image-canvas">{expanded && <Image src={shot.src} alt={shot.alt} width={shot.width} height={shot.height} sizes="95vw" />}</div>
           </div>
-          <div className="gallery-dialog-footer"><p aria-live="polite">{shot.caption}</p><div className="gallery-arrows"><button aria-label="Previous screenshot" onClick={() => move(-1)}><ChevronLeft size={20} /></button><span>{selected + 1} / {screenshots.length}</span><button aria-label="Next screenshot" onClick={() => move(1)}><ChevronRight size={20} /></button></div></div>
+          <p id={`${id}-help`} className="gallery-help">Use arrow keys to change screenshots. When zoomed, focus the image to scroll. Press Escape to close.</p>
+          <div className="gallery-dialog-footer"><p aria-live="polite">{shot.caption}</p><div className="gallery-arrows"><button aria-label="Previous screenshot" onClick={() => move(-1)}><ChevronLeft size={20} aria-hidden="true" /></button><span>{selected + 1} / {screenshots.length}</span><button aria-label="Next screenshot" onClick={() => move(1)}><ChevronRight size={20} aria-hidden="true" /></button></div></div>
         </div>
       </dialog>
     </div>

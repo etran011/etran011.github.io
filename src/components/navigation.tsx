@@ -72,9 +72,9 @@ export function Navigation() {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header ref={header} className="site-header">
         <div className="nav-bar">
-          <Link className="brand" href="/#home" aria-label="Erik Tran — home" onClick={() => setOpen(false)}>
+          <Link className="brand" href="/#home" onClick={() => setOpen(false)}>
             <span className="brand-mark" aria-hidden="true">et<span>.</span></span>
-            <span>Erik Tran</span>
+            <span>Erik Tran<span className="sr-only"> — home</span></span>
           </Link>
           <nav aria-label="Main navigation" className="desktop-nav">
             {links.map((link) => <a key={link.label} className="nav-link" href={link.href} aria-current={activeHref === link.href ? "location" : undefined}>{link.label}{!link.href.startsWith("/") && <ArrowUpRight size={13} aria-hidden="true" />}</a>)}
@@ -88,6 +88,12 @@ export function Navigation() {
         }}>
           {links.map((link) => <a key={link.label} href={link.href} aria-current={activeHref === link.href ? "location" : undefined} onClick={() => setOpen(false)}>{link.label}<ArrowUpRight size={16} aria-hidden="true" /></a>)}
         </nav>
+        <noscript>
+          <style>{"@media(max-width:1023px){.menu-toggle{display:none}.site-header{position:relative;top:0}}"}</style>
+          <nav className="mobile-nav" aria-label="Section navigation">
+            {links.map((link) => <a key={link.label} href={link.href}>{link.label}</a>)}
+          </nav>
+        </noscript>
         <div ref={progress} className="nav-progress" aria-hidden="true" />
       </header>
     </>
