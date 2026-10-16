@@ -38,7 +38,7 @@ test("scene poses keep the model restrained and respond to real narrative states
   for (const scene of ["hero", "about", "projects", "skills", "quiet"]) {
     context.scene = scene; resolveAtmospherePose(context, target);
     assert(Object.values(target).every(Number.isFinite));
-    assert(target.scale <= 0.65 && target.centerX >= 0.58);
+    assert(target.scale <= 0.65 && target.centerX >= 0.4);
   }
   context.scene = "about"; resolveAtmospherePose(context, target); const background = target.yaw;
   context.aboutStep = 2; resolveAtmospherePose(context, target); assert(target.yaw > background);

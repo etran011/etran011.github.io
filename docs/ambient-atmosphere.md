@@ -1,52 +1,64 @@
-# Woven signal atmosphere
+# Data particle atmosphere
 
-## Visual direction
+The original data lattice replaces the ribbon without changing the portfolio's content, palette, fonts, section layouts, navigation, custom cursor, or weighted scrolling. Four layers of sampled observations form a gently waving three-dimensional surface on the open side of the hero. Sparse connections expose its structure. The first scroll releases those same observations into a viewport-wide field, then reverse scrolling draws them back into formation.
 
-The [reference portfolio](https://anoopsonkriya.dev/) was inspected in the browser for slow geometric motion, pointer response, depth-weighted detail, and foreground separation. Its code, models, assets, colors, and editor-style interface were not reused.
+## Architecture
 
-This portfolio uses an original procedural Möbius ribbon: a continuous half-twist sampled as woven longitudinal filaments, cross-ribs, and a few points attached to the surface. The model occupies the open right side of the existing hero. The existing blue design tokens, grid, halo, typography, content, and layout remain intact. A horizontal mask protects the text area.
+- `src/lib/atmosphere-geometry.ts` generates deterministic formation coordinates, stable particle identities, stratified viewport destinations, and sparse local edges. Quality tiers retain exact identities rather than generating a new cloud.
+- `src/lib/atmosphere-renderer.ts` renders original GLSL with native WebGL 1. Two batched draws use static interleaved buffers; vertex shaders handle deformation, curved dispersal, drifting depth layers, pointer repulsion, and parallax. Links fade before they can stretch into distracting lines. Expanded depth no longer depends on the rotating formation.
+- `ScrollStory` publishes its existing **paced** hero progress through `story-progress`. The atmosphere consumes that value; it adds no wheel handler, scroll controller, or pinning behavior. Short desktop viewports use the existing shared Motion observer's natural document progress instead.
+- `src/lib/particle-transition.ts` adds bounded, reversible catch-up. An offscreen story settling, a large wheel delta, an anchor jump, or a keyboard jump cannot teleport particles. There is no irreversible “has scrolled” flag.
+- `use-data-particles.ts` owns the persistent renderer and one animation loop. Pose, expansion, and pointer values live outside React state. Local repulsion fades in after mouse movement and eases away on pointer departure or blur.
+- `AmbientBackground` caches section measurements and reads the existing About story and Skills selection signals. A single canvas persists through client navigation.
 
-## Rendering
+No new runtime dependencies, textures, downloaded models, post-processing passes, or per-frame geometry uploads are needed. Formation and dispersed positions are blended in the shader, so the particle system does not allocate hundreds of DOM elements or run CPU particle simulations.
 
-- `src/lib/atmosphere-geometry.ts` defines the surface and three finite geometry tiers. Unit tests verify its reversed seam, finite buffers, bounded coordinates, and static projection.
-- `src/lib/atmosphere-renderer.ts` uses native WebGL 1 and original GLSL. Two batched draws render lines and surface points. A slow spatial wave deforms the surface; gentle rotation and depth-weighted light establish dimensionality. Pointer lighting stays subtle.
-- `use-signal-ribbon.ts` owns one persistent renderer, one animation loop, and imperative pose interpolation. It does not update React state per frame. The renderer is loaded only for eligible desktop devices.
-- Pointer movement feeds a bounded target with exponential easing. It neither intercepts input nor changes foreground layout. The existing custom cursor remains independent.
-
-There are no new runtime dependencies, textures, model downloads, post-processing passes, depth buffers, or multisample render targets. Resource allocation happens during initialization or a quality change, not during ordinary animation. Buffers, shaders, programs, listeners, and pending frames are cleaned up. These choices follow [WebGL resource and batching guidance](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices).
-
-## Content continuity
-
-The existing Motion scroll observer uses cached section positions. About's existing `story-step` event and the Skills stack's selection attribute supply narrative state without changing those sections.
+## Section treatment
 
 | Context | Treatment |
 | --- | --- |
-| Hero | Strongest lighting and full surface detail in the available right-side space |
-| About | Smaller, softer form; its orientation follows Learn / Build / Explain |
-| Projects | Low opacity and sparse surface points so screenshots retain focus |
-| Skills | More detail; selecting a collection gently adjusts orientation and point emphasis |
-| Experience, education, contact, case studies | Quiet treatment with reduced rendering cadence |
+| Hero | Contained data formation, slow deformation and rotation; expansion follows the pinned story |
+| About | Shared expanded points drift across the viewport; story signals remain available to the scene |
+| Projects | Much lower opacity and point emphasis so screenshots remain dominant |
+| Skills | Collection selection gently increases point emphasis |
+| Experience, education, contact, case studies | Restrained ambient field with reduced rendering cadence |
 
-Poses interpolate over time, so fast and reverse scrolling remain continuous. The renderer persists across client routes; section changes do not rebuild GPU geometry. No wheel handler or scroll pacing behavior was added.
+The canvas spans the viewport after expansion. Before expansion, shader shading protects the hero text area. All layers are decorative, `aria-hidden`, and `pointer-events: none`. Existing controls retain normal hit testing and focus behavior.
 
 ## Budgets and fallbacks
 
-The initial quality uses local core-count and data-saving hints. Sustained slow frame timing reduces density through high, medium, and low tiers before lowering cadence to 30 FPS. A warm-up and full observation windows prevent reactions to isolated frames; quality never oscillates upward during the same session. Project and quiet profiles render at 30 FPS directly.
+High / medium / low tiers contain 1,248 / 624 / 416 points, with fewer than 60 KB of vertex data at the highest tier. Core-count and data-saving hints choose an initial tier. Sustained frame pressure lowers density before cadence, with no upward oscillation. Projects and quiet sections render at 30 FPS; capable desktop hero/About/Skills scenes target 60 FPS.
 
-Pixel ratios cap at 1.5 / 1.25 / 1 across the three tiers. The back buffer caps at approximately 2.4 million pixels and 4096 pixels per dimension. The densest line buffer is under 100 KB. Resizing only reallocates the drawing surface when required.
+Pixel ratios cap at 1.5 / 1.25 / 1. Back buffers cap at approximately 2.4 million pixels and 4096 pixels per dimension. Resize work occurs only when needed. Hiding the tab stops rendering and resets its frame clock. Disposal releases buffers, shaders, programs, listeners, and pending frames.
 
-Touch/mobile, reduced motion, forced colors, failed WebGL initialization, and context loss retain a self-hosted static visual or the existing CSS background. Reduced-motion and mobile views do not initialize WebGL. The static vector is present in server-rendered HTML and works without JavaScript. Regenerate it after changing the base geometry:
+Mobile/touch and reduced-motion visitors receive a simplified static vector with 416 points and no GPU initialization, continuous movement, or scroll expansion. Forced colors hide decorative layers. The vector is in server-rendered HTML and also works with JavaScript disabled, unavailable WebGL, or context loss. A complete WebGL frame hides the fallback; successful context restoration rebuilds one renderer. Preference changes are checked both through events and inside the render loop.
+
+Regenerate the vector after changing formation geometry:
 
 ```sh
 node --experimental-strip-types scripts/generate-atmosphere-fallback.mjs
 ```
 
-The inactive-document handler stops rendering and resets the frame clock. Reduced motion also locks the existing halo and grid layer against translation during section changes. While WebGL is active, its fallback-hiding selector takes priority over every section opacity rule, so the static and animated models do not overlap. Context loss reveals the fallback immediately; restoration rebuilds resources according to the current preferences, following the browser's [context-loss lifecycle](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/webglcontextlost_event). A frame also rechecks eligibility because preference change notifications can arrive after the new media state is observable.
-
 ## Verification
 
-Ten unit tests cover geometry, projection, scene bounds, quality adaptation, and the existing storytelling pacer. Browser checks exercise WebGL compilation, actual context loss and recovery, live reduced-motion changes, disposal, no-WebGL/no-JS views, pointer interpolation, About stages, Skills selection, fast/reverse navigation, and persistent route resources.
+```sh
+npm test
+npm run typecheck
+npm run lint
+npm run build
+```
 
-A production Chrome sample at 1440×1000 and device scale factor 2 measured approximately 60 FPS at high quality, with a median frame interval of 16.7 ms, a 95th percentile of 16.8 ms, and 2,399,969 backing pixels. Quiet sections issued 60 draw calls per second (two draws per frame). A 2560×1440 resize stayed within the buffer cap with no GL error. Synthetic frame pressure reached the low tier without losing the renderer. Results describe this machine and sample, not a universal hardware guarantee.
+Eleven unit tests cover stable quality subsets, bounded GPU data, destination coverage, static projection, scene restraint, adaptive frame budgets, reversible expansion, and the existing story pacer.
 
-For visual regression review, inspect the hero at rest and while moving the pointer, About in both scroll directions, Projects with a screenshot viewer open, and Skills with different collections selected. Resize to mobile and enable reduced motion. Check that the atmosphere remains behind readable content, never captures clicks, and that the cursor and existing scroll scenes remain intact.
+An optional Chrome integration check runs against the dev server or the exported site. It requires an available Playwright installation and Chrome, without adding a portfolio runtime dependency:
+
+```sh
+# Omit PLAYWRIGHT_MODULE when playwright is already resolvable in your environment.
+PLAYWRIGHT_MODULE=/absolute/path/to/playwright node tests/particles.browser.mjs http://127.0.0.1:4173
+```
+
+This exercises first-scroll expansion, fast reversal and return to top, mouse interpolation, custom cursor coexistence, About/Selected Work pinning, quiet Projects, hidden-tab pause, real WebGL context loss/restoration, live reduced-motion changes, mobile, no-JavaScript, and unavailable-WebGL fallbacks.
+
+The production Chrome sample at 1440×1000, device scale factor 2, measured about 60 FPS at high quality: median and 95th-percentile frame intervals were 16.7 ms, with 2,399,969 backing pixels. Quiet sections used 60 draw calls per second (two calls per frame). A 2560×1440 resize stayed within budget at 2066×1162 backing pixels with no GL error. Simulated sustained pressure reached low quality, and data-saving mode started at low quality. These are results for this machine and sample, not a hardware-wide guarantee.
+
+Additional existing browser regressions check weighted wheel distances, anchors and keyboard navigation, forward/reverse Selected Work stages, About readability, gallery dialogs, cursor lifecycle, and technology selection. Visual review should include a slow first scroll, a fast jump to About and back, and a mobile/reduced-motion view. GitHub Pages continues using Next.js static export with local SVG assets and no server runtime.

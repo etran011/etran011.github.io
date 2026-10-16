@@ -1,7 +1,7 @@
 import { atmosphereQuality, createParticleGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
-export const restingPose: AtmospherePose = { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.64, centerX: 0.58, centerY: 0.02, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
+export const restingPose: AtmospherePose = { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.5, centerX: 0.43, centerY: 0.02, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
 
 const vertexSource = `
 attribute vec3 aPosition;
@@ -44,10 +44,12 @@ void main() {
   float influence = exp(-dot(offset, offset) * 32.0) * uPointerStrength;
   screen += offset / max(distanceToPointer, 0.02) * vec2(1.0 / uProjection.y, 1.0) * influence * 0.035;
   gl_Position = vec4(screen, 0.0, 1.0);
-  vLight = mix(0.1, 0.66, clamp((1.8 - p.z) / 3.6, 0.0, 1.0));
+  float visualDepth = mix(p.z, depth * 2.0, phase);
+  vLight = mix(0.16, 0.72, clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0));
+  vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
-  gl_PointSize = clamp((1.5 + aSeed.z * 1.1) * perspective * uRatio, 1.0, 4.5);
+  gl_PointSize = clamp((1.5 + aSeed.z * 1.1) * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 4.5);
 }`;
 const fragmentSource = `
 precision mediump float;
