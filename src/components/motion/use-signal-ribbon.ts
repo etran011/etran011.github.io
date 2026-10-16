@@ -2,9 +2,10 @@
 
 import { useEffect, type RefObject } from "react";
 import type { AtmospherePose, AtmosphereRenderer } from "@/lib/atmosphere-renderer";
+import { poseKeys, resolveAtmospherePose, type AtmosphereContext } from "@/lib/atmosphere-scene";
 
 /** The SSR vector remains visible until a complete WebGL frame has rendered. */
-export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, rootRef: RefObject<HTMLDivElement | null>) {
+export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, rootRef: RefObject<HTMLDivElement | null>, input: RefObject<AtmosphereContext>) {
   useEffect(() => {
     const canvas = canvasRef.current;
     const root = rootRef.current;
@@ -14,7 +15,7 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
     const forced = matchMedia("(forced-colors: active)");
     const coarse = matchMedia("(any-pointer: coarse)");
     let renderer: AtmosphereRenderer | undefined;
-    let pose: AtmospherePose | undefined, basePose: AtmospherePose | undefined;
+    let pose: AtmospherePose | undefined, basePose: AtmospherePose | undefined, targetPose: AtmospherePose | undefined;
     const pointer = { x: 0, y: 0 };
     const targetPointer = { x: 0, y: 0 };
     let frame = 0, generation = 0, previous = 0, time = 0;
@@ -33,9 +34,12 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
       time += previous ? delta : 0; previous = now;
       const follow = 1 - Math.exp(-delta / 0.18);
       pointer.x += (targetPointer.x - pointer.x) * follow; pointer.y += (targetPointer.y - pointer.y) * follow;
-      if (pose && basePose) {
-        pose.yaw = basePose.yaw + pointer.x * 0.13; pose.pitch = basePose.pitch - pointer.y * 0.08;
-        pose.centerX = basePose.centerX + pointer.x * 0.025; pose.centerY = basePose.centerY + pointer.y * 0.018;
+      if (pose && basePose && targetPose) {
+        resolveAtmospherePose(input.current, targetPose);
+        const sceneFollow = 1 - Math.exp(-delta / 0.85);
+        for (const key of poseKeys) { basePose[key] += (targetPose[key] - basePose[key]) * sceneFollow; pose[key] = basePose[key]; }
+        pose.yaw += pointer.x * 0.13; pose.pitch -= pointer.y * 0.08;
+        pose.centerX += pointer.x * 0.025; pose.centerY += pointer.y * 0.018;
         pose.lightX = pointer.x; pose.lightY = pointer.y;
       }
       try {
@@ -57,7 +61,7 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
         const hex = getComputedStyle(root).getPropertyValue("--accent").trim();
         const color = /^#[0-9a-f]{6}$/i.test(hex) ? [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16) / 255) : [0.533, 0.678, 0.961];
         renderer = createAtmosphereRenderer(canvas, "medium", color);
-        basePose = restingPose; pose = { ...restingPose };
+        basePose = { ...restingPose }; pose = { ...restingPose }; targetPose = { ...restingPose };
         needsResize = true; start();
       } catch { if (current === generation) fallback(); }
     };
@@ -84,5 +88,5 @@ export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, 
       document.removeEventListener("pointermove", move); document.removeEventListener("pointerleave", leave); window.removeEventListener("blur", leave);
       canvas.removeEventListener("webglcontextlost", contextLost); canvas.removeEventListener("webglcontextrestored", contextRestored);
     };
-  }, [canvasRef, rootRef]);
+  }, [canvasRef, rootRef, input]);
 }

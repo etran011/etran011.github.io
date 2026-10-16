@@ -26,3 +26,18 @@ test("the fallback projects safely at the same resting pose", () => {
     assert(Math.abs(projected[0]) < 2 && Math.abs(projected[1]) < 2);
   }
 });
+
+test("scene poses keep the model restrained and respond to real narrative states", async () => {
+  const { resolveAtmospherePose } = await import("../src/lib/atmosphere-scene.ts");
+  const target = {};
+  const context = { scene: "hero", progress: 0, aboutStep: 0, skillGroup: null };
+  for (const scene of ["hero", "about", "projects", "skills", "quiet"]) {
+    context.scene = scene; resolveAtmospherePose(context, target);
+    assert(Object.values(target).every(Number.isFinite));
+    assert(target.scale <= 0.65 && target.centerX >= 0.58);
+  }
+  context.scene = "about"; resolveAtmospherePose(context, target); const background = target.yaw;
+  context.aboutStep = 2; resolveAtmospherePose(context, target); assert(target.yaw > background);
+  context.scene = "skills"; context.skillGroup = "tools"; resolveAtmospherePose(context, target); assert.equal(target.detail, 1.3);
+  context.scene = "projects"; resolveAtmospherePose(context, target); assert(target.detail < 0.2);
+});

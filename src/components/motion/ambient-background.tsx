@@ -5,53 +5,75 @@ import { scroll } from "motion";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import type { AtmosphereContext, AtmosphereScene } from "@/lib/atmosphere-scene";
 import { useSignalRibbon } from "./use-signal-ribbon";
 
-/** One shared atmosphere, driven by cached section positions and the existing scroll observer. */
+/** Cached document measurements feed the existing shared scroll observer. */
 export function AmbientBackground() {
   const root = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  useSignalRibbon(canvas, root);
   const pathname = usePathname();
+  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, aboutStep: 0, skillGroup: null });
+  useSignalRibbon(canvas, root, input);
   const shift = useSpring(0, { stiffness: 55, damping: 28, mass: 0.8 });
+
   useEffect(() => {
     const element = root.current;
     if (!element) return;
-    const desktop = matchMedia("(min-width: 1024px) and (pointer: fine)");
+    const desktop = matchMedia("(min-width: 1024px) and (hover: hover) and (pointer: fine)");
     const reduce = matchMedia("(prefers-reduced-motion: reduce)");
     const forced = matchMedia("(forced-colors: active)");
     const coarse = matchMedia("(any-pointer: coarse)");
-    let stop: (() => void) | undefined;
-    let frame = 0;
-    let enabled = false;
+    let frame = 0, y = scrollY, enabled = false, documentHeight = 1;
     let sections: { id: string; top: number }[] = [];
-    let y = window.scrollY;
+    let stack: HTMLElement | null = null;
     const update = () => {
-      const current = sections.findLast((section) => section.top <= y + innerHeight * 0.4)?.id;
-      const scene = current === "home" ? "hero" : ["about", "projects", "skills"].includes(current ?? "") ? current! : "quiet";
+      const index = sections.findLastIndex((section) => section.top <= y + innerHeight * 0.4);
+      const current = sections[index];
+      const scene: AtmosphereScene = current?.id === "home" ? "hero" : current?.id === "about" || current?.id === "projects" || current?.id === "skills" ? current.id : "quiet";
+      input.current.scene = scene;
+      input.current.progress = current ? Math.max(0, Math.min(1, (y - current.top) / Math.max(1, (sections[index + 1]?.top ?? documentHeight) - current.top))) : 0;
       if (element.dataset.scene !== scene) element.dataset.scene = scene;
-      shift.set(-Math.min(80, Math.max(0, y * 0.012)));
+      if (enabled) shift.set(-Math.min(80, Math.max(0, y * 0.012)));
     };
+    const skillSelection = () => {
+      const group = stack?.dataset.activeGroup;
+      input.current.skillGroup = group && ["languages", "libraries", "tools"].includes(group) ? group : null;
+    };
+    const selection = new MutationObserver(skillSelection);
     const measure = () => {
       frame = 0;
-      sections = Array.from(document.querySelectorAll<HTMLElement>("main > section[id]"), (section) => ({ id: section.id, top: section.getBoundingClientRect().top + window.scrollY }));
-      y = window.scrollY; update();
+      sections = Array.from(document.querySelectorAll<HTMLElement>("main > section[id]"), (section) => ({ id: section.id, top: section.getBoundingClientRect().top + scrollY }));
+      documentHeight = document.documentElement.scrollHeight;
+      const nextStack = document.querySelector<HTMLElement>(".technology-stack");
+      if (stack !== nextStack) { selection.disconnect(); stack = nextStack; if (stack) selection.observe(stack, { attributes: true, attributeFilter: ["data-active-group"] }); }
+      skillSelection();
+      input.current.aboutStep = Number(document.querySelector<HTMLElement>('[data-scroll-story="about"]')?.dataset.activeStep ?? 0);
+      y = scrollY; update();
     };
-    const schedule = () => { if (enabled && !frame) frame = requestAnimationFrame(measure); };
-    const observer = new ResizeObserver(schedule);
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
     const configure = () => {
-      stop?.(); stop = undefined; observer.disconnect(); cancelAnimationFrame(frame); frame = 0;
       enabled = desktop.matches && !reduce.matches && !forced.matches && !coarse.matches && navigator.maxTouchPoints === 0;
       element.dataset.animated = String(enabled);
-      if (!enabled) { shift.jump(0); return; }
-      measure(); observer.observe(document.body);
-      stop = scroll((_progress, info) => { y = info.y.current; update(); });
+      if (!enabled) shift.jump(0);
+      schedule();
     };
+    const story = (event: Event) => {
+      if (event.target instanceof HTMLElement && event.target.dataset.scrollStory === "about") input.current.aboutStep = (event as CustomEvent<{ step: number }>).detail.step;
+    };
+    const observer = new ResizeObserver(schedule);
+    observer.observe(document.body);
+    const stop = scroll((_progress, info) => { y = info.y.current; update(); });
     for (const query of [desktop, reduce, forced, coarse]) query.addEventListener("change", configure);
-    window.addEventListener("resize", schedule);
+    window.addEventListener("resize", schedule); document.addEventListener("story-step", story, true);
     configure();
-    return () => { stop?.(); observer.disconnect(); cancelAnimationFrame(frame); for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure); window.removeEventListener("resize", schedule); };
+    return () => {
+      stop(); observer.disconnect(); selection.disconnect(); cancelAnimationFrame(frame);
+      for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure);
+      window.removeEventListener("resize", schedule); document.removeEventListener("story-step", story, true);
+    };
   }, [pathname, shift]);
+
   return <div ref={root} className="ambient-background" data-scene={pathname === "/" ? "hero" : "quiet"} aria-hidden="true">
     <div className="ambient-halo" />
     <motion.div className="ambient-scroll-layer" style={{ y: shift }}>
