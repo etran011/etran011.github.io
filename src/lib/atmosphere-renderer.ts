@@ -1,7 +1,7 @@
 import { atmosphereQuality, createParticleGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
-export const restingPose: AtmospherePose = { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.5, centerX: 0.43, centerY: 0.02, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
+export const restingPose: AtmospherePose = { yaw: 0.55, pitch: 0.42, roll: -0.035, scale: 0.5, centerX: 0.43, centerY: 0.02, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
 
 const vertexSource = `
 attribute vec3 aPosition;

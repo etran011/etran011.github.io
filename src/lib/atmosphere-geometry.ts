@@ -1,10 +1,21 @@
-/** A layered sampling lattice: waves in the surface suggest correlated observations. */
+/** Standard bivariate normal density: x and z are measured in standard deviations. */
+export function gaussianDensity(x: number, z: number) {
+  return Math.exp(-(x * x + z * z) / 2) / (2 * Math.PI);
+}
+
+export const formationContours = [6, 14, 23] as const;
+const contourRadii = new Map<number, number>([[6, 1], [14, 2], [23, 3]]);
+
+/** 48 azimuths × 26 radii. Nonlinear radial sampling concentrates observations
+ * around the peak; three exact sigma radii provide meaningful density contours.
+ */
 export function formationPoint(id: number): readonly [number, number, number] {
-  const column = id % 24, row = Math.floor(id / 24) % 13, layer = Math.floor(id / 312);
-  const x = (column / 23 - 0.5) * 2.8;
-  const y = (row / 12 - 0.5) * 1.6;
-  const z = (layer / 3 - 0.5) * 0.9;
-  return [x, y + Math.sin(x * 2 + z * 2) * 0.22, z + Math.cos(y * 3 + x) * 0.16];
+  const angle = (id % 48) / 48 * Math.PI * 2;
+  const ring = Math.floor(id / 48);
+  const radius = contourRadii.get(ring) ?? 3.2 * Math.pow((ring + 0.25) / 25.25, 0.8);
+  const x = radius * Math.cos(angle), z = radius * Math.sin(angle);
+  // Display height is normalized by the PDF's peak; density itself remains exact.
+  return [x * 0.48, gaussianDensity(x, z) * (2 * Math.PI) * 1.9 - 0.68, z * 0.48];
 }
 
 export const atmosphereQuality = {
@@ -30,9 +41,14 @@ export function createParticleGeometry(quality: AtmosphereQuality = "high") {
   const points: number[] = [], lines: number[] = [];
   for (let id = 0; id < 1248; id += stride) {
     points.push(...particleVertex(id));
-    // Sparse local links reveal the sampling lattice without drawing a solid mesh.
-    if (id % (stride * 8) === 0 && id % 24 + stride < 24) {
-      lines.push(...particleVertex(id), ...particleVertex(id + stride));
+    const ring = Math.floor(id / 48), angle = id % 48;
+    if (formationContours.includes(ring as typeof formationContours[number])) {
+      const neighbor = ring * 48 + (angle + stride) % 48;
+      lines.push(...particleVertex(id), ...particleVertex(neighbor));
+    }
+    // Eight meridians expose the bell silhouette, including on lower quality tiers.
+    if (angle % 6 === 0 && ring < 25) {
+      lines.push(...particleVertex(id), ...particleVertex(id + 48));
     }
   }
   return { points: new Float32Array(points), lines: new Float32Array(lines) };
@@ -40,7 +56,7 @@ export function createParticleGeometry(quality: AtmosphereQuality = "high") {
 
 /** Same rest projection as the shader, for the no-script/static vector fallback. */
 export function projectFormationPoint([x, y, z]: readonly number[]) {
-  const yaw = 0.48, pitch = -0.7, roll = -0.38;
+  const yaw = 0.55, pitch = 0.42, roll = -0.035;
   const xx = x * Math.cos(yaw) + z * Math.sin(yaw);
   const zz = -x * Math.sin(yaw) + z * Math.cos(yaw);
   const yy = y * Math.cos(pitch) - zz * Math.sin(pitch);
