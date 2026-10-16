@@ -3,6 +3,7 @@
 import { motion, useSpring } from "motion/react";
 import { scroll } from "motion";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 /** One shared atmosphere, driven by cached section positions and the existing scroll observer. */
@@ -54,7 +55,7 @@ export function AmbientBackground() {
     <motion.div className="ambient-scroll-layer" style={{ y: shift }}>
       <div className="ambient-grid" />
       <svg className="ambient-lines" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="none" stroke="currentColor" strokeWidth="0.7"><path d="M520 820C720 760 690 280 1440 190M460 880C860 700 720 380 1440 300M640 960C940 700 900 510 1440 430M900 1000C1080 700 1170 650 1440 600" /></g></svg>
-      <div className="ambient-orbit"><span /><span /><span /></div>
+      <Image className="ambient-ribbon" src="/images/atmosphere/signal-ribbon.svg" width={1200} height={1000} alt="" priority />
     </motion.div>
   </div>;
 }
