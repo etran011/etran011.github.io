@@ -29,7 +29,8 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
     const measure = () => {
       frame = 0;
       const height = Math.ceil(content.getBoundingClientRect().height);
-      const enabled = desktop.matches && !reduce.matches && !coarse.matches && !forced.matches && navigator.maxTouchPoints === 0 && parseFloat(getComputedStyle(document.documentElement).fontSize) <= 20 && height <= innerHeight - 136;
+      const top = kind === "hero" ? 0 : 112;
+      const enabled = desktop.matches && !reduce.matches && !coarse.matches && !forced.matches && navigator.maxTouchPoints === 0 && parseFloat(getComputedStyle(document.documentElement).fontSize) <= 20 && height <= innerHeight - (kind === "hero" ? 0 : 136);
       const next = `${enabled}:${height}:${innerHeight}:${innerWidth}`;
       if (signature === next) return;
       signature = next; reset();
@@ -50,7 +51,7 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
           element.dataset.activeStep = step;
           element.dispatchEvent(new CustomEvent("story-step", { detail: { step: Number(step) } }));
         }
-      }, { target: element, offset: ["start 112px", `end ${height + 112}px`] });
+      }, { target: element, offset: [`start ${top}px`, `end ${height + top}px`] });
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
     const observer = new ResizeObserver(schedule);

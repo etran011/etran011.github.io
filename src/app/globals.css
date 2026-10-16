@@ -506,3 +506,18 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 [data-scroll-story="project"][data-pinned] .screenshot-gallery { translate: 0 calc(var(--story-progress, 0) * -6px); }
 
 @media(prefers-reduced-motion: reduce), (forced-colors: active) { .button:active { scale: none; } }
+
+/* A complete landing scene; the next section starts below the initial viewport. */
+.hero { padding: 0; }
+.hero .story-stage { min-height: 100svh; }
+.hero .scroll-story[data-pinned] > .story-stage { top: 0; }
+.hero-scene { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: clamp(2.5rem, 8svh, 6rem); padding-block: clamp(5rem, 12svh, 8rem) clamp(2rem, 6svh, 4rem); }
+.hero-identity { display: block; max-width: 53rem; width: 100%; }
+.hero .hero-narrative { margin-top: clamp(1.75rem, 4svh, 3rem); }
+.hero .hero-headline { margin-top: 0; }
+.hero .hero-role { max-width: 36rem; }
+.hero-scroll-link { display: inline-flex; align-items: center; align-self: flex-start; gap: 1rem; min-height: 44px; font-size: 0.65rem; }
+.hero-scroll-track { position: relative; display: block; width: 4rem; height: 1px; background: var(--border); }
+.hero-scroll-track::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--story-progress, 0)); }
+@media(max-width: 599px) { .hero-scene { padding-block: max(4rem, env(safe-area-inset-top)) 2rem; gap: clamp(2.5rem, 8svh, 4rem); } .hero-role { font-size: 0.8rem; } }
+@media(max-height: 500px) { .hero-scene { gap: 1.5rem; padding-block: 2.5rem 1.5rem; } }
