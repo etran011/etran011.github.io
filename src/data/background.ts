@@ -80,3 +80,14 @@ export const education = {
     "Statistical Data Analysis", "Ethics in Data Science", "Linux for Ethical Hackers",
   ],
 } as const satisfies Education;
+
+export interface SkillCategory { name: string; items: readonly string[]; }
+
+export const skillCategories = [
+  { name: "Programming languages", items: ["Python", "SQL", "R", "Bash"] },
+  { name: "Data analysis", items: ["Data cleaning", "Exploratory data analysis", "Statistical analysis", "ETL", "Data pipelines"] },
+  { name: "Machine learning", items: ["Data preprocessing", "Feature engineering", "Regression", "Model evaluation", "Hyperparameter tuning", "scikit-learn", "PyTorch"] },
+  { name: "Data visualization", items: ["Tableau", "Matplotlib", "Seaborn"] },
+  { name: "Libraries & frameworks", items: ["pandas", "NumPy", "FastAPI", "Next.js", "Pytest"] },
+  { name: "Tools & platforms", items: ["Git", "Linux", "AWS EC2", "Excel", "Stata"] },
+] as const satisfies readonly SkillCategory[];

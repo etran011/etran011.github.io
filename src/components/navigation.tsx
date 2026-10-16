@@ -9,6 +9,7 @@ const links = [
   { label: "Home", href: "/#home" },
   { label: "Projects", href: "/#projects" },
   { label: "Experience", href: "/#experience" },
+  { label: "Skills", href: "/#skills" },
   { label: "GitHub", href: profile.links[0].href },
   { label: "Contact", href: `mailto:${profile.email}` },
 ];
@@ -26,7 +27,7 @@ export function Navigation() {
     const closeOutside = (event: PointerEvent) => {
       if (!header.current?.contains(event.target as Node)) setOpen(false);
     };
-    const desktop = window.matchMedia("(min-width: 768px)");
+    const desktop = window.matchMedia("(min-width: 1024px)");
     const closeOnResize = () => { if (desktop.matches) setOpen(false); };
     document.addEventListener("keydown", closeOnEscape);
     document.addEventListener("pointerdown", closeOutside);
