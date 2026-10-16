@@ -8,6 +8,7 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 const links = [
   { label: "Home", href: "/#home" },
   { label: "Projects", href: "/#projects" },
+  { label: "Experience", href: "/#experience" },
   { label: "GitHub", href: profile.links[0].href },
   { label: "Contact", href: `mailto:${profile.email}` },
 ];
