@@ -4,7 +4,7 @@ A personal portfolio connecting data science and software engineering.
 
 ## Status
 
-Phase 4: professional background complete. The portfolio now includes the core design, project showcase and case studies, experience timeline, education, categorized technical skills, and About section. Deployment and any further phases remain deferred until requested.
+Phase 5: interactive features complete. The portfolio includes cursor-responsive hero depth, progressive scroll reveals, swipeable and zoomable screenshot galleries, and navigation with active-section feedback and reading progress. Existing project showcases and professional background remain intact. Deployment and further phases remain deferred until requested.
 
 Target hosting: https://etran011.github.io/ (not deployed yet).
 
@@ -79,3 +79,14 @@ The experience timeline distinguishes the National Cyber League competition role
 Navigation switches to a mobile disclosure below 1024px to fit the expanded section list. Education is also linked from About. All background content is server-rendered and readable without JavaScript.
 
 See [Phase 4 validation](docs/phase-4-validation.md) for checks performed.
+
+
+## Interaction behavior
+
+Hero depth follows fine-pointer movement. Scroll reveals run once per section mount and cancel when reduced motion is enabled or focus enters an animating section. Content stays visible without JavaScript.
+
+Swipe horizontally across a project screenshot to change images. In the enlarged viewer, select Zoom screenshot to explore a larger image and Fit screenshot to reset it. Focus the zoomed image region to pan with keyboard arrows; elsewhere, arrows select screenshots. Escape closes the viewer and restores focus.
+
+Navigation highlights the current section (Projects on case-study routes), displays reading progress, and animates mobile-menu entry. Reduced-motion preferences suppress entry and reveal animations.
+
+See [Phase 5 validation](docs/phase-5-validation.md) for checks performed.

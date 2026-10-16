@@ -311,3 +311,16 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .gallery-dialog[open] .gallery-dialog-content { animation: viewer-open 180ms ease-out; }
 }
 @keyframes viewer-open { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.nav-link { position: relative; transition: color var(--duration-fast); }
+.nav-link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform var(--duration-normal) var(--ease-standard); }
+.nav-link[aria-current], .mobile-nav a[aria-current] { color: var(--accent); }
+.nav-link[aria-current]::after, .nav-link:hover::after { transform: scaleX(1); }
+.nav-progress { position: absolute; bottom: 0; left: 0.75rem; width: calc(100% - 1.5rem); height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; pointer-events: none; }
+.menu-icon { display: inline-flex; transition: transform 180ms ease; }
+.menu-icon.is-open { transform: rotate(90deg); }
+.mobile-nav { max-height: calc(100svh - 8rem); overflow-y: auto; overscroll-behavior: contain; }
+@media (prefers-reduced-motion: no-preference) {
+ .mobile-nav:not([hidden]) { animation: menu-open 200ms var(--ease-standard); }
+}
+@keyframes menu-open { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
