@@ -5,6 +5,7 @@ import { createStoryPacer } from "@/lib/story-pacer";
 import { useEffect, useRef, type ReactNode } from "react";
 
 type StoryKind = "hero" | "about" | "project";
+const sceneTravel = { hero: [0.65, 600], about: [0.4, 360], project: [0.5, 480] } as const;
 
 /** Native sticky positioning and Motion's shared scroll observer; never a scroll trap. */
 export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps: number; children: ReactNode }) {
@@ -67,7 +68,8 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
       if (signature === next) return;
       signature = next; reset();
       if (!enabled) return;
-      const travel = kind === "hero" ? Math.min(innerHeight * 0.9, 840) : Math.min(innerHeight * 0.62, 560);
+      const [fraction, maximum] = sceneTravel[kind];
+      const travel = Math.min(innerHeight * fraction, maximum);
       element.style.setProperty("--scene-height", `${height}px`);
       element.style.setProperty("--scene-travel", `${travel}px`);
       element.dataset.pinned = "true";

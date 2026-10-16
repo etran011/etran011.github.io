@@ -95,6 +95,8 @@ The cinematic interaction update adds a contextual desktop cursor, weighted whee
 
 The subsequent refinement makes the hero a minimal full-screen scene, reveals navigation on scroll, bounds visual story pacing, raises and animates the skill stack, and adds a shared atmospheric background. See [refinement behavior and validation](docs/animation-refinement-validation.md). Run `npm test` for the permanent timeline regression tests.
 
+The latest [Selected Work pinning fix](docs/selected-work-pinning-validation.md) keeps its label, heading, description, and featured card in one sticky scene. It also simplifies hero copy, shortens the three scene distances, and removes buffered wheel input so scrolling remains continuous.
+
 
 ## Final sections and metadata
 

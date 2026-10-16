@@ -453,7 +453,7 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 .scroll-story[data-pinned] > .story-stage { position: sticky; top: 7rem; }
 .hero-narrative { position: relative; }
 .hero-story-phrase { display: none; position: absolute; inset: 0; font-size: clamp(2rem, 3.5vw, 3.5rem); font-weight: 450; line-height: 1.15; letter-spacing: -0.045em; pointer-events: none; }
-[data-scroll-story="hero"][data-pinned] .hero-narrative-original { opacity: var(--story-weight-0, 1); transform: translateY(calc(var(--story-progress, 0) * -10px)); }
+[data-scroll-story="hero"][data-pinned] .hero-narrative-original { opacity: var(--story-weight-0, 1); }
 [data-scroll-story="hero"][data-pinned] .hero-story-phrase { display: block; }
 .hero-story-software { color: var(--foreground); opacity: var(--story-weight-1, 0); }
 .hero-story-intelligence { color: var(--accent); opacity: var(--story-weight-2, 0); }
@@ -500,7 +500,7 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 @media(prefers-reduced-motion: no-preference) {
  [data-scroll-story="project"][data-pinned] .gallery-stage img { animation: project-frame 380ms var(--ease-standard); }
 }
-@keyframes project-frame { from { opacity: 0.6; transform: scale(1.015); } to { opacity: 1; transform: none; } }
+@keyframes project-frame { from { opacity: 0.92; transform: scale(1.005); } to { opacity: 1; transform: none; } }
 
 .scroll-story[data-pinned] .project-card:hover { transform: none; }
 
@@ -525,8 +525,6 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 [data-scroll-story="hero"][data-pinned] .story-scroll-cue { display: inline-flex; align-items: center; gap: 0.75rem; color: var(--muted); font-size: 0.55rem; white-space: nowrap; }
 .story-scroll-cue > span { display: block; width: 3rem; height: 1px; background: var(--border); position: relative; }
 .story-scroll-cue > span::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--story-progress, 0)); }
-[data-scroll-story="hero"][data-pinned] .hero-grid { scale: calc(1 - var(--story-progress, 0) * 0.012); transform-origin: center top; }
-[data-scroll-story="project"][data-pinned] .screenshot-gallery { translate: 0 calc(var(--story-progress, 0) * -6px); }
 
 @media(prefers-reduced-motion: reduce), (forced-colors: active) { .button:active { scale: none; } }
 

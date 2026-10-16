@@ -6,7 +6,7 @@ The interaction update preserves the existing colors, fonts, content, routes, an
 
 - A precise cursor dot follows the pointer directly; a spring-driven ring responds to links, buttons, cards, and screenshot controls. Text fields, selection, dialogs, keyboard navigation, and window blur restore the native cursor.
 - [Lenis](https://github.com/darkroomengineering/lenis) is dynamically imported for gentle wheel inertia. It is the only scroll manager. Keyboard scrolling, touch input, browser history, and cross-route navigation retain their native behavior. Same-page anchors update history and focus the destination. Modal viewers suspend background scrolling.
-- Three scenes use native CSS sticky positioning and Motion's shared scroll observer: the hero interests, About paragraph emphasis, and OptionLab screenshots. Added scroll travel is capped at 840, 560, and 560 pixels respectively. Content can always be bypassed with navigation or keyboard scrolling.
+- Three scenes use native CSS sticky positioning and Motion's shared scroll observer: the hero interests, About paragraph emphasis, and Selected Work with OptionLab screenshots. Added scroll travel is capped at 600, 360, and 480 pixels respectively. Content can always be bypassed with navigation or keyboard scrolling.
 - The hero keeps the name and credentials visible while interest phrases change. About keeps all paragraphs readable while highlighting the current chapter. OptionLab keeps its project details alongside the real screenshots.
 - Any manual gallery interaction takes priority over scroll-driven image selection. Existing swipe, keyboard, zoom, modal focus, and Escape behavior remain available.
 - Buttons move only a few pixels toward the pointer. Project lighting uses a translated gradient layer, and section entrances use restrained opacity and translation.
@@ -32,3 +32,5 @@ Validation used the production static export served locally and headless Chrome,
 The output retains `output: "export"`, trailing-slash routes, unoptimized images, and `.nojekyll` for GitHub Pages. Deployment remains deferred. The existing five high-severity development-tooling audit entries documented in the README remain outside this interaction update. Safari and Firefox require separate device testing.
 
 See [animation refinement validation](animation-refinement-validation.md) for the subsequent full-screen hero, bounded timeline pacing, navigation visibility, skills, and shared background update.
+
+The latest [Selected Work pinning revision](selected-work-pinning-validation.md) keeps the heading and featured card together, removes buffered hero wheel input, and simplifies the hero copy and scroll transitions.

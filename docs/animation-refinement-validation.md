@@ -1,5 +1,7 @@
 # Animation refinement validation
 
+This records the earlier animation refinement. The later [Selected Work pinning revision](selected-work-pinning-validation.md) supersedes its hero copy, scene grouping, travel distances, and buffered hero wheel behavior.
+
 The update preserves existing colors, self-hosted fonts, verified background data, project screenshots, case studies, and GitHub Pages export settings. The [reference portfolio](https://portfolio-mti1.vercel.app/) was inspected in a browser through its landing, About transition, and technical-stack area. Its large typography, layered atmosphere, and section pacing informed the work; its colors, assets, biography, and layout were not copied.
 
 ## Current behavior
