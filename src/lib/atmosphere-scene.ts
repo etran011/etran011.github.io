@@ -1,10 +1,11 @@
+import { formationView } from "./atmosphere-view.mjs";
 import type { AtmospherePose } from "./atmosphere-renderer";
 
 export type AtmosphereScene = "hero" | "about" | "projects" | "skills" | "quiet";
 export interface AtmosphereContext { scene: AtmosphereScene; progress: number; heroProgress: number; scroll: number; aboutStep: number; skillGroup: string | null; }
 type ScenePose = Omit<AtmospherePose, "lightX" | "lightY" | "pointerStrength" | "scroll">;
 const profiles: Record<AtmosphereScene, ScenePose> = {
-  hero: { yaw: 0.55, pitch: 0.42, roll: -0.035, scale: 0.5, centerX: 0.43, centerY: 0.02, detail: 1 },
+  hero: { ...formationView, detail: 1 },
   about: { yaw: 0.92, pitch: -0.55, roll: -0.2, scale: 0.56, centerX: 0.7, centerY: -0.08, detail: 0.8 },
   projects: { yaw: 1.4, pitch: -0.4, roll: -0.15, scale: 0.5, centerX: 0.76, centerY: -0.05, detail: 0.18 },
   skills: { yaw: 1.1, pitch: -0.8, roll: -0.55, scale: 0.62, centerX: 0.65, centerY: 0, detail: 1.1 },

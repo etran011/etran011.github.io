@@ -87,7 +87,7 @@ export function AmbientBackground() {
     <div className="ambient-halo" />
     <motion.div className="ambient-scroll-layer" style={{ y: shift }}>
       <div className="ambient-grid" />
-      <div className="ambient-formation"><Image src="/images/atmosphere/data-formation.svg" fill sizes="(max-width: 1023px) 140vw, 88vw" style={{ objectFit: "contain" }} alt="" preload /></div>
+      <div className="ambient-formation"><Image src="/images/atmosphere/data-formation.svg" fill sizes="100vw" style={{ objectFit: "contain" }} alt="" preload /></div>
     </motion.div>
     <canvas ref={canvas} className="ambient-canvas" aria-hidden="true" />
   </div>;

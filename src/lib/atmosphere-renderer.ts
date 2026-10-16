@@ -1,7 +1,8 @@
+import { formationCamera, formationView } from "./atmosphere-view.mjs";
 import { atmosphereQuality, createParticleGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
-export const restingPose: AtmospherePose = { yaw: 0.55, pitch: 0.42, roll: -0.035, scale: 0.5, centerX: 0.43, centerY: 0.02, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
+export const restingPose: AtmospherePose = { ...formationView, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
 
 const vertexSource = `
 attribute vec3 aPosition;
@@ -18,15 +19,16 @@ uniform float uScroll;
 varying float vLight;
 void main() {
   vec3 p = aPosition;
-  float wave = sin(p.x * 2.6 + uTime * 0.2 + aSeed.x * 6.28);
-  p.y += wave * 0.035;
+  float density = clamp((aPosition.y + 0.68) / 1.9, 0.0, 1.0);
+  // A shared height modulation preserves the Gaussian profile and closed contours.
+  p.y = (p.y + 0.68) * (1.0 + sin(uTime * 0.16) * 0.012) - 0.68;
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
   p.yz = mat2(cx, sx, -sx, cx) * p.yz;
   float cz = cos(uRotation.z), sz = sin(uRotation.z);
   p.xy = mat2(cz, sz, -sz, cz) * p.xy;
-  float perspective = 4.5 / (4.5 + p.z);
+  float perspective = ${formationCamera.toFixed(1)} / (${formationCamera.toFixed(1)} + p.z);
   vec2 projected = p.xy * uProjection.x * perspective;
   projected.x /= uProjection.y;
   // Slightly staggered departures flow along curved paths, with exact endpoints.
@@ -45,11 +47,14 @@ void main() {
   screen += offset / max(distanceToPointer, 0.02) * vec2(1.0 / uProjection.y, 1.0) * influence * 0.035;
   gl_Position = vec4(screen, 0.0, 1.0);
   float visualDepth = mix(p.z, depth * 2.0, phase);
-  vLight = mix(0.16, 0.72, clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0));
+  float front = clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0);
+  float formationLight = (0.4 + density * 0.5) * (0.78 + front * 0.22);
+  vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
-  gl_PointSize = clamp((1.5 + aSeed.z * 1.1) * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 4.5);
+  float pointSize = mix(1.8 + aSeed.z * 0.8 + density * 0.35, 1.5 + aSeed.z * 1.1, phase);
+  gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 4.5);
 }`;
 const fragmentSource = `
 precision mediump float;
@@ -60,7 +65,7 @@ uniform float uDetail;
 varying float vLight;
 void main() {
   float alpha = vLight;
-  if (uPoint < 0.5) alpha *= 0.25 * (1.0 - smoothstep(0.08, 0.65, uExpansion));
+  if (uPoint < 0.5) alpha *= 0.48 * (1.0 - smoothstep(0.08, 0.65, uExpansion));
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
   gl_FragColor = vec4(uColor, alpha);
 }`;
@@ -134,7 +139,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         if (disposed || gl.isContextLost()) return false;
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
-        gl.uniform3f(uniforms.uRotation, pose.yaw + time * 0.025, pose.pitch + Math.sin(time * 0.12) * 0.06, pose.roll + Math.sin(time * 0.08) * 0.05);
+        gl.uniform3f(uniforms.uRotation, pose.yaw + time * 0.012, pose.pitch + Math.sin(time * 0.12) * 0.025, pose.roll + Math.sin(time * 0.08) * 0.012);
         gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);

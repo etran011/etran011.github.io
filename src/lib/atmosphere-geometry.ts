@@ -1,3 +1,5 @@
+import { formationCamera, formationView } from "./atmosphere-view.mjs";
+
 /** Standard bivariate normal density: x and z are measured in standard deviations. */
 export function gaussianDensity(x: number, z: number) {
   return Math.exp(-(x * x + z * z) / 2) / (2 * Math.PI);
@@ -56,12 +58,12 @@ export function createParticleGeometry(quality: AtmosphereQuality = "high") {
 
 /** Same rest projection as the shader, for the no-script/static vector fallback. */
 export function projectFormationPoint([x, y, z]: readonly number[]) {
-  const yaw = 0.55, pitch = 0.42, roll = -0.035;
+  const { yaw, pitch, roll } = formationView;
   const xx = x * Math.cos(yaw) + z * Math.sin(yaw);
   const zz = -x * Math.sin(yaw) + z * Math.cos(yaw);
   const yy = y * Math.cos(pitch) - zz * Math.sin(pitch);
   const depth = y * Math.sin(pitch) + zz * Math.cos(pitch);
-  const perspective = 4.5 / (4.5 + depth);
+  const perspective = formationCamera / (formationCamera + depth);
   return [(xx * Math.cos(roll) - yy * Math.sin(roll)) * perspective,
     (xx * Math.sin(roll) + yy * Math.cos(roll)) * perspective, depth];
 }

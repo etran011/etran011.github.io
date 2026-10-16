@@ -619,7 +619,7 @@ body { isolation: isolate; }
 .ambient-halo { position: absolute; width: 80vw; height: 100vh; right: -20vw; top: -10vh; background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 10%, transparent), transparent 65%); opacity: 0.7; transition: opacity 900ms var(--ease-standard), transform 1200ms var(--ease-standard); }
 .ambient-scroll-layer { position: absolute; inset: -80px 0; }
 .ambient-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.025; mask-image: radial-gradient(ellipse at 85% 35%, black, transparent 65%); transition: opacity 900ms var(--ease-standard); }
-.ambient-formation { position: absolute; top: 0; right: -20vw; width: min(88vw, 80rem); height: 100svh; object-fit: contain; opacity: 0.42; mask-image: linear-gradient(90deg, transparent, black 25%); transition: opacity 900ms var(--ease-standard); }
+.ambient-formation { position: absolute; top: 80px; right: 0; width: 100%; height: 100svh; object-fit: contain; opacity: 0.6; mask-image: linear-gradient(90deg, transparent, black 25%); transition: opacity 900ms var(--ease-standard); }
 .ambient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; mask-image: radial-gradient(ellipse at center, black 45%, #0008 100%); transition: opacity 900ms var(--ease-standard); }
 .ambient-background[data-renderer="webgl"] .ambient-canvas { opacity: var(--model-intensity, 0.8); }
 .ambient-background[data-renderer="webgl"][data-scene] .ambient-formation { opacity: 0; }
@@ -635,6 +635,6 @@ body { isolation: isolate; }
 .ambient-background[data-scene="skills"] .ambient-formation { opacity: 0.28; }
 .ambient-background[data-scene="quiet"] .ambient-halo { opacity: 0.18; }
 .ambient-background[data-scene="quiet"] .ambient-formation { opacity: 0.1; }
-@media(max-width: 1023px) { .ambient-grid { display: none; } .ambient-halo { opacity: 0.25; } .ambient-background .ambient-formation { width: 140vw; right: -65vw; height: 80svh; opacity: 0.14; } }
+@media(max-width: 1023px) { .ambient-grid { display: none; } .ambient-halo { opacity: 0.25; } .ambient-background .ambient-formation { width: 100%; right: 0; height: 45svh; opacity: 0.3; } }
 @media(prefers-reduced-motion: reduce) { .ambient-scroll-layer, .ambient-halo { transform: none !important; } }
 @media(forced-colors: active) { .ambient-background { display: none; } }
