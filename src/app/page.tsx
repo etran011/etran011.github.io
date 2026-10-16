@@ -5,6 +5,7 @@ export default function Home() {
   return (
     <main id="main-content" className="flex min-h-svh items-center py-(--space-section)">
       <Container>
+        <div id="home" />
         <p className="mb-8 font-mono text-xs tracking-[0.18em] text-accent uppercase">
           Personal portfolio / In development
         </p>
