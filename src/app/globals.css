@@ -621,14 +621,14 @@ body { isolation: isolate; }
 .ambient-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.055; mask-image: radial-gradient(ellipse at 85% 35%, black, transparent 65%); transition: opacity 900ms var(--ease-standard); }
 .ambient-lines { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.12; transition: opacity 900ms var(--ease-standard); }
 .ambient-formation { position: absolute; top: 0; right: -20vw; width: min(88vw, 80rem); height: 100svh; object-fit: contain; opacity: 0.42; mask-image: linear-gradient(90deg, transparent, black 25%); transition: opacity 900ms var(--ease-standard); }
-.ambient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; mask-image: linear-gradient(90deg, transparent 32%, #0006 52%, black 68%); transition: opacity 900ms var(--ease-standard); }
-.ambient-background[data-renderer="webgl"] .ambient-canvas { opacity: var(--model-intensity, 0.46); }
+.ambient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; mask-image: radial-gradient(ellipse at center, black 45%, #0008 100%); transition: opacity 900ms var(--ease-standard); }
+.ambient-background[data-renderer="webgl"] .ambient-canvas { opacity: var(--model-intensity, 0.8); }
 .ambient-background[data-renderer="webgl"][data-scene] .ambient-formation { opacity: 0; }
 .ambient-background:not([data-renderer="webgl"]) .ambient-formation, .ambient-background:not([data-renderer="webgl"]) .ambient-canvas { transition: none; }
-.ambient-background[data-scene="about"] { --model-intensity: 0.24; }
+.ambient-background[data-scene="about"] { --model-intensity: 0.42; }
 .ambient-background[data-scene="projects"] { --model-intensity: 0.12; }
-.ambient-background[data-scene="skills"] { --model-intensity: 0.3; }
-.ambient-background[data-scene="quiet"] { --model-intensity: 0.1; }
+.ambient-background[data-scene="skills"] { --model-intensity: 0.5; }
+.ambient-background[data-scene="quiet"] { --model-intensity: 0.28; }
 .ambient-background[data-scene="about"] .ambient-halo { opacity: 0.25; transform: translateY(8vh); }
 .ambient-background[data-scene="about"] .ambient-formation { opacity: 0.22; }
 .ambient-background[data-scene="projects"] .ambient-lines { opacity: 0.045; }

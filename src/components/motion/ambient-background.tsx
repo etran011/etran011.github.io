@@ -13,7 +13,7 @@ export function AmbientBackground() {
   const root = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const pathname = usePathname();
-  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, aboutStep: 0, skillGroup: null });
+  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, heroProgress: 0, aboutStep: 0, skillGroup: null });
   useDataParticles(canvas, root, input);
   const shift = useSpring(0, { stiffness: 55, damping: 28, mass: 0.8 });
 
@@ -27,11 +27,14 @@ export function AmbientBackground() {
     let frame = 0, y = scrollY, enabled = false, documentHeight = 1;
     let sections: { id: string; top: number }[] = [];
     let stack: HTMLElement | null = null;
+    let hero: HTMLElement | null = null;
     const update = () => {
       const index = sections.findLastIndex((section) => section.top <= y + innerHeight * 0.4);
       const current = sections[index];
       const scene: AtmosphereScene = current?.id === "home" ? "hero" : current?.id === "about" || current?.id === "projects" || current?.id === "skills" ? current.id : "quiet";
       input.current.scene = scene;
+      // Unpinned/short viewports use the same observer's normal document progress.
+      if (!hero?.dataset.pinned) input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, (sections.find(s => s.id === "about")?.top ?? innerHeight) - innerHeight * 0.4))) : 1;
       input.current.progress = current ? Math.max(0, Math.min(1, (y - current.top) / Math.max(1, (sections[index + 1]?.top ?? documentHeight) - current.top))) : 0;
       if (element.dataset.scene !== scene) element.dataset.scene = scene;
       if (enabled) shift.set(-Math.min(80, Math.max(0, y * 0.012)));
@@ -45,6 +48,8 @@ export function AmbientBackground() {
       frame = 0;
       sections = Array.from(document.querySelectorAll<HTMLElement>("main > section[id]"), (section) => ({ id: section.id, top: section.getBoundingClientRect().top + scrollY }));
       documentHeight = document.documentElement.scrollHeight;
+      hero = document.querySelector<HTMLElement>('[data-scroll-story="hero"]');
+      if (hero?.dataset.pinned) input.current.heroProgress = Number(hero.style.getPropertyValue("--story-progress")) || 0;
       const nextStack = document.querySelector<HTMLElement>(".technology-stack");
       if (stack !== nextStack) { selection.disconnect(); stack = nextStack; if (stack) selection.observe(stack, { attributes: true, attributeFilter: ["data-active-group"] }); }
       skillSelection();
@@ -58,6 +63,9 @@ export function AmbientBackground() {
       if (!enabled) shift.jump(0);
       schedule();
     };
+    const heroStory = (event: Event) => {
+      if (event.target instanceof HTMLElement && event.target.dataset.scrollStory === "hero") input.current.heroProgress = (event as CustomEvent<{ progress: number }>).detail.progress;
+    };
     const story = (event: Event) => {
       if (event.target instanceof HTMLElement && event.target.dataset.scrollStory === "about") input.current.aboutStep = (event as CustomEvent<{ step: number }>).detail.step;
     };
@@ -65,12 +73,12 @@ export function AmbientBackground() {
     observer.observe(document.body);
     const stop = scroll((_progress, info) => { y = info.y.current; update(); });
     for (const query of [desktop, reduce, forced, coarse]) query.addEventListener("change", configure);
-    window.addEventListener("resize", schedule); document.addEventListener("story-step", story, true);
+    window.addEventListener("resize", schedule); document.addEventListener("story-step", story, true); document.addEventListener("story-progress", heroStory, true);
     configure();
     return () => {
       stop(); observer.disconnect(); selection.disconnect(); cancelAnimationFrame(frame);
       for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure);
-      window.removeEventListener("resize", schedule); document.removeEventListener("story-step", story, true);
+      window.removeEventListener("resize", schedule); document.removeEventListener("story-step", story, true); document.removeEventListener("story-progress", heroStory, true);
     };
   }, [pathname, shift]);
 

@@ -8,6 +8,7 @@ attribute vec3 aPosition;
 attribute vec3 aDestination;
 attribute vec3 aSeed;
 uniform float uTime;
+uniform mediump float uExpansion;
 uniform vec3 uRotation;
 uniform vec4 uProjection;
 uniform float uRatio;
@@ -26,7 +27,12 @@ void main() {
   float perspective = 4.5 / (4.5 + p.z);
   vec2 projected = p.xy * uProjection.x * perspective;
   projected.x /= uProjection.y;
-  gl_Position = vec4(projected + uProjection.zw, 0.0, 1.0);
+  // Slightly staggered departures flow along curved paths, with exact endpoints.
+  float phase = smoothstep(0.0, 1.0, clamp((uExpansion - aSeed.x * 0.08) / 0.92, 0.0, 1.0));
+  vec2 destination = aDestination.xy;
+  destination += vec2(sin(uTime * 0.09 + aSeed.x * 18.0), cos(uTime * 0.07 + aSeed.y * 8.0)) * 0.028;
+  vec2 flow = vec2(sin(aSeed.x * 6.28), cos(aSeed.y * 6.28)) * sin(phase * 3.141593) * 0.13;
+  gl_Position = vec4(mix(projected + uProjection.zw, destination, phase) + flow, 0.0, 1.0);
   vLight = mix(0.1, 0.66, clamp((1.8 - p.z) / 3.6, 0.0, 1.0));
   vec2 distanceToLight = projected + uProjection.zw - uLight;
   vLight *= 1.0 + exp(-dot(distanceToLight, distanceToLight) * 8.0) * 0.22;
@@ -37,11 +43,12 @@ const fragmentSource = `
 precision mediump float;
 uniform vec3 uColor;
 uniform float uPoint;
+uniform mediump float uExpansion;
 uniform float uDetail;
 varying float vLight;
 void main() {
   float alpha = vLight;
-  if (uPoint < 0.5) alpha *= 0.25;
+  if (uPoint < 0.5) alpha *= 0.25 * (1.0 - smoothstep(0.08, 0.65, uExpansion));
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
   gl_FragColor = vec4(uColor, alpha);
 }`;
@@ -77,7 +84,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uExpansion", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -111,10 +118,10 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         lines = nextLines; points = nextPoints; quality = next;
         this.resize(width, height);
       },
-      render(time: number, pose: AtmospherePose = restingPose) {
+      render(time: number, pose: AtmospherePose = restingPose, expansion = 0) {
         if (disposed || gl.isContextLost()) return false;
         gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.uniform1f(uniforms.uTime, time);
+        gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
         gl.uniform3f(uniforms.uRotation, pose.yaw + time * 0.025, pose.pitch + Math.sin(time * 0.12) * 0.06, pose.roll + Math.sin(time * 0.08) * 0.05);
         gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);

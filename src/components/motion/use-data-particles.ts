@@ -3,6 +3,7 @@
 import { useEffect, type RefObject } from "react";
 import type { AtmospherePose, AtmosphereRenderer } from "@/lib/atmosphere-renderer";
 import { poseKeys, resolveAtmospherePose, type AtmosphereContext } from "@/lib/atmosphere-scene";
+import { advanceExpansion } from "@/lib/particle-transition";
 import { chooseAtmosphereQuality, createAtmosphereBudget } from "@/lib/atmosphere-budget";
 
 /** The SSR vector remains visible until a complete WebGL frame has rendered. */
@@ -19,7 +20,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     let pose: AtmospherePose | undefined, basePose: AtmospherePose | undefined, targetPose: AtmospherePose | undefined;
     const pointer = { x: 0, y: 0 };
     const targetPointer = { x: 0, y: 0 };
-    let frame = 0, generation = 0, previous = 0, previousFrame = 0, time = 0;
+    let frame = 0, generation = 0, previous = 0, previousFrame = 0, time = 0, expansion = 0;
     let budget = createAtmosphereBudget("medium");
     let disposed = false, lost = false, needsResize = true;
     const eligible = () => desktop.matches && !reduce.matches && !forced.matches && !coarse.matches && navigator.maxTouchPoints === 0;
@@ -37,6 +38,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       const cadence = input.current.scene === "quiet" || input.current.scene === "projects" ? 30 : budget.frameRate;
       if (cadence === 30 && previous && now - previous < 1000 / 30 - 1) { frame = requestAnimationFrame(tick); return; }
       const delta = previous ? Math.min(50, now - previous) / 1000 : 1 / 60;
+      expansion = advanceExpansion(expansion, input.current.heroProgress, delta);
       time += previous ? delta : 0; previous = now;
       const follow = 1 - Math.exp(-delta / 0.18);
       pointer.x += (targetPointer.x - pointer.x) * follow; pointer.y += (targetPointer.y - pointer.y) * follow;
@@ -53,7 +55,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
           renderer.setQuality(budget.quality); root.dataset.quality = budget.quality; needsResize = true;
         }
         if (needsResize) { renderer.resize(innerWidth, innerHeight); needsResize = false; }
-        if (!renderer.render(time, pose)) { fallback(); return; }
+        if (!renderer.render(time, pose, expansion)) { fallback(); return; }
         if (root.dataset.renderer !== "webgl") root.dataset.renderer = "webgl";
         if (root.dataset.playing !== "true") root.dataset.playing = "true";
       } catch { fallback(); return; }

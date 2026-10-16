@@ -1,7 +1,7 @@
 import type { AtmospherePose } from "./atmosphere-renderer";
 
 export type AtmosphereScene = "hero" | "about" | "projects" | "skills" | "quiet";
-export interface AtmosphereContext { scene: AtmosphereScene; progress: number; aboutStep: number; skillGroup: string | null; }
+export interface AtmosphereContext { scene: AtmosphereScene; progress: number; heroProgress: number; aboutStep: number; skillGroup: string | null; }
 type ScenePose = Omit<AtmospherePose, "lightX" | "lightY">;
 const profiles: Record<AtmosphereScene, ScenePose> = {
   hero: { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.64, centerX: 0.58, centerY: 0.02, detail: 1 },

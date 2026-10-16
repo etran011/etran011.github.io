@@ -28,6 +28,8 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
     let visible = false;
     const pacer = createStoryPacer(steps);
     const render = (progress: number) => {
+      // Publish the already paced hero value; the atmosphere never controls scrolling.
+      if (kind === "hero") element.dispatchEvent(new CustomEvent("story-progress", { detail: { progress } }));
       const phase = progress * (steps - 1);
       element.style.setProperty("--story-progress", progress.toFixed(4));
       for (let i = 0; i < steps; i++) {
