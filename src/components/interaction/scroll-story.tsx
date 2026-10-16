@@ -53,7 +53,7 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
     };
     const reset = () => {
       stop?.(); stop = undefined; cancelAnimationFrame(pacingFrame); pacingFrame = 0;
-      delete element.dataset.pinned; delete element.dataset.activeStep;
+      delete element.dataset.pinned; delete element.dataset.activeStep; delete element.dataset.storyTravel;
       element.style.removeProperty("--scene-height"); element.style.removeProperty("--scene-travel"); element.style.removeProperty("--story-progress");
       for (let i = 0; i < steps; i++) element.style.removeProperty(`--story-weight-${i}`);
     };
@@ -66,10 +66,11 @@ export function ScrollStory({ kind, steps, children }: { kind: StoryKind; steps:
       if (signature === next) return;
       signature = next; reset();
       if (!enabled) return;
-      const travel = Math.min(innerHeight * (kind === "hero" ? 0.48 : 0.62), kind === "hero" ? 440 : 560);
+      const travel = kind === "hero" ? Math.min(innerHeight * 0.9, 840) : Math.min(innerHeight * 0.62, 560);
       element.style.setProperty("--scene-height", `${height}px`);
       element.style.setProperty("--scene-travel", `${travel}px`);
       element.dataset.pinned = "true";
+      element.dataset.storyTravel = String(travel);
       let previous = -1;
       stop = scroll((progress) => {
         if (Math.abs(progress - previous) < 0.0001) return;
