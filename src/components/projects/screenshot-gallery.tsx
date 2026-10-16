@@ -45,6 +45,13 @@ export function ScreenshotGallery({ screenshots, title }: { screenshots: Project
         </div>
       </figure>
       <dialog ref={dialog} className="gallery-dialog" aria-labelledby={`${id}-title`} onCancel={() => setExpanded(false)} onClose={() => setExpanded(false)} onClick={(event) => { if (event.target === event.currentTarget) setExpanded(false); }} onKeyDown={(event) => {
+        if (event.key === "Tab") {
+          const controls = event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not([disabled])");
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+          if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        }
         if (event.key === "ArrowLeft") { event.preventDefault(); move(-1); }
         if (event.key === "ArrowRight") { event.preventDefault(); move(1); }
       }}>
