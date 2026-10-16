@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Project } from "@/types/portfolio";
 
 export function ProjectCard({ project, index }: { project: Project; index: number }) {
@@ -14,6 +15,10 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
           {project.technologies.map((technology) => <li key={technology}>{technology}</li>)}
         </ul>
       </div>
+      {project.screenshots[0] && <figure className="project-preview">
+        <Image src={project.screenshots[0].src} alt={project.screenshots[0].alt} width={project.screenshots[0].width} height={project.screenshots[0].height} sizes="(max-width: 767px) 100vw, 1100px" />
+        <figcaption>{project.screenshots[0].caption}</figcaption>
+      </figure>}
     </article>
   );
 }

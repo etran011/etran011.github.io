@@ -36,7 +36,11 @@ export const projects = [
       outcome: "The result is a workspace that connects a valuation to its assumptions and sensitivities. The implementation keeps numerical logic in one backend and makes loading, input validation, and partial request failures visible in the interface.",
     },
     technologies: ["Python", "FastAPI", "Next.js", "TypeScript", "Recharts", "Pytest"],
-    screenshots: [],
+    screenshots: [
+      { src: "/images/projects/optionlab/pricing-dashboard.png", width: 2940, height: 1670, alt: "OptionLab pricing dashboard showing call inputs, a theoretical value of $10.4506, and five risk sensitivities.", caption: "Valuation workspace · European call pricing and analytical Greeks" },
+      { src: "/images/projects/optionlab/sensitivity-charts.png", width: 2248, height: 1626, alt: "OptionLab charts showing Delta and Gamma versus underlying price, and option value versus volatility and time to expiration.", caption: "Sensitivity analysis · Explore how model inputs affect value and risk" },
+      { src: "/images/projects/optionlab/implied-volatility.png", width: 2508, height: 766, alt: "OptionLab implied-volatility calculator returning 19.9984 percent for a call with a $10.45 market price.", caption: "Implied volatility · Solve for volatility from an observed premium" },
+    ],
   },
   {
     slug: "platepredict",

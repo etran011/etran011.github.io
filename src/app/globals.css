@@ -162,3 +162,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .technology-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .technology-list li { border: 1px solid var(--border); padding: 0.25rem 0.6rem; border-radius: 0.25rem; font-size: 0.7rem; color: var(--muted); }
 @media(max-width: 767px) { .section-heading { display: block; } .section-heading > p { margin-top: 1.25rem; } }
+
+.project-preview { padding: 0 clamp(1rem, 3vw, 2rem) 1.5rem; }
+.project-preview img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 0.5rem; background: #f7f7f4; }
+.project-preview figcaption { margin-top: 0.85rem; color: var(--muted); font-size: 0.7rem; }
