@@ -424,3 +424,5 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  html[data-custom-cursor], html[data-custom-cursor] * { cursor: none !important; }
 }
 @media(forced-colors: active) { .custom-cursor { display: none; } html[data-custom-cursor], html[data-custom-cursor] * { cursor: auto !important; } }
+
+html[data-weighted-scroll] { scroll-behavior: auto !important; }

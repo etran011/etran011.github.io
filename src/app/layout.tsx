@@ -1,3 +1,4 @@
+import { SmoothScroll } from "@/components/interaction/smooth-scroll";
 import { CustomCursor } from "@/components/interaction/custom-cursor";
 import { pageMetadata, site } from "@/lib/site-metadata";
 import { Footer } from "@/components/footer";
@@ -6,6 +7,7 @@ import { Navigation } from "@/components/navigation";
 import type { Metadata } from "next";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,5 +23,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><CustomCursor /><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
+  return <html lang="en" data-scroll-behavior="smooth"><body><SmoothScroll /><CustomCursor /><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }
