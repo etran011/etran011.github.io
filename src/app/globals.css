@@ -539,3 +539,28 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 .hero-scroll-track::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(var(--story-progress, 0)); }
 @media(max-width: 599px) { .hero-scene { padding-block: max(4rem, env(safe-area-inset-top)) 2rem; gap: clamp(2.5rem, 8svh, 4rem); } .hero-role { font-size: 0.8rem; } }
 @media(max-height: 500px) { .hero-scene { gap: 1.5rem; padding-block: 2.5rem 1.5rem; } }
+
+/* Shared atmosphere: one palette, restrained density, and one family of motion. */
+body { isolation: isolate; }
+.ambient-background { position: fixed; inset: 0; z-index: -1; overflow: clip; pointer-events: none; color: var(--accent); }
+.ambient-halo { position: absolute; width: 80vw; height: 100vh; right: -20vw; top: -10vh; background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 10%, transparent), transparent 65%); opacity: 0.7; transition: opacity 900ms var(--ease-standard), transform 1200ms var(--ease-standard); }
+.ambient-scroll-layer { position: absolute; inset: -80px 0; }
+.ambient-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.055; mask-image: radial-gradient(ellipse at 85% 35%, black, transparent 65%); transition: opacity 900ms var(--ease-standard); }
+.ambient-lines { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.12; transition: opacity 900ms var(--ease-standard); }
+.ambient-orbit { position: absolute; top: 25%; right: -10%; width: min(65vw, 58rem); aspect-ratio: 1.2; border: 1px solid currentColor; border-radius: 50%; opacity: 0.1; rotate: -28deg; transition: opacity 900ms var(--ease-standard); }
+.ambient-orbit span { position: absolute; inset: 12%; border: 1px solid currentColor; border-radius: 50%; }
+.ambient-orbit span:nth-child(2) { inset: 26%; }
+.ambient-orbit span:last-child { inset: auto; left: 16%; top: 15%; width: 5px; height: 5px; background: currentColor; border: none; }
+.ambient-background[data-scene="about"] .ambient-halo { opacity: 0.25; transform: translateY(8vh); }
+.ambient-background[data-scene="about"] .ambient-orbit { opacity: 0.035; }
+.ambient-background[data-scene="projects"] .ambient-lines { opacity: 0.18; }
+.ambient-background[data-scene="skills"] .ambient-grid { opacity: 0.1; }
+.ambient-background[data-scene="skills"] .ambient-orbit { opacity: 0.045; }
+.ambient-background[data-scene="quiet"] .ambient-halo { opacity: 0.18; }
+.ambient-background[data-scene="quiet"] .ambient-lines, .ambient-background[data-scene="quiet"] .ambient-orbit { opacity: 0.035; }
+.ambient-background[data-animated="true"] .ambient-orbit { animation: ambient-drift 22s ease-in-out infinite alternate; }
+.ambient-background:not([data-playing="true"]) .ambient-orbit { animation-play-state: paused; }
+@keyframes ambient-drift { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-18px, 20px, 0); } }
+@media(max-width: 1023px) { .ambient-grid, .ambient-lines, .ambient-orbit { display: none; } .ambient-halo { opacity: 0.25; } }
+@media(prefers-reduced-motion: reduce) { .ambient-scroll-layer { transform: none !important; } .ambient-orbit { animation: none !important; } }
+@media(forced-colors: active) { .ambient-background { display: none; } .skill-category li:hover .technology-icon { transform: none; } }
