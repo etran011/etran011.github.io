@@ -27,6 +27,12 @@ async function ready(page) {
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(() => {
       window.particleFrames = 0;
+      window.particleLineDraws = 0;
+      const draw = WebGLRenderingContext.prototype.drawArrays;
+      WebGLRenderingContext.prototype.drawArrays = function (...args) {
+        if (args[0] === this.LINES) window.particleLineDraws++;
+        return draw.apply(this, args);
+      };
       const clear = WebGLRenderingContext.prototype.clear;
       WebGLRenderingContext.prototype.clear = function (...args) {
         window.particleFrames++;
@@ -47,12 +53,16 @@ async function ready(page) {
     await page.waitForTimeout(2300);
     assert((await inspect(page)).expansion > 0.95);
     assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
+    const releasedLineDraws = await page.evaluate(() => window.particleLineDraws);
+    await page.waitForTimeout(200);
+    assert.equal(await page.evaluate(() => window.particleLineDraws), releasedLineDraws, 'Invisible connections must not issue GPU draws');
     await page.keyboard.press('Home');
     await page.waitForTimeout(100);
     assert((await inspect(page)).expansion > 0.6, 'A reverse jump must not teleport particles');
     await page.waitForTimeout(2900);
     assert((await inspect(page)).expansion < 0.02);
     assert((await inspect(page)).links > 0.98 && (await inspect(page)).release < 0.001);
+    assert(await page.evaluate(n => window.particleLineDraws > n, releasedLineDraws));
     await page.mouse.move(1250, 350);
     await page.waitForTimeout(900);
     assert((await inspect(page)).strength > 0.99);

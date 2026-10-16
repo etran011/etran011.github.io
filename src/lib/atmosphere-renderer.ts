@@ -83,7 +83,7 @@ void main() {
   gl_FragColor = vec4(uColor, alpha);
 }`;
 
-/** Two batched draws, static buffers, procedural deformation in the vertex shader. */
+/** At most two batched draws; expanded fields need only the points pass. */
 export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuality: AtmosphereQuality, color: readonly number[]) {
   const gl = canvas.getContext("webgl", { alpha: true, antialias: false, depth: false, stencil: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: "low-power" });
   if (!gl) throw new Error("WebGL unavailable");
@@ -160,7 +160,8 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);
-        gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES);
+        // Expanded sections have no visible relationships; omit their entire draw.
+        if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }
         if (pose.detail > 0.01) { gl.uniform1f(uniforms.uPoint, 1); draw(points, gl.POINTS); }
         return true;
       },

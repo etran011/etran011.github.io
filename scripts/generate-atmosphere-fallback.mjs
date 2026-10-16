@@ -18,6 +18,6 @@ for (let i = 0; i < lines.length; i += particleStride * 2) {
 for (let i = 0; i < points.length; i += particleStride) {
   const [x, y] = project(points.slice(i, i + 3));
   const density = points[i + 12];
-  dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.1 + density * 0.35).toFixed(2)}" opacity="${(0.3 + density * 0.4 + points[i + 7] * 0.15).toFixed(2)}"/>`;
+  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.1 + density * 0.35).toFixed(2)}" opacity="${(0.3 + density * 0.4 + points[i + 7] * 0.15).toFixed(2)}"/>`;
 }
-writeFileSync(new URL("../public/images/atmosphere/data-formation.svg", import.meta.url), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none"><g stroke="#88adf5" stroke-width=".8">${[...paths].map(([opacity, d]) => `<path d="${d}" opacity="${opacity}"/>`).join("")}</g><g fill="#b5cdff">${dots}</g></svg>\n`);
+writeFileSync(new URL("../public/images/atmosphere/data-formation.svg", import.meta.url), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none"><g stroke="#88adf5" stroke-width=".8">${[...paths].map(([opacity, d]) => `<path vector-effect="non-scaling-stroke" d="${d}" opacity="${opacity}"/>`).join("")}</g><g fill="#b5cdff" stroke="#b5cdff" stroke-width=".65">${dots}</g></svg>\n`);
