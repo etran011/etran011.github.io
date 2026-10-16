@@ -8,8 +8,8 @@
   --muted: #9298a5;
   --accent: #88adf5;
   --border: #2b303d;
-  --font-body: Arial, Helvetica, sans-serif;
-  --font-code: "SFMono-Regular", Consolas, monospace;
+  --font-body: "Geist Variable", Arial, Helvetica, sans-serif;
+  --font-code: "Geist Mono Variable", "SFMono-Regular", Consolas, monospace;
   --space-section: clamp(4rem, 9vw, 8rem);
   --page-gutter: clamp(1.25rem, 5vw, 4rem);
   --content-width: 76rem;
@@ -56,3 +56,10 @@
     scroll-behavior: auto !important;
   }
 }
+
+@layer base {
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+}
+
+.eyebrow { font-family: var(--font-code); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; }
