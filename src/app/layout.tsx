@@ -1,3 +1,4 @@
+import { ScrollReveals } from "@/components/motion/scroll-reveals";
 import { Navigation } from "@/components/navigation";
 import type { Metadata } from "next";
 import "@fontsource-variable/geist";
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><Navigation />{children}</body></html>;
+  return <html lang="en"><body><Navigation /><ScrollReveals>{children}</ScrollReveals></body></html>;
 }
