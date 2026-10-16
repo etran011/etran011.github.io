@@ -30,14 +30,15 @@ export function TechnologySelection({ technologies, collections }: { technologie
   return (
     <div className="stack-introduction">
       <div id="stack-selection" className="stack-selection" aria-live="polite" aria-atomic="true">
-        {selected ? <>
+        <div className="stack-selection-overview" aria-hidden={selected ? true : undefined}>
+          <p className="stack-selection-prompt">Select a technology to explore the stack and its project connections.</p>
+          <dl className="stack-summary"><div><dt>Technologies</dt><dd>{technologies}</dd></div><div><dt>Collections</dt><dd>{String(collections).padStart(2, "0")}</dd></div></dl>
+        </div>
+        {selected && <div className="stack-selection-detail">
           <p className="stack-selection-category">{selected.category}</p>
           <p className="stack-selection-name">{selected.name}</p>
           {selected.projects.length ? <div className="stack-project-links">{selected.projects.map((project) => <Link key={project.href} href={project.href}>{project.title}<span aria-hidden="true"> ↗</span></Link>)}</div> : <p className="stack-selection-note">Part of my technical toolkit.</p>}
-        </> : <>
-          <p className="stack-selection-prompt">Select a technology to explore the stack and its project connections.</p>
-          <dl className="stack-summary"><div><dt>Technologies</dt><dd>{technologies}</dd></div><div><dt>Collections</dt><dd>{String(collections).padStart(2, "0")}</dd></div></dl>
-        </>}
+        </div>}
       </div>
       {selected && <button className="stack-reset" type="button" onClick={clear}>Clear selection <span aria-hidden="true">×</span></button>}
     </div>

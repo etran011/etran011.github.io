@@ -295,6 +295,9 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .stack-header h2 { font-size: clamp(2.75rem, 5.5vw, 4.75rem); line-height: 1.04; font-weight: 450; letter-spacing: -0.055em; }
 .stack-header h2 span { color: var(--accent); }
 .stack-introduction { width: 19rem; max-width: 100%; min-height: 9.5rem; position: relative; padding-bottom: 1.5rem; }
+.stack-selection { display: grid; }
+.stack-selection-overview, .stack-selection-detail { grid-area: 1 / 1; min-width: 0; }
+.stack-selection-overview[aria-hidden="true"] { visibility: hidden; }
 .stack-selection-prompt { color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
 .stack-selection-category { color: var(--accent); font-family: var(--font-code); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em; }
 .stack-selection-name { font-size: 1.75rem; letter-spacing: -0.04em; margin-block: 0.4rem; }
@@ -345,7 +348,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 @media(max-width: 767px) {
  .stack-header { display: block; margin-bottom: 1.5rem; }
  .stack-introduction { width: 100%; margin-top: 1.5rem; min-height: 8rem; }
- .stack-selection { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; }
+ .stack-selection-overview, .stack-selection-detail { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; }
  .stack-selection-prompt { max-width: 20rem; }
  .stack-selection-category { flex-basis: 100%; }
  .stack-summary { margin-top: 0; gap: 1.5rem; }
