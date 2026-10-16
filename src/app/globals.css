@@ -299,3 +299,15 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 @media (hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
  .hero-motion:hover .hero-pointer-glow { opacity: 1; }
 }
+
+.gallery-stage { touch-action: pan-y pinch-zoom; }
+.gallery-dialog-header h2 { margin-right: auto; }
+.gallery-viewport { overflow: auto; max-height: 65svh; overscroll-behavior: contain; border-radius: 0.3rem; }
+.gallery-viewport img { width: 100%; height: auto; max-height: 65svh; object-fit: contain; }
+.gallery-image-canvas { width: 100%; }
+.gallery-viewport.is-zoomed .gallery-image-canvas { width: 180%; }
+.gallery-viewport.is-zoomed img { max-height: none; }
+@media (prefers-reduced-motion: no-preference) {
+ .gallery-dialog[open] .gallery-dialog-content { animation: viewer-open 180ms ease-out; }
+}
+@keyframes viewer-open { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
