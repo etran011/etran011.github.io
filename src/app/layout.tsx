@@ -1,3 +1,4 @@
+import { Footer } from "@/components/footer";
 import { ScrollReveals } from "@/components/motion/scroll-reveals";
 import { Navigation } from "@/components/navigation";
 import type { Metadata } from "next";
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><Navigation /><ScrollReveals>{children}</ScrollReveals></body></html>;
+  return <html lang="en"><body><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }
