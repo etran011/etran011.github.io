@@ -7,6 +7,7 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 
 const links = [
   { label: "Home", href: "/#home" },
+  { label: "Projects", href: "/#projects" },
   { label: "GitHub", href: profile.links[0].href },
   { label: "Contact", href: `mailto:${profile.email}` },
 ];
@@ -46,7 +47,7 @@ export function Navigation() {
             <span>Erik Tran</span>
           </Link>
           <nav aria-label="Main navigation" className="desktop-nav">
-            {links.map((link) => <a key={link.label} className="nav-link" href={link.href}>{link.label}{link.label !== "Home" && <ArrowUpRight size={13} aria-hidden="true" />}</a>)}
+            {links.map((link) => <a key={link.label} className="nav-link" href={link.href}>{link.label}{!link.href.startsWith("/") && <ArrowUpRight size={13} aria-hidden="true" />}</a>)}
           </nav>
           <button ref={toggle} className="menu-toggle" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>
             {open ? <X size={22} /> : <Menu size={22} />}

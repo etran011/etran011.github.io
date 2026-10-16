@@ -166,3 +166,16 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .project-preview { padding: 0 clamp(1rem, 3vw, 2rem) 1.5rem; }
 .project-preview img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 0.5rem; background: #f7f7f4; }
 .project-preview figcaption { margin-top: 0.85rem; color: var(--muted); font-size: 0.7rem; }
+
+.project-card-copy { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+.project-period { color: var(--muted); font-family: var(--font-code); font-size: 0.65rem; margin-top: 1.5rem; }
+.project-featured { background: linear-gradient(135deg, #182131, var(--surface) 65%); }
+.project-featured .project-preview { padding: 0 clamp(1rem, 4vw, 3rem) 2rem; }
+.project-secondary .project-card-copy { padding-block: clamp(2rem, 5vw, 4rem); }
+.project-secondary .project-details { border-left: 1px solid var(--border); padding-left: clamp(1.5rem, 4vw, 3rem); }
+.project-details .project-highlights { margin-top: 0; }
+@media(max-width: 767px) {
+ .project-card-copy { grid-template-columns: 1fr; }
+ .project-secondary .project-details { border-left: 0; border-top: 1px solid var(--border); padding: 1.5rem 0 0; }
+ .project-featured .project-preview { padding-bottom: 1.25rem; }
+}
