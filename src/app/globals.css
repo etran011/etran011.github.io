@@ -197,3 +197,17 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .gallery-dialog-footer { margin-top: 1rem; color: var(--muted); }
 .gallery-dialog-content > img { width: 100%; height: auto; max-height: 70svh; object-fit: contain; }
 @media(max-width: 767px) { .gallery-dialog-footer { flex-wrap: wrap; } .expand-label { bottom: 0.4rem; right: 0.4rem; } }
+
+.project-card { transition: border-color var(--duration-normal), box-shadow var(--duration-normal); }
+.project-card:focus-within { border-color: #637ea7; }
+.gallery-selectors button, .gallery-arrows button, .gallery-dialog-header button { transition: color var(--duration-fast), background var(--duration-fast), border-color var(--duration-fast); }
+.gallery-selectors button:hover, .gallery-arrows button:hover, .gallery-dialog-header button:hover { background: var(--surface-raised); color: var(--accent); border-color: #637ea7; }
+.gallery-stage:focus-visible .expand-label { background: var(--accent); color: var(--background); }
+@media (hover: hover) and (pointer: fine) {
+ .project-card:hover { border-color: #637ea7; box-shadow: 0 18px 50px #00000030; }
+ .gallery-stage:hover .expand-label { background: var(--accent); color: var(--background); }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+ .project-card { transition: transform var(--duration-normal) var(--ease-standard), border-color var(--duration-normal), box-shadow var(--duration-normal); }
+ .project-card:hover { transform: translateY(-3px); }
+}
