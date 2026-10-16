@@ -5,10 +5,13 @@ import { scroll } from "motion";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { useSignalRibbon } from "./use-signal-ribbon";
 
 /** One shared atmosphere, driven by cached section positions and the existing scroll observer. */
 export function AmbientBackground() {
   const root = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useSignalRibbon(canvas, root);
   const pathname = usePathname();
   const shift = useSpring(0, { stiffness: 55, damping: 28, mass: 0.8 });
   useEffect(() => {
@@ -35,27 +38,27 @@ export function AmbientBackground() {
       y = window.scrollY; update();
     };
     const schedule = () => { if (enabled && !frame) frame = requestAnimationFrame(measure); };
-    const playback = () => { element.dataset.playing = String(!document.hidden); };
     const observer = new ResizeObserver(schedule);
     const configure = () => {
       stop?.(); stop = undefined; observer.disconnect(); cancelAnimationFrame(frame); frame = 0;
       enabled = desktop.matches && !reduce.matches && !forced.matches && !coarse.matches && navigator.maxTouchPoints === 0;
       element.dataset.animated = String(enabled);
       if (!enabled) { shift.jump(0); return; }
-      measure(); playback(); observer.observe(document.body);
+      measure(); observer.observe(document.body);
       stop = scroll((_progress, info) => { y = info.y.current; update(); });
     };
     for (const query of [desktop, reduce, forced, coarse]) query.addEventListener("change", configure);
-    window.addEventListener("resize", schedule); document.addEventListener("visibilitychange", playback);
+    window.addEventListener("resize", schedule);
     configure();
-    return () => { stop?.(); observer.disconnect(); cancelAnimationFrame(frame); for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure); window.removeEventListener("resize", schedule); document.removeEventListener("visibilitychange", playback); };
+    return () => { stop?.(); observer.disconnect(); cancelAnimationFrame(frame); for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure); window.removeEventListener("resize", schedule); };
   }, [pathname, shift]);
   return <div ref={root} className="ambient-background" data-scene={pathname === "/" ? "hero" : "quiet"} aria-hidden="true">
     <div className="ambient-halo" />
     <motion.div className="ambient-scroll-layer" style={{ y: shift }}>
       <div className="ambient-grid" />
       <svg className="ambient-lines" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="none" stroke="currentColor" strokeWidth="0.7"><path d="M520 820C720 760 690 280 1440 190M460 880C860 700 720 380 1440 300M640 960C940 700 900 510 1440 430M900 1000C1080 700 1170 650 1440 600" /></g></svg>
-      <Image className="ambient-ribbon" src="/images/atmosphere/signal-ribbon.svg" width={1200} height={1000} alt="" priority />
+      <div className="ambient-ribbon"><Image src="/images/atmosphere/signal-ribbon.svg" fill sizes="(max-width: 1023px) 140vw, 88vw" style={{ objectFit: "contain" }} alt="" preload /></div>
     </motion.div>
+    <canvas ref={canvas} className="ambient-canvas" aria-hidden="true" />
   </div>;
 }
