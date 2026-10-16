@@ -34,7 +34,7 @@ test("destinations cover all viewport quadrants with finite depth and no random 
 test("scene poses keep the model restrained and respond to real narrative states", async () => {
   const { resolveAtmospherePose } = await import("../src/lib/atmosphere-scene.ts");
   const target = {};
-  const context = { scene: "hero", progress: 0, heroProgress: 0, aboutStep: 0, skillGroup: null };
+  const context = { scene: "hero", progress: 0, heroProgress: 0, scroll: 0, aboutStep: 0, skillGroup: null };
   for (const scene of ["hero", "about", "projects", "skills", "quiet"]) {
     context.scene = scene; resolveAtmospherePose(context, target);
     assert(Object.values(target).every(Number.isFinite));

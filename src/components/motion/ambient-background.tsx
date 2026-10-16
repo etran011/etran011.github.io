@@ -13,7 +13,7 @@ export function AmbientBackground() {
   const root = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const pathname = usePathname();
-  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, heroProgress: 0, aboutStep: 0, skillGroup: null });
+  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, heroProgress: 0, scroll: 0, aboutStep: 0, skillGroup: null });
   useDataParticles(canvas, root, input);
   const shift = useSpring(0, { stiffness: 55, damping: 28, mass: 0.8 });
 
@@ -33,6 +33,7 @@ export function AmbientBackground() {
       const current = sections[index];
       const scene: AtmosphereScene = current?.id === "home" ? "hero" : current?.id === "about" || current?.id === "projects" || current?.id === "skills" ? current.id : "quiet";
       input.current.scene = scene;
+      input.current.scroll = Math.max(0, y / 1000);
       // Unpinned/short viewports use the same observer's normal document progress.
       if (!hero?.dataset.pinned) input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, (sections.find(s => s.id === "about")?.top ?? innerHeight) - innerHeight * 0.4))) : 1;
       input.current.progress = current ? Math.max(0, Math.min(1, (y - current.top) / Math.max(1, (sections[index + 1]?.top ?? documentHeight) - current.top))) : 0;
@@ -86,7 +87,6 @@ export function AmbientBackground() {
     <div className="ambient-halo" />
     <motion.div className="ambient-scroll-layer" style={{ y: shift }}>
       <div className="ambient-grid" />
-      <svg className="ambient-lines" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="none" stroke="currentColor" strokeWidth="0.7"><path d="M520 820C720 760 690 280 1440 190M460 880C860 700 720 380 1440 300M640 960C940 700 900 510 1440 430M900 1000C1080 700 1170 650 1440 600" /></g></svg>
       <div className="ambient-formation"><Image src="/images/atmosphere/data-formation.svg" fill sizes="(max-width: 1023px) 140vw, 88vw" style={{ objectFit: "contain" }} alt="" preload /></div>
     </motion.div>
     <canvas ref={canvas} className="ambient-canvas" aria-hidden="true" />

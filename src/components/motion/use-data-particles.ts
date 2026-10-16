@@ -18,8 +18,8 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     const coarse = matchMedia("(any-pointer: coarse)");
     let renderer: AtmosphereRenderer | undefined;
     let pose: AtmospherePose | undefined, basePose: AtmospherePose | undefined, targetPose: AtmospherePose | undefined;
-    const pointer = { x: 0, y: 0 };
-    const targetPointer = { x: 0, y: 0 };
+    const pointer = { x: 0, y: 0, strength: 0 };
+    const targetPointer = { x: 0, y: 0, strength: 0 };
     let frame = 0, generation = 0, previous = 0, previousFrame = 0, time = 0, expansion = 0;
     let budget = createAtmosphereBudget("medium");
     let disposed = false, lost = false, needsResize = true;
@@ -42,6 +42,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       time += previous ? delta : 0; previous = now;
       const follow = 1 - Math.exp(-delta / 0.18);
       pointer.x += (targetPointer.x - pointer.x) * follow; pointer.y += (targetPointer.y - pointer.y) * follow;
+      pointer.strength += (targetPointer.strength - pointer.strength) * follow;
       if (pose && basePose && targetPose) {
         resolveAtmospherePose(input.current, targetPose);
         const sceneFollow = 1 - Math.exp(-delta / 0.85);
@@ -49,6 +50,8 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
         pose.yaw += pointer.x * 0.13; pose.pitch -= pointer.y * 0.08;
         pose.centerX += pointer.x * 0.025; pose.centerY += pointer.y * 0.018;
         pose.lightX = pointer.x; pose.lightY = pointer.y;
+        pose.pointerStrength = pointer.strength;
+        pose.scroll += (input.current.scroll - pose.scroll) * follow;
       }
       try {
         if (root.dataset.quality !== budget.quality) {
@@ -83,10 +86,11 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     const resize = () => { needsResize = true; };
     const move = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" || !eligible()) return;
+      targetPointer.strength = 1;
       targetPointer.x = Math.max(-1, Math.min(1, event.clientX / innerWidth * 2 - 1));
       targetPointer.y = Math.max(-1, Math.min(1, 1 - event.clientY / innerHeight * 2));
     };
-    const leave = () => { targetPointer.x = 0; targetPointer.y = 0; };
+    const leave = () => { targetPointer.x = 0; targetPointer.y = 0; targetPointer.strength = 0; };
     const contextLost = (event: Event) => { event.preventDefault(); lost = true; generation++; fallback(); };
     const contextRestored = () => { lost = false; void configure(); };
     root.dataset.renderer = "static";
