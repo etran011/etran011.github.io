@@ -10,7 +10,7 @@ async function inspect(page) {
     const gl = canvas.getContext('webgl');
     const program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { expansion: uniform('uExpansion'), strength: uniform('uPointerStrength'), error: gl.getError() };
+    return { expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), strength: uniform('uPointerStrength'), error: gl.getError() };
   });
 }
 async function ready(page) {
@@ -35,18 +35,24 @@ async function ready(page) {
     });
     await ready(page);
     assert((await inspect(page)).expansion < 0.01);
-    await page.mouse.wheel(0, 200);
+    await page.mouse.wheel(0, 60);
+    await page.waitForTimeout(750);
+    const loosening = await inspect(page);
+    assert(loosening.separation > 0.02 && loosening.release < 0.001 && loosening.links > 0.5);
+    await page.mouse.wheel(0, 140);
     await page.waitForTimeout(650);
     const partial = (await inspect(page)).expansion;
     assert(partial > 0.02 && partial < 0.65);
     await page.mouse.wheel(0, 400);
     await page.waitForTimeout(2300);
     assert((await inspect(page)).expansion > 0.95);
+    assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
     await page.keyboard.press('Home');
     await page.waitForTimeout(100);
     assert((await inspect(page)).expansion > 0.6, 'A reverse jump must not teleport particles');
     await page.waitForTimeout(2900);
     assert((await inspect(page)).expansion < 0.02);
+    assert((await inspect(page)).links > 0.98 && (await inspect(page)).release < 0.001);
     await page.mouse.move(1250, 350);
     await page.waitForTimeout(900);
     assert((await inspect(page)).strength > 0.99);

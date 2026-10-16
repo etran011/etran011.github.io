@@ -1,3 +1,4 @@
+import { resolveParticleChoreography } from "./particle-transition";
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
 import { atmosphereQuality, createParticleGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
 
@@ -10,6 +11,8 @@ attribute vec3 aDestination;
 attribute vec3 aSeed;
 attribute vec4 aCluster;
 uniform float uTime;
+uniform float uSeparation;
+uniform float uRelease;
 uniform mediump float uExpansion;
 uniform vec3 uRotation;
 uniform vec4 uProjection;
@@ -21,9 +24,16 @@ varying float vLight;
 varying float vPulse;
 void main() {
   vec3 p = aPosition;
-  float density = aCluster.w;
+  float density = sqrt(aCluster.w);
   vPulse = 0.88 + sin(uTime * 0.5 + aCluster.x * 3.0 + aCluster.y * 2.0) * 0.12;
-  p.y += sin(uTime * 0.16) * 0.012;
+  // All observations in a component share bounded movement; identities stay fixed.
+  vec3 origin = aCluster.xyz;
+  float breath = (sin(uTime * 0.13 + origin.x * 2.0) - sin(origin.x * 2.0)) * 0.008;
+  vec3 drift = vec3(sin(uTime * 0.14 + origin.x * 3.0) - sin(origin.x * 3.0),
+    cos(uTime * 0.11 + origin.y * 3.0) - cos(origin.y * 3.0),
+    sin(uTime * 0.09 + origin.z * 4.0) - sin(origin.z * 4.0)) * 0.014;
+  p = origin + (p - origin) * (1.0 + breath) + drift + origin * uSeparation * 0.18;
+  p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.003 * (1.0 - uExpansion);
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
@@ -34,7 +44,7 @@ void main() {
   vec2 projected = p.xy * uProjection.x * perspective;
   projected.x /= uProjection.y;
   // Slightly staggered departures flow along curved paths, with exact endpoints.
-  float phase = smoothstep(0.0, 1.0, clamp((uExpansion - aSeed.x * 0.08) / 0.92, 0.0, 1.0));
+  float phase = smoothstep(0.0, 1.0, clamp((uRelease - aSeed.x * 0.06) / 0.94, 0.0, 1.0));
   vec2 destination = aDestination.xy;
   // Depth is independent of formation rotation once the data fills the viewport.
   float depth = aDestination.z - 0.5;
@@ -55,20 +65,20 @@ void main() {
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
-  float pointSize = mix(1.8 + aSeed.z * 0.8 + density * 0.35, 1.5 + aSeed.z * 1.1, phase);
+  float pointSize = mix(1.9 + aSeed.z * 0.9 + density * 0.6, 1.5 + aSeed.z * 1.1, phase);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 4.5);
 }`;
 const fragmentSource = `
 precision mediump float;
 uniform vec3 uColor;
 uniform float uPoint;
-uniform mediump float uExpansion;
+uniform float uLinks;
 uniform float uDetail;
 varying float vLight;
 varying float vPulse;
 void main() {
   float alpha = vLight;
-  if (uPoint < 0.5) alpha *= vPulse * 0.48 * (1.0 - smoothstep(0.08, 0.65, uExpansion));
+  if (uPoint < 0.5) alpha *= vPulse * 0.48 * uLinks;
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
   gl_FragColor = vec4(uColor, alpha);
 }`;
@@ -104,7 +114,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uExpansion", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uExpansion", "uRelease", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -120,6 +130,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
+    const choreography = { separation: 0, release: 0, links: 1 };
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number) => {
       gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, geometry.count);
     };
@@ -141,8 +152,10 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
       render(time: number, pose: AtmospherePose = restingPose, expansion = 0) {
         if (disposed || gl.isContextLost()) return false;
         gl.clear(gl.COLOR_BUFFER_BIT);
+        resolveParticleChoreography(expansion, choreography);
         gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
-        gl.uniform3f(uniforms.uRotation, pose.yaw + time * 0.012, pose.pitch + Math.sin(time * 0.12) * 0.025, pose.roll + Math.sin(time * 0.08) * 0.012);
+        gl.uniform1f(uniforms.uSeparation, choreography.separation); gl.uniform1f(uniforms.uRelease, choreography.release); gl.uniform1f(uniforms.uLinks, choreography.links);
+        gl.uniform3f(uniforms.uRotation, pose.yaw + Math.sin(time * 0.075) * 0.12, pose.pitch + Math.sin(time * 0.12) * 0.025, pose.roll + Math.sin(time * 0.08) * 0.012);
         gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
