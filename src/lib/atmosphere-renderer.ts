@@ -1,10 +1,12 @@
-import { atmosphereQuality, createRibbonGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
+import { atmosphereQuality, createParticleGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; }
 export const restingPose: AtmospherePose = { yaw: 0.48, pitch: -0.7, roll: -0.38, scale: 0.64, centerX: 0.58, centerY: 0.02, detail: 1, lightX: 0, lightY: 0 };
 
 const vertexSource = `
 attribute vec3 aPosition;
+attribute vec3 aDestination;
+attribute vec3 aSeed;
 uniform float uTime;
 uniform vec3 uRotation;
 uniform vec4 uProjection;
@@ -13,8 +15,8 @@ uniform vec2 uLight;
 varying float vLight;
 void main() {
   vec3 p = aPosition;
-  float wave = sin(p.y * 2.6 + uTime * 0.2) * cos(p.x * 2.2 - uTime * 0.16);
-  p += normalize(vec3(p.x * 0.5, 0.7, p.z)) * wave * 0.065;
+  float wave = sin(p.x * 2.6 + uTime * 0.2 + aSeed.x * 6.28);
+  p.y += wave * 0.035;
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
@@ -28,7 +30,8 @@ void main() {
   vLight = mix(0.1, 0.66, clamp((1.8 - p.z) / 3.6, 0.0, 1.0));
   vec2 distanceToLight = projected + uProjection.zw - uLight;
   vLight *= 1.0 + exp(-dot(distanceToLight, distanceToLight) * 8.0) * 0.22;
-  gl_PointSize = clamp(2.0 * perspective * uRatio, 1.0, 4.0);
+  vLight *= 0.65 + aSeed.y * 0.5;
+  gl_PointSize = clamp((1.5 + aSeed.z * 1.1) * perspective * uRatio, 1.0, 4.5);
 }`;
 const fragmentSource = `
 precision mediump float;
@@ -38,6 +41,7 @@ uniform float uDetail;
 varying float vLight;
 void main() {
   float alpha = vLight;
+  if (uPoint < 0.5) alpha *= 0.25;
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
   gl_FragColor = vec4(uColor, alpha);
 }`;
@@ -68,7 +72,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     program = gl.createProgram();
     if (!program) throw new Error("Program allocation failed");
     shaders.forEach((shader) => gl.attachShader(program!, shader));
-    gl.bindAttribLocation(program, 0, "aPosition"); gl.linkProgram(program);
+    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aDestination"); gl.bindAttribLocation(program, 2, "aSeed"); gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("Atmosphere shader link failed");
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
@@ -78,19 +82,19 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
       buffers.add(buffer); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-      return { buffer, count: data.length / 3 };
+      return { buffer, count: data.length / 9 };
     };
-    const geometry = createRibbonGeometry(quality);
+    const geometry = createParticleGeometry(quality);
     let lines = allocate(geometry.lines);
     let points = allocate(geometry.points);
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
-    gl.enableVertexAttribArray(0); gl.enable(gl.BLEND);
+    for (let i = 0; i < 3; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number) => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.drawArrays(mode, 0, geometry.count);
+      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 3; i++) gl.vertexAttribPointer(i, 3, gl.FLOAT, false, 36, i * 12); gl.drawArrays(mode, 0, geometry.count);
     };
     return {
       resize(w: number, h: number) {
@@ -101,7 +105,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
       },
       setQuality(next: AtmosphereQuality) {
         if (next === quality || disposed) return;
-        const geometry = createRibbonGeometry(next);
+        const geometry = createParticleGeometry(next);
         const nextLines = allocate(geometry.lines); const nextPoints = allocate(geometry.points);
         gl.deleteBuffer(lines.buffer); buffers.delete(lines.buffer); gl.deleteBuffer(points.buffer); buffers.delete(points.buffer);
         lines = nextLines; points = nextPoints; quality = next;

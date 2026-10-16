@@ -1,30 +1,34 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { atmosphereQuality, createRibbonGeometry, projectRibbonPoint, ribbonPoint } from "../src/lib/atmosphere-geometry.ts";
+import { createParticleGeometry, particleVertex, projectFormationPoint, formationPoint } from "../src/lib/atmosphere-geometry.ts";
 
-test("the ribbon closes with a continuous half twist", () => {
-  for (const v of [-1, -0.5, 0, 0.5, 1]) {
-    const start = ribbonPoint(0, -v); const end = ribbonPoint(Math.PI * 2, v);
-    assert(start.every((value, index) => Math.abs(value - end[index]) < 1e-12));
+test("quality reductions retain exact particle identities and bounded GPU buffers", () => {
+  const high = createParticleGeometry("high");
+  assert.equal(high.points.length / 9, 1248);
+  for (const [quality, stride] of [["medium", 2], ["low", 3]]) {
+    const geometry = createParticleGeometry(quality);
+    assert.equal(geometry.points.length / 9, 1248 / stride);
+    assert(geometry.lines.length % 18 === 0);
+    for (let i = 0; i < geometry.points.length / 9; i++) {
+      assert.deepEqual(geometry.points.slice(i * 9, i * 9 + 9), high.points.slice(i * stride * 9, i * stride * 9 + 9));
+    }
   }
+  assert(high.points.byteLength + high.lines.byteLength < 60_000);
 });
-test("bounded quality tiers generate finite, complete line and point buffers", () => {
-  let previous = Infinity;
-  for (const quality of Object.keys(atmosphereQuality)) {
-    const geometry = createRibbonGeometry(quality);
-    assert(geometry.lines.length % 6 === 0 && geometry.points.length % 3 === 0);
-    assert(geometry.lines.length < previous); previous = geometry.lines.length;
-    assert(geometry.lines.every((value) => Number.isFinite(value) && Math.abs(value) < 1.7));
-    assert(geometry.points.every(Number.isFinite));
-    assert(geometry.lines.byteLength < 100_000);
-  }
-});
-test("the fallback projects safely at the same resting pose", () => {
-  for (let u = 0; u < Math.PI * 2; u += 0.05) for (const v of [-1, 0, 1]) {
-    const projected = projectRibbonPoint(ribbonPoint(u, v));
+test("destinations cover all viewport quadrants with finite depth and no random regeneration", () => {
+  const quadrants = [0, 0, 0, 0];
+  for (let id = 0; id < 1248; id++) {
+    const vertex = particleVertex(id);
+    assert.deepEqual(vertex, particleVertex(id));
+    assert(vertex.every(Number.isFinite));
+    assert(Math.abs(vertex[3]) <= 1.05 && Math.abs(vertex[4]) <= 1.05);
+    assert(vertex[5] >= 0 && vertex[5] < 1);
+    quadrants[(vertex[3] > 0 ? 1 : 0) + (vertex[4] > 0 ? 2 : 0)]++;
+    const projected = projectFormationPoint(formationPoint(id));
     assert(projected.every(Number.isFinite));
     assert(Math.abs(projected[0]) < 2 && Math.abs(projected[1]) < 2);
   }
+  assert(quadrants.every(count => count > 280 && count < 345));
 });
 
 test("scene poses keep the model restrained and respond to real narrative states", async () => {

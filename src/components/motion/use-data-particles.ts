@@ -6,7 +6,7 @@ import { poseKeys, resolveAtmospherePose, type AtmosphereContext } from "@/lib/a
 import { chooseAtmosphereQuality, createAtmosphereBudget } from "@/lib/atmosphere-budget";
 
 /** The SSR vector remains visible until a complete WebGL frame has rendered. */
-export function useSignalRibbon(canvasRef: RefObject<HTMLCanvasElement | null>, rootRef: RefObject<HTMLDivElement | null>, input: RefObject<AtmosphereContext>) {
+export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>, rootRef: RefObject<HTMLDivElement | null>, input: RefObject<AtmosphereContext>) {
   useEffect(() => {
     const canvas = canvasRef.current;
     const root = rootRef.current;

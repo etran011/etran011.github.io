@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import type { AtmosphereContext, AtmosphereScene } from "@/lib/atmosphere-scene";
-import { useSignalRibbon } from "./use-signal-ribbon";
+import { useDataParticles } from "./use-data-particles";
 
 /** Cached document measurements feed the existing shared scroll observer. */
 export function AmbientBackground() {
@@ -14,7 +14,7 @@ export function AmbientBackground() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const pathname = usePathname();
   const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, aboutStep: 0, skillGroup: null });
-  useSignalRibbon(canvas, root, input);
+  useDataParticles(canvas, root, input);
   const shift = useSpring(0, { stiffness: 55, damping: 28, mass: 0.8 });
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export function AmbientBackground() {
     <motion.div className="ambient-scroll-layer" style={{ y: shift }}>
       <div className="ambient-grid" />
       <svg className="ambient-lines" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="none" stroke="currentColor" strokeWidth="0.7"><path d="M520 820C720 760 690 280 1440 190M460 880C860 700 720 380 1440 300M640 960C940 700 900 510 1440 430M900 1000C1080 700 1170 650 1440 600" /></g></svg>
-      <div className="ambient-ribbon"><Image src="/images/atmosphere/signal-ribbon.svg" fill sizes="(max-width: 1023px) 140vw, 88vw" style={{ objectFit: "contain" }} alt="" preload /></div>
+      <div className="ambient-formation"><Image src="/images/atmosphere/data-formation.svg" fill sizes="(max-width: 1023px) 140vw, 88vw" style={{ objectFit: "contain" }} alt="" preload /></div>
     </motion.div>
     <canvas ref={canvas} className="ambient-canvas" aria-hidden="true" />
   </div>;
