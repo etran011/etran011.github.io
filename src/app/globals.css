@@ -623,7 +623,7 @@ body { isolation: isolate; }
 .ambient-ribbon { position: absolute; top: 0; right: -20vw; width: min(88vw, 80rem); height: 100svh; object-fit: contain; opacity: 0.42; mask-image: linear-gradient(90deg, transparent, black 25%); transition: opacity 900ms var(--ease-standard); }
 .ambient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; mask-image: linear-gradient(90deg, transparent 32%, #0006 52%, black 68%); transition: opacity 900ms var(--ease-standard); }
 .ambient-background[data-renderer="webgl"] .ambient-canvas { opacity: var(--model-intensity, 0.46); }
-.ambient-background[data-renderer="webgl"] .ambient-ribbon { opacity: 0; }
+.ambient-background[data-renderer="webgl"][data-scene] .ambient-ribbon { opacity: 0; }
 .ambient-background:not([data-renderer="webgl"]) .ambient-ribbon, .ambient-background:not([data-renderer="webgl"]) .ambient-canvas { transition: none; }
 .ambient-background[data-scene="about"] { --model-intensity: 0.24; }
 .ambient-background[data-scene="projects"] { --model-intensity: 0.12; }
@@ -639,5 +639,5 @@ body { isolation: isolate; }
 .ambient-background[data-scene="quiet"] .ambient-lines { opacity: 0.035; }
 .ambient-background[data-scene="quiet"] .ambient-ribbon { opacity: 0.1; }
 @media(max-width: 1023px) { .ambient-grid, .ambient-lines { display: none; } .ambient-halo { opacity: 0.25; } .ambient-background .ambient-ribbon { width: 140vw; right: -65vw; height: 80svh; opacity: 0.14; } }
-@media(prefers-reduced-motion: reduce) { .ambient-scroll-layer { transform: none !important; } }
+@media(prefers-reduced-motion: reduce) { .ambient-scroll-layer, .ambient-halo { transform: none !important; } }
 @media(forced-colors: active) { .ambient-background { display: none; } }
