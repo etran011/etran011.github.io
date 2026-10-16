@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/container";
 import { profile } from "@/data/portfolio";
+import { HeroMotion } from "./hero-motion";
 import { SignalGraphic } from "./signal-graphic";
 
 export function Hero() {
@@ -12,7 +13,7 @@ export function Hero() {
             <h1 id="hero-heading">Turning data<br />into <span>useful</span><br />experiences.</h1>
             <p className="hero-description">I’m Erik, a Data Science student at William &amp; Mary. I build at the intersection of software, machine learning, and thoughtful design.</p>
           </div>
-          <SignalGraphic />
+          <HeroMotion><SignalGraphic /></HeroMotion>
         </div>
         <div className="hero-baseline">
           <p><span className="eyebrow">Currently</span><br />{profile.discipline} · {profile.institution}</p>
