@@ -15,7 +15,7 @@ export function HeroMotion({ children }: { children: ReactNode }) {
   return (
     <motion.div
       className="hero-motion"
-      style={{ x: reducedMotion ? 0 : x, y: reducedMotion ? 0 : y, rotateX: reducedMotion ? 0 : rotateX, rotateY: reducedMotion ? 0 : rotateY, transformPerspective: reducedMotion ? undefined : 900 }}
+      style={{ x: reducedMotion ? 0 : x, y: reducedMotion ? 0 : y, rotateX: reducedMotion ? 0 : rotateX, rotateY: reducedMotion ? 0 : rotateY }}
       onPointerMove={(event) => {
         if (reducedMotion || event.pointerType !== "mouse" || !window.matchMedia("(hover: hover) and (min-width: 768px)").matches) return;
         const bounds = event.currentTarget.getBoundingClientRect();

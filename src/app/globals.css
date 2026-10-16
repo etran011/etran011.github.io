@@ -113,7 +113,8 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .hero-role { color: var(--muted); margin-top: 1.25rem; font-size: 0.875rem; line-height: 1.8; }
 .hero-role > span { padding-inline: 0.2rem; }
 .hero-headline { margin-top: 2rem; font-size: clamp(2rem, 3.5vw, 3.5rem); font-weight: 450; line-height: 1.15; letter-spacing: -0.045em; }
-.hero-headline > span { display: block; }
+.hero-headline-line { display: block; }
+.hero-word { display: inline-block; max-width: 100%; }
 .hero-headline > span:last-child { color: var(--accent); }
 .hero-project { display: block; overflow: hidden; transition: border-color var(--duration-normal); }
 .hero-project:hover, .hero-project:focus-visible { border-color: var(--accent); }
@@ -143,12 +144,15 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .hero-motion { min-width: 0; }
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
-  .hero-copy > * { animation: hero-arrive 700ms var(--ease-standard) both; }
-  .hero-copy > :nth-child(2) { animation-delay: 80ms; }
-  .hero-copy > :nth-child(3) { animation-delay: 160ms; }
-  .hero-copy > :nth-child(4) { animation-delay: 240ms; }
+  .hero-grid { perspective: 900px; }
+  .hero-copy > :not(.hero-headline) { animation: hero-arrive 700ms var(--ease-standard) both; }
+  .hero-copy > h1 { animation-delay: 60ms; }
+  .hero-copy > .hero-role { animation-delay: 120ms; }
+  .hero-copy > .hero-actions { animation-delay: 650ms; }
+  .hero-word { animation: hero-word-arrive 650ms var(--ease-standard) both; animation-delay: calc(180ms + var(--word-index) * 60ms); }
   .signal-graphic { animation: signal-arrive 1000ms var(--ease-standard) both; }
 }
+@keyframes hero-word-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes hero-arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes signal-arrive { from { opacity: 0; } to { opacity: 1; } }
 
@@ -382,3 +386,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 @media(max-width: 599px) { .nav-bar { padding-inline: 0.75rem; } .brand { gap: 0.5rem; } }
 
 @media(max-width: 1023px) { .hero-grid { grid-template-columns: 1fr; } .hero .hero-motion { width: 100%; max-width: 24rem; } }
+
+@media(max-width: 767px) and (prefers-reduced-motion: no-preference) {
+ .hero-word { animation-duration: 500ms; animation-delay: calc(160ms + var(--word-index) * 45ms); }
+}

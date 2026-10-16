@@ -1,4 +1,5 @@
 import { ArrowDown } from "lucide-react";
+import { HeroHeadline } from "./hero-headline";
 import { HeroActions } from "./hero-actions";
 import { HeroProject } from "./hero-project";
 import { Container } from "@/components/ui/container";
@@ -14,7 +15,7 @@ export function Hero() {
             <p className="eyebrow hero-kicker"><span aria-hidden="true" />Hello, I’m</p>
             <h1 id="hero-heading">{profile.name}<span>.</span></h1>
             <p className="hero-role">{profile.institution} <span aria-hidden="true">·</span> {profile.discipline} <span aria-hidden="true">·</span> Class of {profile.graduationYear}</p>
-            <p className="hero-headline"><span>Building intelligent systems,</span><span>one idea at a time.</span></p>
+            <HeroHeadline />
             <HeroActions />
           </div>
           <HeroMotion><HeroProject /></HeroMotion>
