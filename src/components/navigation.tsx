@@ -8,12 +8,13 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 
 const links = [
   { label: "Home", href: "/#home" },
+  { label: "About", href: "/#about" },
   { label: "Projects", href: "/#projects" },
   { label: "Experience", href: "/#experience" },
   { label: "Skills", href: "/#skills" },
-  { label: "About", href: "/#about" },
-  { label: "GitHub", href: profile.links[0].href },
+  { label: "Education", href: "/#education" },
   { label: "Contact", href: "/#contact" },
+  { label: "GitHub", href: profile.links[0].href },
 ];
 
 export function Navigation() {

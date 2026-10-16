@@ -97,9 +97,9 @@ export interface About { paragraphs: readonly string[]; interests: readonly stri
 // First-person copy grounded in the supplied brief, résumé, and project materials.
 export const about = {
   paragraphs: [
-    "I’m Erik, a Data Science student at William & Mary, graduating in 2028. I’m interested in how software engineering and machine learning can turn technical ideas into useful applications.",
-    "I enjoy moving between the model and the interface: understanding what a calculation means, testing its behavior, and making the result clear to someone using it. OptionLab brings those interests together through financial models and interactive visualizations.",
-    "Clear communication matters to me just as much as the implementation. Whether I’m helping someone troubleshoot a campus system or explaining an analysis, I want the next step to feel understandable. I’m continuing to develop that approach through coursework, projects, and hands-on technical work.",
+    "I’m Erik, a Data Science student at William & Mary, graduating in 2028. I’m interested in software engineering, AI, and machine learning, especially where they meet financial technology.",
+    "My projects let me work from the calculation to the interface. In OptionLab, I developed the Python pricing backend and reviewed the AI-assisted frontend. PlatePredict gave me practice preparing data, comparing regression models, and checking how results are evaluated.",
+    "I also work in campus IT support, where explaining a solution clearly matters as much as finding it. I’m building on that experience through coursework and projects, with the goal of making technical tools easier to understand and use.",
   ],
   interests: ["Software engineering", "Artificial intelligence", "Machine learning", "Financial technology", "Data visualization"],
 } as const satisfies About;

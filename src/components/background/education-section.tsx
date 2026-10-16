@@ -5,7 +5,7 @@ export function EducationSection() {
   return (
     <section id="education" className="background-section education-section" aria-labelledby="education-heading">
       <Container>
-        <div className="section-heading"><div><p className="eyebrow">Education / 03</p><h2 id="education-heading">A foundation in data.</h2></div></div>
+        <div className="section-heading"><div><p className="eyebrow">Education / 05</p><h2 id="education-heading">A foundation in data.</h2></div></div>
         <div className="education-layout">
           <div className="education-school">
             <p className="education-location">{education.location}</p>

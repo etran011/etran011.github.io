@@ -8,7 +8,7 @@ export function AboutSection() {
       <Container>
         <div className="about-layout">
           <div className="about-intro">
-            <p className="eyebrow">About / 05</p>
+            <p className="eyebrow">About me / 01</p>
             <h2 id="about-heading">Curious about data.<br /><span>Careful about the experience.</span></h2>
           </div>
           <div className="about-copy">

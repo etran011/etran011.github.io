@@ -6,7 +6,7 @@ export function ExperienceSection() {
     <section id="experience" className="background-section" aria-labelledby="experience-heading">
       <Container>
         <div className="section-heading">
-          <div><p className="eyebrow">Experience / 02</p><h2 id="experience-heading">Working with people.<br />Solving technical problems.</h2></div>
+          <div><p className="eyebrow">Experience / 03</p><h2 id="experience-heading">Working with people.<br />Solving technical problems.</h2></div>
           <p>From campus support to data analysis, my work connects technical detail with clear communication.</p>
         </div>
         <ol className="experience-list">
