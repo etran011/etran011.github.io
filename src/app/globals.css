@@ -362,25 +362,39 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 }
 @media(max-width: 479px) { .stack-introduction { display: block; } .stack-summary { margin-top: 1rem; } }
 
-.about-section { background: linear-gradient(135deg, #18213155, transparent 65%); }
-.about-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 6vw, 6rem); }
+.about-section { padding-block: clamp(3rem, 5vw, 4.5rem); background: linear-gradient(135deg, #18213155, transparent 65%); }
+.about-layout { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: start; gap: clamp(2rem, 5vw, 5rem); }
 .about-intro > .eyebrow { color: var(--accent); margin-bottom: 1.5rem; }
-.about-intro h2 { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.16; letter-spacing: -0.045em; }
-.about-intro h2 span { color: var(--muted); }
-.about-intro .case-link { margin-top: 2rem; }
-.about-copy > p { color: var(--muted); font-size: 0.95rem; line-height: 1.9; margin-bottom: 1.25rem; }
-.about-copy > p:first-child { color: var(--foreground); }
-.about-chapter + .about-chapter { margin-top: 1.5rem; }
-.about-chapter > .eyebrow { color: var(--accent); font-size: 0.6rem; margin-bottom: 0.5rem; }
+.about-intro h2 { font-size: clamp(2.75rem, 4.7vw, 4.25rem); font-weight: 450; line-height: 1.04; letter-spacing: -0.055em; }
+.about-intro h2 span { display: block; color: var(--muted); }
+.about-chapters { display: grid; gap: 1rem; margin-top: 2rem; position: relative; }
+.about-chapters li { display: flex; align-items: center; gap: 1.25rem; position: relative; }
+.about-journey-number { display: grid; place-items: center; width: 2rem; height: 2rem; flex: 0 0 auto; border: 1px solid var(--border); border-radius: 50%; color: var(--muted); font-family: var(--font-code); font-size: 0.6rem; background: var(--background); z-index: 1; }
+.about-chapters strong { display: block; font-size: 1.25rem; font-weight: 450; letter-spacing: -0.025em; }
+.about-chapters small { display: block; color: var(--muted); font-size: 0.65rem; margin-top: 0.1rem; }
+.about-story-next { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 44px; margin-top: 1.5rem; font-size: 0.75rem; }
+.about-copy { border-top: 1px solid var(--border); }
+.about-chapter { position: relative; padding: 1.25rem 0 1.25rem 2.5rem; border-bottom: 1px solid var(--border); }
+.about-chapter-number { position: absolute; left: 0; top: 1.4rem; color: var(--accent); font-family: var(--font-code); font-size: 0.6rem; }
+.about-chapter > .eyebrow { color: var(--muted); font-size: 0.6rem; margin-bottom: 0.5rem; }
 .about-chapter h3 { font-size: 1.2rem; margin-bottom: 0.65rem; letter-spacing: -0.025em; font-weight: 450; }
 .about-chapter-body { color: var(--muted); font-size: 0.9rem; line-height: 1.8; }
 .about-evidence, .about-project-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.25rem; margin-top: 0.65rem; font-size: 0.7rem; }
 .about-evidence:is(a), .about-project-links a { display: inline-flex; align-items: center; gap: 0.3rem; min-height: 32px; }
-.about-interests { border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem; }
-.about-interests h3 { font-size: 0.65rem; color: var(--accent); margin-bottom: 1rem; }
-.about-interests ul { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-size: 0.8rem; }
-.about-education-link { display: inline-flex; gap: 0.5rem; align-items: center; min-height: 44px; font-size: 0.75rem; margin-top: 1.25rem; }
-@media(max-width: 767px) { .about-layout { grid-template-columns: 1fr; } }
+@media(min-width: 1024px) and (max-height: 850px) {
+ .about-chapter { padding-block: 1rem; }
+ .about-chapter-number { top: 1.15rem; }
+ .about-chapter-body { font-size: 0.85rem; line-height: 1.75; }
+ .about-chapters { gap: 0.75rem; margin-top: 1.5rem; }
+}
+@media(max-width: 767px) {
+ .about-layout { grid-template-columns: 1fr; gap: 2rem; }
+ .about-chapters { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+ .about-chapters li { align-items: start; flex-direction: column; gap: 0.65rem; }
+ .about-chapters strong { font-size: 1rem; }
+ .about-chapters small { font-size: 0.6rem; }
+ .about-chapter { padding-left: 2rem; }
+}
 
 .hero-motion { position: relative; isolation: isolate; }
 .hero-pointer-glow { position: absolute; z-index: -1; inset: 15% 5%; border-radius: 50%; background: radial-gradient(ellipse, #5183d529, transparent 68%); opacity: 0; transition: opacity 350ms ease; pointer-events: none; }
@@ -512,21 +526,6 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 [data-scroll-story="hero"][data-pinned] .hero-project { transform: translateY(calc(var(--story-progress, 0) * -8px)); }
 [data-scroll-story="hero"][data-pinned] .hero-baseline { border-color: color-mix(in srgb, var(--accent) calc(var(--story-progress, 0) * 50%), var(--border)); }
 
-.about-chapters { display: none; }
-.about-story-next { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; margin-top: 1.5rem; font-size: 0.8rem; }
-@media(min-width: 1024px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
- .about-copy > p[data-story-paragraph] { border-left: 2px solid transparent; padding-left: 1.25rem; transition: color 240ms ease, border-color 240ms ease; }
-}
-[data-scroll-story="about"][data-pinned] .about-chapters { display: grid; gap: 0.8rem; margin-top: 2rem; font-size: 0.8rem; color: var(--muted); }
-.about-chapters li { display: flex; align-items: center; gap: 1rem; transition: color 240ms ease; }
-.about-chapters span { font-family: var(--font-code); font-size: 0.65rem; }
-[data-scroll-story="about"][data-pinned] .about-copy > p { color: var(--muted); }
-[data-scroll-story="about"][data-active-step="0"][data-pinned] .about-copy > p:nth-of-type(1),
-[data-scroll-story="about"][data-active-step="1"][data-pinned] .about-copy > p:nth-of-type(2),
-[data-scroll-story="about"][data-active-step="2"][data-pinned] .about-copy > p:nth-of-type(3) { color: var(--foreground); border-left-color: var(--accent); }
-[data-scroll-story="about"][data-active-step="0"] .about-chapters li:nth-child(1),
-[data-scroll-story="about"][data-active-step="1"] .about-chapters li:nth-child(2),
-[data-scroll-story="about"][data-active-step="2"] .about-chapters li:nth-child(3) { color: var(--accent); }
 
 .gallery-story-hint { display: none; }
 @media(min-width: 1024px) {

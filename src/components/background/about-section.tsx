@@ -13,15 +13,16 @@ export function AboutSection() {
           <div className="about-layout">
             <div className="about-intro">
               <p className="eyebrow">About me / 01</p>
-              <h2 id="about-heading">Curiosity,<br /><span>put into practice.</span></h2>
+              <h2 id="about-heading">Curiosity,<br /><span>put into</span><span>practice.</span></h2>
               <ol className="about-chapters" aria-hidden="true">
-                {about.chapters.map((chapter, index) => <li key={chapter.id}><span>{String(index + 1).padStart(2, "0")}</span>{chapter.word}</li>)}
+                {about.chapters.map((chapter, index) => <li key={chapter.id}><span className="about-journey-number">{String(index + 1).padStart(2, "0")}</span><div><strong>{chapter.word}</strong><small>{chapter.label}</small></div></li>)}
               </ol>
               <a className="text-link about-story-next" href="#projects">See what I’m building <ArrowDown size={16} aria-hidden="true" /></a>
             </div>
             <div className="about-copy">
               {about.chapters.map((chapter, index) => (
                 <article className="about-chapter" key={chapter.id} data-about-chapter={index} aria-labelledby={`about-${chapter.id}-heading`}>
+                  <span className="about-chapter-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                   <p className="eyebrow">{chapter.label}</p>
                   <h3 id={`about-${chapter.id}-heading`}>{chapter.title}</h3>
                   <p className="about-chapter-body">{chapter.body}</p>
