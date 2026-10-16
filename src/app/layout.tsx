@@ -1,3 +1,4 @@
+import { CustomCursor } from "@/components/interaction/custom-cursor";
 import { pageMetadata, site } from "@/lib/site-metadata";
 import { Footer } from "@/components/footer";
 import { ScrollReveals } from "@/components/motion/scroll-reveals";
@@ -20,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
+  return <html lang="en"><body><CustomCursor /><Navigation /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }
