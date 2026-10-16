@@ -10,6 +10,7 @@ const links = [
   { label: "Projects", href: "/#projects" },
   { label: "Experience", href: "/#experience" },
   { label: "Skills", href: "/#skills" },
+  { label: "About", href: "/#about" },
   { label: "GitHub", href: profile.links[0].href },
   { label: "Contact", href: `mailto:${profile.email}` },
 ];

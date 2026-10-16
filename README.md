@@ -4,7 +4,7 @@ A personal portfolio connecting data science and software engineering.
 
 ## Status
 
-Phase 3: project showcase complete. Includes the core design, reusable project cards, featured layouts, original OptionLab screenshots, accessible galleries, hover interactions, and statically exported OptionLab and PlatePredict case studies. Additional sections and deployment remain deferred until requested.
+Phase 4: professional background complete. The portfolio now includes the core design, project showcase and case studies, experience timeline, education, categorized technical skills, and About section. Deployment and any further phases remain deferred until requested.
 
 Target hosting: https://etran011.github.io/ (not deployed yet).
 
@@ -68,3 +68,14 @@ Cards, galleries, and `/projects/<slug>/` pages derive from the same data. Next.
 Gallery selectors and arrow buttons work with touch or keyboard. Select Enlarge to open the modal viewer; use left/right arrows to change images and Escape to close. Focus returns to the opener. Card movement is restricted to fine pointers and disabled for reduced motion.
 
 See [Phase 3 validation](docs/phase-3-validation.md) for tested routes and interactions.
+
+
+## Updating professional background
+
+Edit `src/data/background.ts` to update experience, education, skill categories, or About copy. Section components in `src/components/background/` render these typed records. Keep role dates, accomplishments, coursework, and skills aligned with the current résumé. The résumé download remains in `public/Erik-Tran-Resume.pdf` and must be updated separately when a new document is supplied.
+
+The experience timeline distinguishes the National Cyber League competition role through its organization label. Skills are grouped by function without proficiency ratings. About copy is grounded in the supplied brief and professional materials; no personal hobbies or unsupported credentials are added.
+
+Navigation switches to a mobile disclosure below 1024px to fit the expanded section list. Education is also linked from About. All background content is server-rendered and readable without JavaScript.
+
+See [Phase 4 validation](docs/phase-4-validation.md) for checks performed.

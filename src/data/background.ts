@@ -91,3 +91,15 @@ export const skillCategories = [
   { name: "Libraries & frameworks", items: ["pandas", "NumPy", "FastAPI", "Next.js", "Pytest"] },
   { name: "Tools & platforms", items: ["Git", "Linux", "AWS EC2", "Excel", "Stata"] },
 ] as const satisfies readonly SkillCategory[];
+
+export interface About { paragraphs: readonly string[]; interests: readonly string[]; }
+
+// First-person copy grounded in the supplied brief, résumé, and project materials.
+export const about = {
+  paragraphs: [
+    "I’m Erik, a Data Science student at William & Mary, graduating in 2028. I’m interested in how software engineering and machine learning can turn technical ideas into useful applications.",
+    "I enjoy moving between the model and the interface: understanding what a calculation means, testing its behavior, and making the result clear to someone using it. OptionLab brings those interests together through financial models and interactive visualizations.",
+    "Clear communication matters to me just as much as the implementation. Whether I’m helping someone troubleshoot a campus system or explaining an analysis, I want the next step to feel understandable. I’m continuing to develop that approach through coursework, projects, and hands-on technical work.",
+  ],
+  interests: ["Software engineering", "Artificial intelligence", "Machine learning", "Financial technology", "Data visualization"],
+} as const satisfies About;

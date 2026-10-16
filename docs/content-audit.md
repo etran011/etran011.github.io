@@ -2,7 +2,7 @@
 
 ## Sources and scope
 
-Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; development proceeds only through the explicitly requested phases. Phase 3 adds the project showcase and case studies. Raw project source files and datasets are not copied into this public repository. Phase 2 includes the supplied résumé PDF unchanged as the requested public download; its original contact information is retained.
+Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; development proceeds only through the explicitly requested phases. Phase 3 adds the project showcase and case studies; Phase 4 adds experience, education, technical skills, and About. Raw project source files and datasets are not copied into this public repository. Phase 2 includes the supplied résumé PDF unchanged as the requested public download; its original contact information is retained.
 
 ## Verified content
 
@@ -28,3 +28,8 @@ Feature OptionLab and PlatePredict. Introduce Erik through his data science/soft
 ## Design direction
 
 Near-black #0B0D12 background, charcoal #12151C surfaces, off-white #F5F5F7 text, muted #9298A5 secondary text, restrained electric blue accents. Use a readable sans-serif and monospace labels, generous responsive spacing, thin borders, visible focus, and reduced-motion support. Future hero and project showcase should carry most of the visual emphasis.
+
+
+## Phase 4 background integration
+
+`src/data/background.ts` holds the four résumé roles, William & Mary degree, expected 2028 graduation, overall GPA, all ten listed courses, and the résumé skill inventory grouped into six categories. Experience bullets are condensed without introducing new employers, dates, metrics, or responsibilities. The National Cyber League role remains explicitly labeled as competition experience. About copy draws on the user’s stated interests and the supplied professional/project materials; it adds no unsupported hobbies or credentials.
