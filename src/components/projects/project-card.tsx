@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { ScreenshotGallery } from "./screenshot-gallery";
 import type { Project } from "@/types/portfolio";
 
@@ -10,6 +12,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         <h3 id={`project-${project.slug}`}>{project.title}</h3>
         <p className="project-summary">{project.summary}</p>
         <p className="project-period">{project.period}</p>
+        <Link className="case-link" href={`/projects/${project.slug}/`}>Read case study <ArrowUpRight size={17} aria-hidden="true" /><span className="sr-only">: {project.title}</span></Link>
         </div>
         <div className="project-details">
         <ul className="project-highlights" aria-label={`${project.title} highlights`}>

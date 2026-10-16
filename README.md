@@ -4,7 +4,7 @@ A personal portfolio connecting data science and software engineering.
 
 ## Status
 
-Phase 2: core design complete. Includes self-hosted typography, dark theme, responsive navigation, hero illustration and motion, social links, email CTA, and résumé download. Project showcases and other sections remain deferred until requested.
+Phase 3: project showcase complete. Includes the core design, reusable project cards, featured layouts, original OptionLab screenshots, accessible galleries, hover interactions, and statically exported OptionLab and PlatePredict case studies. Additional sections and deployment remain deferred until requested.
 
 Target hosting: https://etran011.github.io/ (not deployed yet).
 
@@ -57,3 +57,14 @@ Implement only the explicitly requested phase. For each meaningful step: validat
 ## Dependency audit
 
 The initial full npm audit reports five high-severity development-tooling entries from the same `braces` dependency chain in `eslint-config-next`. npm suggests downgrading the Next.js lint configuration to 14.x; that incompatible downgrade has not been applied. Recheck upstream fixes before enabling CI. This tooling is not included in the static website runtime.
+
+
+## Updating the project showcase
+
+Edit `src/data/portfolio.ts` using the `Project` contract in `src/types/portfolio.ts`. Each project includes a unique URL-safe slug, category, dates, highlights, technologies, a featured flag, and structured case-study text. Add original screenshots to `public/images/projects/<slug>/` and record their real dimensions, descriptive alt text, and captions in the data file.
+
+Cards, galleries, and `/projects/<slug>/` pages derive from the same data. Next.js generates all project routes at build time. Rebuild after adding a project. An empty screenshot list produces a text-led card and omits the gallery; optional repository and demo links are shown on case-study pages only when supplied.
+
+Gallery selectors and arrow buttons work with touch or keyboard. Select Enlarge to open the modal viewer; use left/right arrows to change images and Escape to close. Focus returns to the opener. Card movement is restricted to fine pointers and disabled for reduced motion.
+
+See [Phase 3 validation](docs/phase-3-validation.md) for tested routes and interactions.

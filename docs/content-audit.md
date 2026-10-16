@@ -2,7 +2,7 @@
 
 ## Sources and scope
 
-Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; the current request limits implementation to Phase 1: foundation. Raw project source files and datasets are not copied into this public repository. Phase 2 includes the supplied résumé PDF unchanged as the requested public download; its original contact information is retained.
+Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; development proceeds only through the explicitly requested phases. Phase 3 adds the project showcase and case studies. Raw project source files and datasets are not copied into this public repository. Phase 2 includes the supplied résumé PDF unchanged as the requested public download; its original contact information is retained.
 
 ## Verified content
 
@@ -15,15 +15,15 @@ Reviewed the supplied resume PDF, OptionLab repository README, and project_imple
 
 ## Assets and evidence gaps
 
-Three OptionLab screenshots were subsequently supplied and inspected: pricing-dashboard.png (2940 × 1670), sensitivity-charts.png (2248 × 1626), and implied-volatility.png (2508 × 766). Original files are preserved unchanged in public/images/projects/optionlab/ for integration in a later phase. The notebook also includes eight embedded chart images; these are analysis figures, not app screenshots. Preserve original aspect ratios when integrating assets.
+Three OptionLab screenshots were subsequently supplied and inspected: pricing-dashboard.png (2940 × 1670), sensitivity-charts.png (2248 × 1626), and implied-volatility.png (2508 × 766). Original files are preserved unchanged in public/images/projects/optionlab/ and integrated into the Phase 3 showcase and OptionLab case study. The notebook also includes eight embedded chart images; these are analysis figures, not app screenshots. Preserve original aspect ratios when integrating assets.
 
 Application Atlas, Email Scam Classifier, and Amazon Fresh appear only as suggestions in the brief, not in the supplied resume or project evidence. Omit until substantiated. No live project URLs were supplied.
 
 The notebook's Random Forest evaluation reuses predictions from a previous model, its tuning loop reverses r2_score arguments, and its final “top 3” table uses validation values. Do not present these outputs as independently validated test metrics. Source code remains untouched.
 
-## Content plan for later phases
+## Content plan
 
-Feature OptionLab and PlatePredict. Introduce Erik through his data science/software engineering interests; follow with project work, experience, skills, education, and contact. Keep facts in typed data modules separate from presentation. Add project galleries and case studies only when that phase is requested and supporting assets are available.
+Feature OptionLab and PlatePredict. Introduce Erik through his data science/software engineering interests; follow with project work, experience, skills, education, and contact. Keep facts in typed data modules separate from presentation. Phase 3 implements these two case studies; OptionLab uses the supplied screenshots, while PlatePredict uses a text-led presentation.
 
 ## Design direction
 
