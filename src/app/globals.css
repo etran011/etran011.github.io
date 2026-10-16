@@ -63,3 +63,27 @@
 }
 
 .eyebrow { font-family: var(--font-code); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* Shared dark surfaces and controls. Keep accent use sparse. */
+:root {
+  --surface-raised: #181d27;
+  --accent-strong: #b5cdff;
+  --shadow-panel: 0 24px 80px #00000038;
+}
+
+html { scroll-padding-top: 7rem; }
+body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transparent 50%); }
+.surface-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow-panel); }
+.text-link { color: var(--muted); transition: color var(--duration-fast); }
+.text-link:hover { color: var(--foreground); }
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.65rem;
+  min-height: 3rem; padding: 0.75rem 1.2rem; border: 1px solid var(--border);
+  border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500;
+  transition: background var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast);
+}
+.button:hover { background: var(--surface-raised); border-color: var(--muted); }
+.button-primary { background: var(--accent); color: var(--background); border-color: var(--accent); }
+.button-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.skip-link { position: fixed; left: 1rem; top: 1rem; z-index: 100; transform: translateY(-200%); background: var(--accent); color: var(--background); padding: 0.75rem 1rem; border-radius: 0.25rem; }
+.skip-link:focus { transform: translateY(0); }
