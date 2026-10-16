@@ -72,7 +72,7 @@ See [Phase 3 validation](docs/phase-3-validation.md) for tested routes and inter
 
 ## Updating professional background
 
-Edit `src/data/background.ts` to update experience, education, skill categories, or About copy. Section components in `src/components/background/` render these typed records. Keep role dates, accomplishments, coursework, and skills aligned with the current résumé. The résumé download remains in `public/Erik-Tran-Resume.pdf` and must be updated separately when a new document is supplied.
+Edit `src/data/background.ts` to update experience, education, skill categories, or About copy. Section components in `src/components/background/` render these typed records. Keep role dates, accomplishments, coursework, and skills aligned with the current résumé. The résumé is a private source document; no PDF or download link is published in the portfolio.
 
 The experience timeline distinguishes the National Cyber League competition role through its organization label. Skills are grouped by function without proficiency ratings. About copy is grounded in the supplied brief and professional materials; no personal hobbies or unsupported credentials are added.
 

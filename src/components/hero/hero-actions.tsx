@@ -1,4 +1,4 @@
-import { ArrowUpRight, Download, Mail } from "lucide-react";
+import { ArrowUpRight, Mail } from "lucide-react";
 import { profile } from "@/data/portfolio";
 
 export function HeroActions() {
@@ -10,8 +10,6 @@ export function HeroActions() {
       </div>
       <div className="hero-socials">
         <a className="text-link" href={profile.links[1].href}>LinkedIn <ArrowUpRight size={14} aria-hidden="true" /></a>
-        <span aria-hidden="true" className="social-divider" />
-        <a className="text-link" href={profile.resumePath} download>Download résumé <Download size={14} aria-hidden="true" /><span className="sr-only"> (PDF)</span></a>
       </div>
     </div>
   );

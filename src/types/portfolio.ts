@@ -4,7 +4,6 @@ export interface Profile {
   institution: string;
   graduationYear: number;
   email: string;
-  resumePath: `/${string}`;
   links: ReadonlyArray<{ label: string; href: `https://${string}` }>;
 }
 

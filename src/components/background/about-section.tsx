@@ -1,7 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { about } from "@/data/background";
-import { profile } from "@/data/portfolio";
 
 export function AboutSection() {
   return (
@@ -11,7 +10,6 @@ export function AboutSection() {
           <div className="about-intro">
             <p className="eyebrow">About / 05</p>
             <h2 id="about-heading">Curious about data.<br /><span>Careful about the experience.</span></h2>
-            <a className="case-link" href={profile.resumePath} download>Read my résumé <ArrowUpRight size={17} aria-hidden="true" /><span className="sr-only"> (PDF download)</span></a>
           </div>
           <div className="about-copy">
             {about.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}

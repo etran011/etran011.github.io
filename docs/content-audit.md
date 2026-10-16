@@ -2,7 +2,7 @@
 
 ## Sources and scope
 
-Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; development proceeds only through the explicitly requested phases. Phase 3 adds the project showcase and case studies; Phase 4 adds experience, education, technical skills, and About. Raw project source files and datasets are not copied into this public repository. Phase 2 includes the supplied résumé PDF unchanged as the requested public download; its original contact information is retained.
+Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; development proceeds only through the explicitly requested phases. Phase 3 adds the project showcase and case studies; Phase 4 adds experience, education, technical skills, and About. Raw project source files and datasets are not copied into this public repository. The supplied résumé was used to verify professional content. At the user’s request in Phase 6, all résumé downloads and the public PDF were removed; phone numbers must not appear in portfolio content or public assets.
 
 ## Verified content
 

@@ -7,7 +7,6 @@ export const profile = {
   institution: "William & Mary",
   graduationYear: 2028,
   email: "etran01@wm.edu",
-  resumePath: "/Erik-Tran-Resume.pdf",
   links: [
     { label: "GitHub", href: "https://github.com/etran011" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/erik-tran-tech" },
