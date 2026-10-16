@@ -27,10 +27,10 @@ export function SkillsReveal({ children }: { children: ReactNode }) {
         });
       }
     }, { threshold: 0.12, rootMargin: "0px 0px -24px 0px" });
-    element.querySelectorAll(".skill-category").forEach((category) => observer.observe(category));
+    element.querySelectorAll(".stack-collection").forEach((category) => observer.observe(category));
     const cancel = () => { if (reduce.matches || forced.matches) { animations.forEach((animation) => animation.cancel()); animations.clear(); } };
     reduce.addEventListener("change", cancel); forced.addEventListener("change", cancel);
     return () => { observer.disconnect(); animations.forEach((animation) => animation.cancel()); reduce.removeEventListener("change", cancel); forced.removeEventListener("change", cancel); };
   }, []);
-  return <div ref={root} className="skills-grid" data-skills-motion>{children}</div>;
+  return <div ref={root} className="stack-collections" data-skills-motion>{children}</div>;
 }

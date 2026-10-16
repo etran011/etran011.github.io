@@ -6,17 +6,16 @@ import { SkillsReveal } from "./skills-reveal";
 export function SkillsSection() {
   return (
     <section id="skills" className="background-section skills-section" aria-labelledby="skills-heading">
-      <Container className="skills-layout">
-        <div className="section-heading skills-heading">
-          <div><p className="eyebrow">Technical skills / 04</p><h2 id="skills-heading">From exploration<br />to implementation.</h2></div>
-          <p>The languages, libraries, frameworks, and tools I use across my projects.</p>
-        </div>
+      <Container>
+        <header className="stack-header">
+          <div><p className="eyebrow">Technical stack / 04</p><h2 id="skills-heading">The tools behind<br /><span>the work.</span></h2></div>
+          <div className="stack-introduction"><p>The languages, libraries, and tools I bring into my projects.</p><dl className="stack-summary"><div><dt>Technologies</dt><dd>{skillCategories.reduce((total, category) => total + category.items.length, 0)}</dd></div><div><dt>Collections</dt><dd>{String(skillCategories.length).padStart(2, "0")}</dd></div></dl></div>
+        </header>
         <SkillsReveal>
           {skillCategories.map((category, index) => (
-            <section className="skill-category" key={category.name} aria-labelledby={`skill-category-${index}`}>
-              <span className="eyebrow" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-              <h3 id={`skill-category-${index}`}>{category.name}</h3>
-              <ul>{category.items.map((skill) => <li key={skill} data-technology={skill}><TechnologyIcon name={skill} /><span>{skill}</span></li>)}</ul>
+            <section className="stack-collection" key={category.id} data-collection={category.id} aria-labelledby={`stack-${category.id}`}>
+              <div className="stack-collection-heading"><span className="eyebrow" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><h3 id={`stack-${category.id}`}>{category.name}</h3></div>
+              <ul className="stack-technologies" role="list">{category.items.map((skill) => <li className="technology-node" key={skill} data-technology={skill}><span className="technology-glyph"><TechnologyIcon name={skill} /></span><span className="technology-name">{skill}</span></li>)}</ul>
             </section>
           ))}
         </SkillsReveal>
