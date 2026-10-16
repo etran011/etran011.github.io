@@ -145,7 +145,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
   .hero-grid { perspective: 900px; }
-  .hero-copy > :not(.hero-headline) { animation: hero-arrive 700ms var(--ease-standard) both; }
+  .hero-copy > :not(.hero-narrative) { animation: hero-arrive 700ms var(--ease-standard) both; }
   .hero-copy > h1 { animation-delay: 60ms; }
   .hero-copy > .hero-role { animation-delay: 120ms; }
   .hero-copy > .hero-actions { animation-delay: 650ms; }
@@ -426,3 +426,17 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 @media(forced-colors: active) { .custom-cursor { display: none; } html[data-custom-cursor], html[data-custom-cursor] * { cursor: auto !important; } }
 
 html[data-weighted-scroll] { scroll-behavior: auto !important; }
+
+/* Brief, opt-in desktop scenes. All base content stays in normal document flow. */
+.scroll-story { position: relative; }
+.scroll-story[data-pinned] { height: calc(var(--scene-height) + var(--scene-travel)); }
+.scroll-story[data-pinned] > .story-stage { position: sticky; top: 7rem; }
+.hero-narrative { position: relative; }
+.hero-story-phrase { display: none; position: absolute; inset: 0; font-size: clamp(2rem, 3.5vw, 3.5rem); font-weight: 450; line-height: 1.15; letter-spacing: -0.045em; pointer-events: none; }
+[data-scroll-story="hero"][data-pinned] .hero-narrative-original { opacity: var(--story-weight-0, 1); transform: translateY(calc(var(--story-progress, 0) * -10px)); }
+[data-scroll-story="hero"][data-pinned] .hero-story-phrase { display: block; }
+.hero-story-software { color: var(--foreground); opacity: var(--story-weight-1, 0); }
+.hero-story-intelligence { color: var(--accent); opacity: var(--story-weight-2, 0); }
+.hero-story-finance { color: var(--accent-strong); opacity: var(--story-weight-3, 0); }
+[data-scroll-story="hero"][data-pinned] .hero-project { transform: translateY(calc(var(--story-progress, 0) * -8px)); }
+[data-scroll-story="hero"][data-pinned] .hero-baseline { border-color: color-mix(in srgb, var(--accent) calc(var(--story-progress, 0) * 50%), var(--border)); }
