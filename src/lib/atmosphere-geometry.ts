@@ -1,23 +1,56 @@
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
 
-/** Standard bivariate normal density: x and z are measured in standard deviations. */
-export function gaussianDensity(x: number, z: number) {
-  return Math.exp(-(x * x + z * z) / 2) / (2 * Math.PI);
-}
+export const particleCount = 1248;
+export const particleStride = 13;
 
-export const formationContours = [6, 14, 23] as const;
-const contourRadii = new Map<number, number>([[6, 1], [14, 2], [23, 3]]);
-
-/** 48 azimuths × 26 radii. Nonlinear radial sampling concentrates observations
- * around the peak; three exact sigma radii provide meaningful density contours.
+/** Synthetic mixture components. L is a Cholesky factor, so covariance = L·Lᵀ.
+ * Positive diagonal entries give each component a full-rank, anisotropic spread.
  */
+export const latentClusters = [
+  { weight: 0.38, center: [-0.57, -0.44, 0.24], factor: [0.27, 0.09, 0.13, 0.02, 0.03, 0.12], angle: -0.35, bend: 0.2 },
+  { weight: 0.28, center: [-0.1, 0.3, -0.3], factor: [0.13, -0.03, 0.24, 0.04, 0.03, 0.13], angle: 0.4, bend: 0.16 },
+  { weight: 0.21, center: [0.63, 0.72, 0.18], factor: [0.23, -0.045, 0.13, 0.01, 0.04, 0.16], angle: 0.18, bend: -0.18 },
+  { weight: 0.13, center: [0.66, -0.54, -0.28], factor: [0.14, 0.03, 0.14, 0.035, 0, 0.11], angle: -0.6, bend: 0.1 },
+] as const;
+
+const fraction = (value: number) => value - Math.floor(value);
+export function particleCluster(id: number) {
+  const value = fraction((id + 1) * 0.618033989);
+  let cumulative = 0;
+  for (let i = 0; i < latentClusters.length - 1; i++) {
+    cumulative += latentClusters[i].weight;
+    if (value < cumulative) return i;
+  }
+  return latentClusters.length - 1;
+}
+function uniform(seed: number, channel: number) {
+  let value = Math.imul(seed + 1, 0x9e3779b1) ^ Math.imul(channel + 1, 0x85ebca6b);
+  value = Math.imul(value ^ (value >>> 16), 0x7feb352d);
+  value = Math.imul(value ^ (value >>> 15), 0x846ca68b);
+  return ((value ^ (value >>> 16)) >>> 0) / 4294967296 + 0.5 / 4294967296;
+}
+/** Deterministic Box–Muller sampling, conditioned on Mahalanobis radius ≤ 2.8.
+ * Finite tails keep the sculpture contained; this is a truncated synthetic mixture.
+ */
+export function latentSample(id: number) {
+  for (let attempt = 0; ; attempt++) {
+    const seed = id + attempt * particleCount;
+    const radius = Math.sqrt(-2 * Math.log(uniform(seed, 0)));
+    const angle = uniform(seed, 1) * Math.PI * 2;
+    const x = radius * Math.cos(angle), y = radius * Math.sin(angle);
+    const z = Math.sqrt(-2 * Math.log(uniform(seed, 2))) * Math.cos(uniform(seed, 3) * Math.PI * 2);
+    if (x * x + y * y + z * z <= 2.8 * 2.8) return [x, y, z] as const;
+  }
+}
 export function formationPoint(id: number): readonly [number, number, number] {
-  const angle = (id % 48) / 48 * Math.PI * 2;
-  const ring = Math.floor(id / 48);
-  const radius = contourRadii.get(ring) ?? 3.2 * Math.pow((ring + 0.25) / 25.25, 0.8);
-  const x = radius * Math.cos(angle), z = radius * Math.sin(angle);
-  // Display height is normalized by the PDF's peak; density itself remains exact.
-  return [x * 0.48, gaussianDensity(x, z) * (2 * Math.PI) * 1.9 - 0.68, z * 0.48];
+  const component = latentClusters[particleCluster(id)];
+  const [a, b, c] = latentSample(id);
+  const [l00, l10, l11, l20, l21, l22] = component.factor;
+  const x = l00 * a, y = l10 * a + l11 * b, z = l20 * a + l21 * b + l22 * c;
+  const cosine = Math.cos(component.angle), sine = Math.sin(component.angle);
+  return [component.center[0] + x * cosine - y * sine,
+    component.center[1] + x * sine + y * cosine + component.bend * (a * a - 1) * 0.08,
+    component.center[2] + z + Math.sin(a * 0.9) * component.bend * 0.15];
 }
 
 export const atmosphereQuality = {
@@ -26,33 +59,22 @@ export const atmosphereQuality = {
   low: { stride: 3, pixelRatio: 1 },
 } as const;
 export type AtmosphereQuality = keyof typeof atmosphereQuality;
-const fraction = (value: number) => value - Math.floor(value);
-
 /** Stable identities keep every retained particle in place when quality decreases.
- * Interleaved vertex: formation.xyz, viewport destination.xyz, identity/depth/size.
+ * Interleaved vertex: formation.xyz, viewport destination.xyz, identity/depth/size, cluster center/density.
  * The destination uses a low-discrepancy distribution, not frame-by-frame randomness.
  */
 export function particleVertex(id: number) {
+  const sample = latentSample(id);
   return [...formationPoint(id), (fraction((id + 1) * 0.754877666) * 2 - 1) * 1.05,
     (fraction((id + 1) * 0.569840291) * 2 - 1) * 1.05,
-    fraction((id + 1) * 0.438579), id / 1248,
-    fraction((id + 1) * 0.618033989), fraction((id + 1) * 0.414213562)];
+    fraction((id + 1) * 0.438579), id / particleCount,
+    fraction((id + 1) * 0.618033989), fraction((id + 1) * 0.414213562),
+    ...latentClusters[particleCluster(id)].center, Math.exp(-sample.reduce((sum, value) => sum + value * value, 0) / 2)];
 }
 export function createParticleGeometry(quality: AtmosphereQuality = "high") {
   const { stride } = atmosphereQuality[quality];
   const points: number[] = [], lines: number[] = [];
-  for (let id = 0; id < 1248; id += stride) {
-    points.push(...particleVertex(id));
-    const ring = Math.floor(id / 48), angle = id % 48;
-    if (formationContours.includes(ring as typeof formationContours[number])) {
-      const neighbor = ring * 48 + (angle + stride) % 48;
-      lines.push(...particleVertex(id), ...particleVertex(neighbor));
-    }
-    // Eight meridians expose the bell silhouette, including on lower quality tiers.
-    if (angle % 6 === 0 && ring < 25) {
-      lines.push(...particleVertex(id), ...particleVertex(id + 48));
-    }
-  }
+  for (let id = 0; id < particleCount; id += stride) points.push(...particleVertex(id));
   return { points: new Float32Array(points), lines: new Float32Array(lines) };
 }
 

@@ -1,5 +1,5 @@
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
-import { atmosphereQuality, createParticleGeometry, type AtmosphereQuality } from "./atmosphere-geometry";
+import { atmosphereQuality, createParticleGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
 export const restingPose: AtmospherePose = { ...formationView, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
@@ -8,6 +8,7 @@ const vertexSource = `
 attribute vec3 aPosition;
 attribute vec3 aDestination;
 attribute vec3 aSeed;
+attribute vec4 aCluster;
 uniform float uTime;
 uniform mediump float uExpansion;
 uniform vec3 uRotation;
@@ -19,9 +20,8 @@ uniform float uScroll;
 varying float vLight;
 void main() {
   vec3 p = aPosition;
-  float density = clamp((aPosition.y + 0.68) / 1.9, 0.0, 1.0);
-  // A shared height modulation preserves the Gaussian profile and closed contours.
-  p.y = (p.y + 0.68) * (1.0 + sin(uTime * 0.16) * 0.012) - 0.68;
+  float density = aCluster.w;
+  p.y += sin(uTime * 0.16) * 0.012;
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
@@ -96,7 +96,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     program = gl.createProgram();
     if (!program) throw new Error("Program allocation failed");
     shaders.forEach((shader) => gl.attachShader(program!, shader));
-    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aDestination"); gl.bindAttribLocation(program, 2, "aSeed"); gl.linkProgram(program);
+    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aDestination"); gl.bindAttribLocation(program, 2, "aSeed"); gl.bindAttribLocation(program, 3, "aCluster"); gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("Atmosphere shader link failed");
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
@@ -106,19 +106,19 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
       buffers.add(buffer); gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-      return { buffer, count: data.length / 9 };
+      return { buffer, count: data.length / particleStride };
     };
     const geometry = createParticleGeometry(quality);
     let lines = allocate(geometry.lines);
     let points = allocate(geometry.points);
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
-    for (let i = 0; i < 3; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
+    for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number) => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 3; i++) gl.vertexAttribPointer(i, 3, gl.FLOAT, false, 36, i * 12); gl.drawArrays(mode, 0, geometry.count);
+      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, geometry.count);
     };
     return {
       resize(w: number, h: number) {
