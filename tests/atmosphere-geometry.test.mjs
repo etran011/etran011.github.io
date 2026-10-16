@@ -40,6 +40,32 @@ test("deterministic Gaussian samples have finite bounded tails and distinct non-
   });
 });
 
+test("spatial-hash links match brute-force nearest neighbors and remain sparse at every quality", () => {
+  const distance = (a, b) => a.reduce((sum, v, axis) => sum + (v - b[axis]) ** 2, 0);
+  for (const [quality, stride] of [["high", 1], ["medium", 2], ["low", 3]]) {
+    const { connections, lines } = createParticleGeometry(quality);
+    const ids = Array.from({length: 1248 / stride}, (_, i) => i * stride);
+    const positions = new Map(ids.map(id => [id, formationPoint(id)]));
+    assert(connections.length > 60 && connections.length < 320);
+    assert.equal(lines.length, connections.length * particleStride * 2);
+    const keys = connections.map(e => [e.from, e.to].sort((a, b) => a - b).join(":"));
+    assert.equal(new Set(keys).size, keys.length);
+    for (const edge of connections) {
+      assert(positions.has(edge.from) && positions.has(edge.to) && edge.from !== edge.to);
+      if (!edge.bridge) assert(distance(positions.get(edge.from), positions.get(edge.to)) <= 0.26 ** 2);
+    }
+    for (const id of ids.filter(id => id % (stride * 8) === 0)) {
+      const expected = ids.filter(other => other !== id).map(other => ({id: other, distance: distance(positions.get(id), positions.get(other))})).filter(p => p.distance < 0.26 ** 2).sort((a, b) => a.distance - b.distance).slice(0, 2);
+      for (const nearest of expected) assert(connections.some(e => (e.from === id && e.to === nearest.id) || (e.to === id && e.from === nearest.id)));
+    }
+    // Every intended component pair has a relationship, including when an edge
+    // was already found by the local nearest-neighbor pass.
+    for (const [a, b] of [[0, 1], [1, 2], [1, 3]]) {
+      assert(connections.some(e => [particleCluster(e.from), particleCluster(e.to)].sort().join(":") === `${a}:${b}`));
+    }
+  }
+});
+
 test("destinations cover all viewport quadrants with finite depth and no random regeneration", () => {
   const quadrants = [0, 0, 0, 0];
   for (let id = 0; id < 1248; id++) {

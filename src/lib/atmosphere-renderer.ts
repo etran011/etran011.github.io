@@ -18,9 +18,11 @@ uniform vec2 uLight;
 uniform float uPointerStrength;
 uniform float uScroll;
 varying float vLight;
+varying float vPulse;
 void main() {
   vec3 p = aPosition;
   float density = aCluster.w;
+  vPulse = 0.88 + sin(uTime * 0.5 + aCluster.x * 3.0 + aCluster.y * 2.0) * 0.12;
   p.y += sin(uTime * 0.16) * 0.012;
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
@@ -63,9 +65,10 @@ uniform float uPoint;
 uniform mediump float uExpansion;
 uniform float uDetail;
 varying float vLight;
+varying float vPulse;
 void main() {
   float alpha = vLight;
-  if (uPoint < 0.5) alpha *= 0.48 * (1.0 - smoothstep(0.08, 0.65, uExpansion));
+  if (uPoint < 0.5) alpha *= vPulse * 0.48 * (1.0 - smoothstep(0.08, 0.65, uExpansion));
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
   gl_FragColor = vec4(uColor, alpha);
 }`;

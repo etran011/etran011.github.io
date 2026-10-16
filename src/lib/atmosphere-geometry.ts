@@ -71,11 +71,65 @@ export function particleVertex(id: number) {
     fraction((id + 1) * 0.618033989), fraction((id + 1) * 0.414213562),
     ...latentClusters[particleCluster(id)].center, Math.exp(-sample.reduce((sum, value) => sum + value * value, 0) / 2)];
 }
+export interface ParticleConnection { from: number; to: number; bridge: boolean; }
+const neighborRadius = 0.26;
+const distanceSquared = (a: readonly number[], b: readonly number[]) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+
+/** Construct topology only at initialization/quality changes, never during a frame.
+ * A radius-sized spatial hash bounds local searches to 27 cells. Selected anchors
+ * connect to their two closest observations within that radius.
+ */
+function particleConnections(vertices: Map<number, number[]>, stride: number) {
+  const cells = new Map<string, number[]>();
+  const cell = (point: readonly number[]) => point.slice(0, 3).map(value => Math.floor(value / neighborRadius));
+  for (const [id, vertex] of vertices) {
+    const key = cell(vertex).join(":");
+    const bucket = cells.get(key) ?? []; bucket.push(id); cells.set(key, bucket);
+  }
+  const edges: ParticleConnection[] = [], seen = new Set<string>();
+  const add = (from: number, to: number, bridge = false) => {
+    const key = `${Math.min(from, to)}:${Math.max(from, to)}`;
+    if (seen.has(key)) return;
+    seen.add(key); edges.push({ from, to, bridge });
+  };
+  for (const [id, vertex] of vertices) {
+    if (id % (stride * 8) !== 0) continue;
+    const [cx, cy, cz] = cell(vertex);
+    let first = -1, second = -1, d1 = neighborRadius ** 2, d2 = d1;
+    for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
+      for (const other of cells.get(`${cx + x}:${cy + y}:${cz + z}`) ?? []) {
+        if (other === id) continue;
+        const distance = distanceSquared(vertex, vertices.get(other)!);
+        if (distance < d1) { second = first; d2 = d1; first = other; d1 = distance; }
+        else if (distance < d2) { second = other; d2 = distance; }
+      }
+    }
+    if (first >= 0) add(id, first);
+    if (second >= 0) add(id, second);
+  }
+  // A tree of component relationships uses the nearest pair of boundary samples,
+  // rather than drawing arbitrary long lines through cluster centers.
+  const groups = latentClusters.map((_, group) => [...vertices].filter(([id]) => particleCluster(id) === group));
+  for (const [a, b] of [[0, 1], [1, 2], [1, 3]]) {
+    let best = Infinity, pair: [number, number] | undefined;
+    for (const [from, va] of groups[a]) for (const [to, vb] of groups[b]) {
+      const distance = distanceSquared(va, vb);
+      if (distance < best) { best = distance; pair = [from, to]; }
+    }
+    if (pair) add(...pair, true);
+  }
+  return edges;
+}
 export function createParticleGeometry(quality: AtmosphereQuality = "high") {
   const { stride } = atmosphereQuality[quality];
+  const vertices = new Map<number, number[]>();
   const points: number[] = [], lines: number[] = [];
-  for (let id = 0; id < particleCount; id += stride) points.push(...particleVertex(id));
-  return { points: new Float32Array(points), lines: new Float32Array(lines) };
+  for (let id = 0; id < particleCount; id += stride) {
+    const vertex = particleVertex(id); vertices.set(id, vertex); points.push(...vertex);
+  }
+  const connections = particleConnections(vertices, stride);
+  for (const { from, to } of connections) lines.push(...vertices.get(from)!, ...vertices.get(to)!);
+  return { points: new Float32Array(points), lines: new Float32Array(lines), connections };
 }
 
 /** Same rest projection as the shader, for the no-script/static vector fallback. */
