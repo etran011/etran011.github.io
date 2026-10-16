@@ -109,8 +109,6 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 
 .hero { padding: clamp(3.5rem, 6vw, 6rem) 0 2.5rem; overflow: clip; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; align-items: center; gap: clamp(2rem, 5vw, 5rem); }
-.hero-kicker { display: flex; align-items: center; gap: 0.65rem; color: var(--accent); margin-bottom: 0.75rem; }
-.hero-kicker > span { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; }
 .hero h1 { font-size: clamp(3.25rem, 8.6vw, 7rem); font-weight: 500; line-height: 1.04; letter-spacing: -0.065em; }
 .hero h1 > span { color: var(--accent); }
 .hero-role { color: var(--muted); margin-top: 1.25rem; font-size: 0.875rem; line-height: 1.8; }
@@ -459,7 +457,6 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 [data-scroll-story="hero"][data-pinned] .hero-story-phrase { display: block; }
 .hero-story-software { color: var(--foreground); opacity: var(--story-weight-1, 0); }
 .hero-story-intelligence { color: var(--accent); opacity: var(--story-weight-2, 0); }
-.hero-story-finance { color: var(--accent-strong); opacity: var(--story-weight-3, 0); }
 [data-scroll-story="hero"][data-pinned] .hero-project { transform: translateY(calc(var(--story-progress, 0) * -8px)); }
 [data-scroll-story="hero"][data-pinned] .hero-baseline { border-color: color-mix(in srgb, var(--accent) calc(var(--story-progress, 0) * 50%), var(--border)); }
 
