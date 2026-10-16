@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/container";
 import { skillCategories } from "@/data/background";
+import { TechnologyIcon } from "./technology-icon";
 
 export function SkillsSection() {
   return (
@@ -14,7 +15,7 @@ export function SkillsSection() {
             <section className="skill-category" key={category.name} aria-labelledby={`skill-category-${index}`}>
               <span className="eyebrow" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
               <h3 id={`skill-category-${index}`}>{category.name}</h3>
-              <ul>{category.items.map((skill) => <li key={skill}>{skill}</li>)}</ul>
+              <ul>{category.items.map((skill) => <li key={skill}><TechnologyIcon name={skill} /><span>{skill}</span></li>)}</ul>
             </section>
           ))}
         </div>
