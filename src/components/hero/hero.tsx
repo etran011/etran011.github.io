@@ -1,3 +1,4 @@
+import { HeroActions } from "./hero-actions";
 import { Container } from "@/components/ui/container";
 import { profile } from "@/data/portfolio";
 import { HeroMotion } from "./hero-motion";
@@ -12,6 +13,7 @@ export function Hero() {
             <p className="eyebrow hero-kicker"><span aria-hidden="true" />{profile.name} / Data &amp; software</p>
             <h1 id="hero-heading">Turning data<br />into <span>useful</span><br />experiences.</h1>
             <p className="hero-description">I’m Erik, a Data Science student at William &amp; Mary. I build at the intersection of software, machine learning, and thoughtful design.</p>
+            <HeroActions />
           </div>
           <HeroMotion><SignalGraphic /></HeroMotion>
         </div>

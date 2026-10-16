@@ -1,13 +1,14 @@
 "use client";
 
+import { profile } from "@/data/portfolio";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 
 const links = [
   { label: "Home", href: "/#home" },
-  { label: "GitHub", href: "https://github.com/etran011" },
-  { label: "Contact", href: "mailto:etran01@wm.edu" },
+  { label: "GitHub", href: profile.links[0].href },
+  { label: "Contact", href: `mailto:${profile.email}` },
 ];
 
 export function Navigation() {

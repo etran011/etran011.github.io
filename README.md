@@ -4,7 +4,7 @@ A personal portfolio connecting data science and software engineering.
 
 ## Status
 
-Phase 1: foundation. Later sections, interactions, screenshots, and deployment are intentionally deferred until requested.
+Phase 2: core design complete. Includes self-hosted typography, dark theme, responsive navigation, hero illustration and motion, social links, email CTA, and résumé download. Project showcases and other sections remain deferred until requested.
 
 Target hosting: https://etran011.github.io/ (not deployed yet).
 
@@ -46,7 +46,7 @@ GitHub Actions deployment and Pages activation are deferred to a deployment phas
 - `public/`: future screenshots and downloadable assets.
 - `docs/`: content provenance and development notes.
 
-Use `@/` imports, semantic HTML, server components by default, and client components only for browser interactions. Colors, typography, spacing, radii, and motion values live in `globals.css`; Tailwind exposes the semantic tokens. System font stacks avoid external font requests during builds. The simple holding page exercises the foundation; it is not the final hero.
+Use `@/` imports, semantic HTML, server components by default, and client components only for browser interactions. Colors, typography, spacing, radii, and motion values live in `globals.css`; Tailwind exposes the semantic tokens. Geist and Geist Mono are self-hosted through Fontsource, with system fallbacks. The hero uses CSS entrance animations and Motion springs for subtle pointer response; reduced-motion preferences disable both.
 
 Add future projects to the typed data file and their real screenshots to `public/`. Keep unsupported URLs absent and screenshot arrays empty until assets are supplied. Do not invent achievements or model metrics.
 

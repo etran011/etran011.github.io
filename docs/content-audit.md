@@ -2,7 +2,7 @@
 
 ## Sources and scope
 
-Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; the current request limits implementation to Phase 1: foundation. Private source files, phone number, and raw datasets are not copied into this public repository.
+Reviewed the supplied resume PDF, OptionLab repository README, and project_implementation.ipynb. The pasted design brief is a reference; the current request limits implementation to Phase 1: foundation. Raw project source files and datasets are not copied into this public repository. Phase 2 includes the supplied résumé PDF unchanged as the requested public download; its original contact information is retained.
 
 ## Verified content
 

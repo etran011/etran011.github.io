@@ -3,6 +3,8 @@ export interface Profile {
   discipline: string;
   institution: string;
   graduationYear: number;
+  email: string;
+  resumePath: `/${string}`;
   links: ReadonlyArray<{ label: string; href: `https://${string}` }>;
 }
 
