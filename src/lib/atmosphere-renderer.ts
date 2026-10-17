@@ -85,11 +85,13 @@ void main() {
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
   // Illuminate the sampled surface without moving it away from the objective.
-  float markerDistance = length(aPosition - uMarker);
-  float proximity = exp(-markerDistance * markerDistance * 18.0);
-  float minimumPulse = smoothstep(0.94, 0.99, uHead) *
-    pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
-  if (uKind < 0.5) vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
+  if (uKind < 0.5 && uTrajectoryAlpha > 0.001) {
+    float markerDistance = length(aPosition - uMarker);
+    float proximity = exp(-markerDistance * markerDistance * 18.0);
+    float minimumPulse = smoothstep(0.94, 0.99, uHead) *
+      pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
+    vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
+  }
   float pointSize = mix(5.0 + aSeed.z * 0.9, 1.15 + aSeed.z * 0.65, uShrink);
   if (uKind > 0.5) vLight = 1.0;
   if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x);
