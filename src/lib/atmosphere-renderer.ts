@@ -68,6 +68,7 @@ void main() {
     else if (aSeed.y < 1.5) p.yz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.yz;
     else p.xy = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xy;
     vPulse = 0.42 + 0.58 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 0.65 + aSeed.y), 12.0);
+    vPulse += pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 + uTime * (0.8 + aSeed.y * 0.13)), 18.0) * 0.2;
     vPulse += energy * (0.32 + 0.48 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 1.1 - aSeed.y * 1.7), 6.0));
   }
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
@@ -104,7 +105,6 @@ void main() {
   float rim = pow(1.0 - max(0.0, normal.y), 2.0);
   float formationLight = (illumination * 0.82 + rim * 0.18) * (0.48 + front * 0.52);
   vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
-  vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
   // Illuminate the sampled surface without moving it away from the objective.
@@ -121,11 +121,13 @@ void main() {
     if (aSurface.w > 1.5) vLight *= aSurface.w < 2.5 ? 0.62 + energy * 0.45 : 0.9;
   }
   vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
+  // Protect typography after every lighting contribution, including propagating energy.
+  vLight *= mix(smoothstep(0.02, 0.42, screen.x), 1.0, phase);
   float formationSize = layer < 0.5 ? 4.8 + aSeed.z * 0.8 : layer < 1.5 ? 2.6 + aSeed.z * 0.5 : 1.4 + aSeed.z * 0.3;
   float pointSize = mix(formationSize, 1.15 + aSeed.z * 0.65, uShrink);
   pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation + energy * 0.24;
   if (uKind > 0.5) vLight = 1.0;
-  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x) * (1.0 + energy * 0.2);
+  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(0.02, 0.42, screen.x) * (1.0 + energy * 0.2) * (aSurface.w < 0.5 ? 1.0 : aSurface.w < 1.5 ? 0.6 : aSurface.w < 2.5 ? 0.8 : 1.3);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
   if (uKind > 1.5 && uKind < 2.5) gl_PointSize = (22.0 + breath * 4.0) * uRatio;
 }`;

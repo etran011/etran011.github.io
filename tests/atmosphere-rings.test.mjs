@@ -2,19 +2,20 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createRingGeometry } from '../src/lib/atmosphere-rings.ts';
 
-test('three sparse coordinate rings share one bounded static buffer', () => {
+test('three detailed instrument rings share one bounded static buffer', () => {
   const data = createRingGeometry();
   assert.deepEqual(data, createRingGeometry());
-  assert(data.byteLength < 120000);
-  const rings = new Set(), speeds = new Set();
+  assert(data.byteLength < 400000);
+  const rings = new Set(), speeds = new Set(), details = new Set();
   for (let i = 0; i < data.length; i += 13) {
     assert(Array.from(data.slice(i, i + 13)).every(Number.isFinite));
-    rings.add(data[i + 7]); speeds.add(data[i + 8]);
+    rings.add(data[i + 7]); speeds.add(data[i + 8]); details.add(data[i + 12]);
     assert(data[i + 6] >= 0 && data[i + 6] < 1);
     assert(Math.hypot(data[i], data[i + 1] + .12, data[i + 2]) > 1.5);
   }
   assert.equal(createRingGeometry(false).length * 3, data.length, 'Static strokes and live ribbons share the same arc/tick layout');
   assert.equal(rings.size, 3); assert.equal(speeds.size, 3);
+  assert.deepEqual([...details].sort(), [0,1,2,3]);
   assert.equal(data.length % 78, 0, 'Every ribbon segment contains two triangles');
 });
 

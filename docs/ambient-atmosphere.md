@@ -1,6 +1,6 @@
 # Gradient descent particle landscape
 
-The hero uses a particle sampling of Himmelblau's loss landscape, a visible optimization trail, one moving optimization point, and three sparse coordinate rings. It retains the portfolio's palette, typography, layout, weighted scrolling, pinned scenes, cursor, navigation, and project presentations. The same landscape particles disperse into a smaller ambient field and reconstruct on reverse scroll.
+The hero uses a particle sampling of Himmelblau's loss landscape, a visible optimization trail, one moving optimization point, and three detailed instrument rings. It retains the portfolio's palette, typography, layout, weighted scrolling, pinned scenes, cursor, navigation, and project presentations. The same landscape particles disperse into a smaller ambient field and reconstruct on reverse scroll.
 
 ## Mathematics
 
@@ -20,16 +20,16 @@ Playback retimes the precomputed parameter-space segments by distance, then re-e
 ## Geometry and rendering
 
 - `loss-landscape.mjs`: objective, analytic gradient, display height/normals, descent solver, and playback.
-- `atmosphere-geometry.ts`: a 48 × 26 deterministic sampling grid, stable identities, ambient destinations, sparse parameter-neighbor links, and the static trajectory buffer.
-- `atmosphere-rings.ts`: three open coordinate ellipses, differently tilted and sized, with sparse ticks; one deterministic ribbon buffer under 120 KB.
+- `atmosphere-geometry.ts`: a 72 × 42 deterministic sampling grid with two normal-offset detail layers, stable identities, ambient destinations, sparse parameter-neighbor links, and the static trajectory buffer.
+- `atmosphere-rings.ts`: three open coordinate ellipses, differently tilted and sized, with nested tracks, graduated ticks and fiducial nodes; one deterministic ribbon buffer under 400 KB.
 - `atmosphere-view.mjs`: shared resting view and camera for WebGL and the SVG generator.
 - `atmosphere-renderer.ts`: native WebGL 1 and original GLSL, with static buffers and no per-frame geometry upload.
 - `particle-transition.ts`: bounded expansion catch-up and reversible release, connection opacity, loosening, and shrinking.
 - `use-data-particles.ts`: one persistent renderer, one frame loop, pointer easing, adaptive quality, lifecycle handling, and no per-frame React state.
 
-There are 1,248 / 624 / 416 landscape points at high / medium / low quality. Each quality tier retains the exact identities of its samples. Connections follow adjacent surface parameters; there are no unrelated nearest-neighbor cluster links. The trajectory uses one additional static buffer; its marker reuses the same buffer with a position uniform. The rings use one additional static buffer. There are four live GPU buffers, cleaned up on disposal. The hero uses at most five batched draws; fully dispersed sections use one points draw.
+There are 3,600 / 1,200 / 600 points (3,024 primary surface samples plus 576 secondary/micro samples at full quality) at high / medium / low quality. Each quality tier retains the exact identities of its samples. Connections follow adjacent surface parameters; there are no unrelated nearest-neighbor cluster links. The trajectory uses one additional static buffer; its marker reuses the same buffer with a position uniform. The rings use one additional static buffer. There are four live GPU buffers, cleaned up on disposal. The hero uses at most five batched draws; fully dispersed sections use one points draw.
 
-All three rings are batched into one triangles draw. Narrow ribbons provide a reliable visible width instead of relying on unsupported wider WebGL lines. Original local radii are 2.02/2.17/2.32 units with a shared 0.85 framing factor. They rotate around different axes at 0.065/−0.045/0.03 radians per second, with traveling highlights, sparse ticks, and depth-controlled opacity. Depth and a left-side mask keep them subordinate to the surface and text. Invisible rings issue no draw; fully expanded particles skip trajectory illumination calculations.
+All three rings are batched into one triangles draw. Narrow ribbons provide a reliable visible width instead of relying on unsupported wider WebGL lines. Original local radii are 2.02/2.17/2.32 units with a shared 0.85 framing factor. They rotate around different axes at 0.065/−0.045/0.03 radians per second, with traveling highlights, graduated ticks, inner tracks and depth-controlled opacity. Depth and a left-side mask keep them subordinate to the surface and text. Invisible rings issue no draw; fully expanded particles skip trajectory illumination calculations.
 
 No new runtime library, mesh texture, downloaded model, or post-processing pass is required. All layers remain decorative, `aria-hidden`, and `pointer-events: none`.
 
@@ -84,7 +84,7 @@ npm run lint
 npm run build
 ```
 
-Twenty-five unit tests cover loss/gradient agreement with finite differences, display samples/normals, valid surface links, stable quality subsets, bounded buffers, viewport destinations, scene restraint, adaptive budgets, exact negative-gradient updates, sufficient decrease, continuous downhill interpolation, multiple starting basins, surface-following playback, invisible restarts, reversible shrinking, ring geometry/reversible phases, ribbon framing bounds across desktop/tall windows, bounded display breathing and idle camera motion, capped story distances, and the weighted story pacer.
+Unit tests cover loss/gradient agreement with finite differences, display samples/normals, valid surface links, stable quality subsets, bounded buffers, viewport destinations, scene restraint, adaptive budgets, exact negative-gradient updates, sufficient decrease, continuous downhill interpolation, multiple starting basins, surface-following playback, invisible restarts, reversible shrinking, ring geometry/reversible phases, ribbon framing bounds across desktop/tall windows, bounded display breathing and idle camera motion, capped story distances, and the weighted story pacer.
 
 The optional browser regression requires Playwright and Chrome without adding a runtime dependency:
 
@@ -105,7 +105,7 @@ The shared view uses a 0.47 requested scale (previously 0.42), camera distance 8
 
 A single active clock drives the entire system. The bounded camera orbit uses yaw amplitudes 0.22 and 0.055 radians, pitch 0.055, and roll 0.025, producing visible movement over a few seconds while preserving the initial silhouette during a long visit. `atmosphere-idle.mjs` supplies both the tested display-wave math and GLSL. Network pulses and a gently changing light direction animate the surface. The trajectory follows the same small breathing displacement, so it remains attached; neither the gradient nor descent steps are modified.
 
-Scroll progress continues to control only the existing loosening, release, ring fragmentation, fading, and shrinking. Idle phase keeps advancing during the transition and reconstruction; returning to the top does not reset it. Fully dispersed fields skip the now-invisible breathing calculation. The renderer still uses one frame loop, four buffers, no per-frame geometry upload, and the same maximum five hero draws/one ambient draw. No particles or runtime libraries were added.
+Scroll progress continues to control only the existing loosening, release, ring fragmentation, fading, and shrinking. Idle phase keeps advancing during the transition and reconstruction; returning to the top does not reset it. Fully dispersed fields skip the now-invisible breathing calculation. The renderer still uses one frame loop, four buffers, no per-frame geometry upload, and the same maximum five hero draws/one ambient draw. No runtime libraries were added.
 
 `tests/sculpture.browser.mjs` verifies visible idle rotation and real pixel changes without input, stationary typography, ribbon draws, ongoing ambient drift at fixed scroll, reconstruction without clock reset, and exact active-clock pause/resume while hidden. Existing lifecycle tests cover context restoration, cleanup, static modes, and preference changes.
 
@@ -118,3 +118,18 @@ Every 6.8 active seconds, an emission samples the optimizer's actual position on
 Rings receive staggered arrival times and independent traveling highlights. Their brightness responds without changing radius, tilt, center or rotation. New motion fades with surface release; existing ring opacity still controls dissolution. The ambient drift and active clock continue through scrolling and reconstruction. The emitter reuses one playback object and updates its origin only once per emission; animation retains four GPU buffers, one frame loop and no per-frame geometry uploads or React updates. Static/mobile/reduced-motion fallbacks remain unchanged.
 
 `tests/idle-energy.browser.mjs` verifies emission coordinates against the actual descent, then holds other GPU inputs constant to isolate the wave's rendered pixels. It checks visible surface motion, a complete fade back to the same image, and the ring response separately. Run with the same `PLAYWRIGHT_MODULE` environment as the other browser suites. Unit coverage checks waveform smoothness, bounded amplitudes, primary timing, outward propagation and fading wake.
+
+
+## Detailed mathematical sculpture
+
+The primary surface now samples the same Himmelblau objective at 72 × 42 points. Mesh links follow adjacent parameters, with restrained diagonal braces. `atmosphere-contours.mjs` refines crossings against the actual loss for six full-quality contour levels (2, 8, 24, 64, 160, 400). Triangular cells avoid ambiguous saddle connections. Small arrow shafts use the analytic negative gradient and are included only when their endpoints decrease the objective; their heads are decorative directional markings, not optimizer steps. The optimizer itself remains the existing Armijo-backtracked descent.
+
+Full quality contains 3,024 surface points, 384 smaller secondary points and 192 micro points. Detail layers sample an inset region of the same landscape and offset along its analytic normals by 0.055–0.20 scene units. GPU motion adds bounded normal/tangent oscillations at different speeds. Their sizes and opacities differ; depth attenuation, slope-sensitive lighting, localized optimizer energy and a stronger left-side mask (also on the desktop static fallback) preserve hierarchy and text readability. Connections and contours share the existing static line buffer, respond to the propagating energy field, and disappear with the existing link fade during dissolution.
+
+Each original orbit now has two inner segmented tracks, graduated ticks and illuminated fiducial markings. Narrow ribbons have different widths and opacities, with counter-traveling highlight frequencies layered over the existing independent rotations. All details stay inside the previous outer ring envelope; framing, scale and center are unchanged. The same shared ring opacity/fragmentation controls dissolve and reconstruction.
+
+High/medium/low quality use 3,600/1,200/600 points and 2,058/866/640 line segments, respectively. Point/line geometry occupies approximately 401/152/98 KB; all instrument rings share a 351 KB buffer. The renderer still uses four buffers, at most five hero draws, and one draw in expanded ambient sections. No post-processing, new renderer, animation loop, per-frame geometry upload or React updates are introduced. Static SVG generation includes the contours and hierarchical ring strokes; the local fallback is about 103 KB. Mobile/touch and reduced-motion remain static.
+
+Verification includes analytic contour endpoint levels, downhill vector shafts, deterministic quality subsets, normal-anchored layers, bounded ring geometry and exact objective/gradient tests. The GPU energy regression isolates a right-side graphic crop at stable low geometry, excluding unrelated terminal typing and adaptive density changes. Browser lifecycle tests check all four buffers, loss descent, continuous idle motion, scroll reconstruction, visibility pause and context recovery. Frame-rate samples describe the test machine and are not a guarantee for all hardware.
+
+The final isolated 1440×1000 production sample at device scale factor 2 measured about 60.3 model FPS at high quality, with 16.7ms median and 16.8ms p95 frame intervals. Quiet sections retained 30 draws/second. Large-canvas bounds, data saving and synthetic frame-pressure degradation passed.

@@ -11,11 +11,12 @@ const project = (p) => {
   return [(1 + centerX) * 720 + x * viewScale * 500,
     (1 - formationView.centerY) * 500 - y * viewScale * 500, depth];
 };
-let ringPath = "";
+const ringPaths = new Map();
 const rings = createRingGeometry(false);
 for (let i = 0; i < rings.length; i += particleStride * 2) {
   const a = project(rings.slice(i, i + 3).map(value => value * 0.85)), b = project(rings.slice(i + particleStride, i + particleStride + 3).map(value => value * 0.85));
-  ringPath += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+  const detail = rings[i + 12];
+  ringPaths.set(detail, (ringPaths.get(detail) ?? "") + `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`);
 }
 let dots = "";
 const paths = new Map();
@@ -37,4 +38,4 @@ for (let i = 0; i < trail.length; i += particleStride) {
   trajectoryPath += `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
 }
 const end = project(trail.slice(-particleStride, -particleStride + 3));
-writeFileSync(new URL("../public/images/atmosphere/data-formation.svg", import.meta.url), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none"><path d="${ringPath}" stroke="#88adf5" stroke-width="1.25" opacity=".55" vector-effect="non-scaling-stroke"/><g stroke="#88adf5" stroke-width=".8">${[...paths].map(([opacity, d]) => `<path vector-effect="non-scaling-stroke" d="${d}" opacity="${opacity}"/>`).join("")}</g><g fill="#b5cdff" stroke="#b5cdff" stroke-width=".65">${dots}</g><path d="${trajectoryPath}" stroke="#b5cdff" stroke-width="1.2" vector-effect="non-scaling-stroke" opacity=".8"/><circle cx="${end[0].toFixed(1)}" cy="${end[1].toFixed(1)}" r="3.5" fill="#b5cdff"/></svg>\n`);
+writeFileSync(new URL("../public/images/atmosphere/data-formation.svg", import.meta.url), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none">${[...ringPaths].map(([detail, d]) => `<path d="${d}" stroke="#88adf5" stroke-width="${[1.1,.65,.85,1.4][detail]}" opacity="${[.55,.25,.5,.75][detail]}" vector-effect="non-scaling-stroke"/>`).join("")}<g stroke="#88adf5" stroke-width=".8">${[...paths].map(([opacity, d]) => `<path vector-effect="non-scaling-stroke" d="${d}" opacity="${opacity}"/>`).join("")}</g><g fill="#b5cdff" stroke="#b5cdff" stroke-width=".65">${dots}</g><path d="${trajectoryPath}" stroke="#b5cdff" stroke-width="1.2" vector-effect="non-scaling-stroke" opacity=".8"/><circle cx="${end[0].toFixed(1)}" cy="${end[1].toFixed(1)}" r="3.5" fill="#b5cdff"/></svg>\n`);

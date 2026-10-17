@@ -10,6 +10,8 @@ const browser = await chromium.launch({ headless: true, channel: 'chrome' });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await page.addInitScript(() => {
+    // Start at stable low geometry so adaptive density cannot alter the pixel comparison.
+    Object.defineProperty(navigator, 'hardwareConcurrency', {configurable:true,value:4});
     // Hold the real scene's other GPU inputs steady to isolate the emitted wave.
     const names = new WeakMap(), frozen = new Map();
     const proto = WebGLRenderingContext.prototype, locate = proto.getUniformLocation;
@@ -52,7 +54,8 @@ try {
   assert.equal(state.error, 0);
   await page.evaluate(() => { window.freezeIdle = true; window.waveAge = 0; });
   await page.waitForTimeout(150);
-  const capture = () => page.locator('.ambient-canvas').screenshot();
+  // Crop the graphic, excluding the independently running terminal text above the canvas.
+  const capture = () => page.screenshot({clip:{x:900,y:80,width:500,height:840}});
   const quiet = await capture();
   await page.evaluate(() => { window.waveAge = 2.9; });
   await page.waitForTimeout(150);
