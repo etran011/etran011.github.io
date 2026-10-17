@@ -26,8 +26,9 @@ for (let i = 0; i < lines.length; i += particleStride * 2) {
 }
 for (let i = 0; i < points.length; i += particleStride) {
   const [x, y] = project(points.slice(i, i + 3));
-  const density = points[i + 12];
-  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(2.8 + density * 0.45).toFixed(2)}" opacity="${(0.5 + density * 0.3 + points[i + 7] * 0.12).toFixed(2)}"/>`;
+  const layer = Math.max(0, -points[i + 12]);
+  const density = Math.max(0, points[i + 12]);
+  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(layer ? 1.6 / layer : 2.8 + density * 0.45).toFixed(2)}" opacity="${(layer ? .4 / layer : 0.5 + density * 0.3 + points[i + 7] * 0.12).toFixed(2)}"/>`;
 }
 const trail = createTrajectoryGeometry().data;
 let trajectoryPath = "";

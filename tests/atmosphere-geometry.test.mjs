@@ -14,11 +14,11 @@ test("quality reductions retain exact particle identities and bounded GPU buffer
       assert.deepEqual(geometry.points.slice(i * particleStride, i * particleStride + particleStride), high.points.slice(i * stride * particleStride, i * stride * particleStride + particleStride));
     }
   }
-  assert(high.points.byteLength + high.lines.byteLength < 330_000);
+  assert(high.points.byteLength + high.lines.byteLength < 500_000);
 });
 test("landscape samples the exact objective and analytic display normals at every quality", async () => {
   const { loss, lossGradient, surfacePoint, surfaceNormal } = await import("../src/lib/loss-landscape.mjs");
-  for (let id = 0; id < particleCount; id++) {
+  for (let id = 0; id < surfaceCount; id++) {
     const [x, z] = surfaceCoordinates(id), normal = surfaceNormal(x, z);
     assert.deepEqual(formationPoint(id), surfacePoint(x, z));
     assert(Math.abs(Math.hypot(...normal) - 1) < 1e-12 && normal[1] > 0);
@@ -68,4 +68,17 @@ test("scene poses keep the model restrained and respond to real narrative states
   context.aboutStep = 2; resolveAtmospherePose(context, target); assert(target.yaw > background);
   context.scene = "skills"; context.skillGroup = "tools"; resolveAtmospherePose(context, target); assert.equal(target.detail, 1.3);
   context.scene = "projects"; resolveAtmospherePose(context, target); assert(target.detail < 0.2);
+});
+
+test('secondary and micro layers stay anchored to mathematical surface normals',async()=>{
+  const {surfacePoint,surfaceNormal}=await import('../src/lib/loss-landscape.mjs');
+  const tiers=new Set();
+  for(let id=surfaceCount;id<particleCount;id++){
+    const coords=surfaceCoordinates(id), anchor=surfacePoint(...coords), normal=surfaceNormal(...coords), vertex=particleVertex(id);
+    const offset=vertex.slice(0,3).map((v,i)=>v-anchor[i]), distance=Math.hypot(...offset);
+    assert(distance>.05&&distance<=.201);
+    assert(Math.hypot(...offset.map((v,i)=>v-normal[i]*distance))<1e-10);
+    tiers.add(vertex[12]);
+  }
+  assert.deepEqual([...tiers],[-1,-2]);
 });

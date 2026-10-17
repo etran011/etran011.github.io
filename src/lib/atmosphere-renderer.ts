@@ -39,6 +39,7 @@ void main() {
   vec3 p = uKind > 1.5 && uKind < 2.5 ? uMarker : aPosition;
   vPath = aSeed.x;
   vec3 normal = uKind > 1.5 && uKind < 2.5 ? markerNormal(p.xz) : aSurface.xyz;
+  float layer = max(0.0, -aSurface.w);
   float breath = idleBreath(uTime);
   float formation = 1.0 - smoothstep(0.0, 1.0, uRelease);
   float energy = 0.0;
@@ -48,6 +49,10 @@ void main() {
   // Optimization still evaluates the original objective and analytic gradient.
   if (uKind < 2.5 && uRelease < 0.999) {
     p += normal * (displayWave(p.xz, uTime) * formation + energy * 0.045);
+  }
+  if (uKind < 0.5 && layer > 0.5 && formation > 0.001) {
+    p += normal * sin(uTime * (0.45 + layer * 0.17) + aSeed.x * 19.0) * (0.012 + layer * 0.009) * formation;
+    p += vec3(-normal.z, 0.0, normal.x) * sin(uTime * 0.2 + aSeed.y * 8.0) * 0.018 * layer * formation;
   }
   // Larger displacements belong exclusively to dissolution.
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
@@ -96,7 +101,8 @@ void main() {
   float visualDepth = mix(p.z, depth * 2.0, phase);
   float front = clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0);
   float illumination = 0.65 + max(0.0, dot(normal, normalize(vec3(-0.4 + sin(uTime * 0.21) * 0.12, 0.8, 0.5 + cos(uTime * 0.17) * 0.1)))) * 0.35;
-  float formationLight = illumination * (0.75 + front * 0.25);
+  float rim = pow(1.0 - max(0.0, normal.y), 2.0);
+  float formationLight = (illumination * 0.82 + rim * 0.18) * (0.48 + front * 0.52);
   vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
@@ -109,9 +115,14 @@ void main() {
       pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
     vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
   }
-  vLight += energy * 0.48;
+  vLight += energy * 0.62;
+  if (uKind < 0.5) {
+    vLight *= mix(1.0, layer < 1.5 ? 0.65 : 0.36, step(0.5, layer)) * (1.0 - phase * 0.45);
+    if (aSurface.w > 1.5) vLight *= aSurface.w < 2.5 ? 0.62 + energy * 0.45 : 0.9;
+  }
   vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
-  float pointSize = mix(4.8 + aSeed.z * 0.8, 1.15 + aSeed.z * 0.65, uShrink);
+  float formationSize = layer < 0.5 ? 4.8 + aSeed.z * 0.8 : layer < 1.5 ? 2.6 + aSeed.z * 0.5 : 1.4 + aSeed.z * 0.3;
+  float pointSize = mix(formationSize, 1.15 + aSeed.z * 0.65, uShrink);
   pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation + energy * 0.24;
   if (uKind > 0.5) vLight = 1.0;
   if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x) * (1.0 + energy * 0.2);
@@ -136,7 +147,7 @@ void main() {
   float alpha = vLight;
   if (uPoint < 0.5) alpha *= vPulse * 0.48 * uLinks;
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
-  vec3 color = uColor;
+  vec3 color = mix(uColor, vec3(0.71, 0.804, 1.0), clamp(vLight - 0.65, 0.0, 0.22));
   if (uKind > 0.5 && uKind < 2.5) {
     alpha = uTrajectoryAlpha;
     color = mix(uColor, vec3(0.71, 0.804, 1.0), 0.7);
