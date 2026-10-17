@@ -37,6 +37,8 @@ export function AmbientBackground() {
       // Unpinned/short viewports use the same observer's normal document progress.
       if (!hero?.dataset.pinned) input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, (sections.find(s => s.id === "about")?.top ?? innerHeight) - innerHeight * 0.4))) : 1;
       input.current.progress = current ? Math.max(0, Math.min(1, (y - current.top) / Math.max(1, (sections[index + 1]?.top ?? documentHeight) - current.top))) : 0;
+      const section = current?.id ?? "home";
+      if (element.dataset.section !== section) element.dataset.section = section;
       if (element.dataset.scene !== scene) element.dataset.scene = scene;
       if (enabled) shift.set(-Math.min(80, Math.max(0, y * 0.012)));
     };

@@ -618,11 +618,11 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 /* Shared atmosphere: one palette, restrained density, and one family of motion. */
 body { isolation: isolate; }
 .ambient-background { position: fixed; inset: 0; z-index: -1; overflow: clip; pointer-events: none; color: var(--accent); }
-.ambient-halo { position: absolute; width: 80vw; height: 100vh; right: -20vw; top: -10vh; background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 10%, transparent), transparent 65%); opacity: 0.7; transition: opacity 900ms var(--ease-standard), transform 1200ms var(--ease-standard); }
+.ambient-halo { position: absolute; width: 80vw; height: 100vh; right: -20vw; top: -10vh; background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 10%, transparent), transparent 65%); opacity: 0.7; transition: opacity var(--duration-scene) var(--ease-standard), transform 1200ms var(--ease-standard); }
 .ambient-scroll-layer { position: absolute; inset: -80px 0; }
-.ambient-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.025; mask-image: radial-gradient(ellipse at 85% 35%, black, transparent 65%); transition: opacity 900ms var(--ease-standard); }
-.ambient-formation { position: absolute; top: 80px; right: 0; width: 100%; height: 100svh; object-fit: contain; opacity: 0.6; mask-image: linear-gradient(90deg, transparent, black 25%); transition: opacity 900ms var(--ease-standard); }
-.ambient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; mask-image: radial-gradient(ellipse at center, black 45%, #0008 100%); transition: opacity 900ms var(--ease-standard); }
+.ambient-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--accent) 1px, transparent 1px), linear-gradient(90deg, var(--accent) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.025; mask-image: radial-gradient(ellipse at 85% 35%, black, transparent 65%); transition: opacity var(--duration-scene) var(--ease-standard); }
+.ambient-formation { position: absolute; top: 80px; right: 0; width: 100%; height: 100svh; object-fit: contain; opacity: 0.6; mask-image: linear-gradient(90deg, transparent, black 25%); transition: opacity var(--duration-scene) var(--ease-standard); }
+.ambient-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; mask-image: radial-gradient(ellipse at center, black 45%, #0008 100%); transition: opacity var(--duration-scene) var(--ease-standard); }
 .ambient-background[data-renderer="webgl"] .ambient-canvas { opacity: var(--model-intensity, 0.8); }
 .ambient-background[data-renderer="webgl"][data-scene] .ambient-formation { opacity: 0; }
 .ambient-background:not([data-renderer="webgl"]) .ambient-formation, .ambient-background:not([data-renderer="webgl"]) .ambient-canvas { transition: none; }
@@ -640,3 +640,8 @@ body { isolation: isolate; }
 @media(max-width: 1023px) { .ambient-grid { display: none; } .ambient-halo { opacity: 0.25; } .ambient-background .ambient-formation { width: 100%; right: 0; height: 45svh; opacity: 0.3; } }
 @media(prefers-reduced-motion: reduce) { .ambient-scroll-layer, .ambient-halo { transform: none !important; } }
 @media(forced-colors: active) { .ambient-background { display: none; } }
+
+/* Quiet professional chapters lead into a gently illuminated closing scene. */
+.ambient-background[data-section="experience"] .ambient-halo { opacity: 0.12; }
+.ambient-background[data-section="education"] .ambient-halo { opacity: 0.14; }
+.ambient-background[data-section="contact"] .ambient-halo { opacity: 0.3; transform: translateY(5vh) scale(1.06); }
