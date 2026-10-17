@@ -548,9 +548,10 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 /* Fine-pointer enhancement: the exact dot stays on the real hit target. */
 .custom-cursor { pointer-events: none; opacity: 0; }
 .custom-cursor[data-visible] { opacity: 1; }
-.cursor-dot, .cursor-ring { position: fixed; top: 0; left: 0; translate: -50% -50%; pointer-events: none; z-index: 1000; border-radius: 50%; }
-.cursor-dot { width: 4px; height: 4px; background: var(--accent-strong); transform: translate3d(var(--cursor-x, -100px), var(--cursor-y, -100px), 0); }
-.cursor-ring { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--accent); color: var(--foreground); transition: width 180ms ease, height 180ms ease, background 180ms ease, scale 120ms ease; }
+.cursor-dot, .cursor-position { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1000; }
+.cursor-dot { translate: -50% -50%; border-radius: 50%; width: 4px; height: 4px; background: var(--accent-strong); transform: translate3d(var(--cursor-x, -100px), var(--cursor-y, -100px), 0); }
+.cursor-position { width: 0; height: 0; }
+.cursor-ring { position: absolute; top: 0; left: 0; translate: -50% -50%; pointer-events: none; border-radius: 50%; display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--accent); color: var(--foreground); transition: width 180ms ease, height 180ms ease, background 180ms ease, scale 120ms ease; }
 .cursor-ring > span { font-size: 10px; letter-spacing: 0.02em; }
 .custom-cursor[data-mode="link"] .cursor-ring { width: 36px; height: 36px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .custom-cursor[data-mode="context"] .cursor-ring { width: 54px; height: 54px; background: var(--surface); }

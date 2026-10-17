@@ -97,5 +97,6 @@ export function CustomCursor() {
 
   useEffect(() => { refresh.current(); }, [pathname]);
 
-  return <div ref={root} className="custom-cursor" aria-hidden="true"><span ref={dot} className="cursor-dot" /><motion.span className="cursor-ring" style={{ x: ringX, y: ringY }}><span ref={label} /></motion.span></div>;
+  // Keep viewport translation outside the ring's local hover/press transforms.
+  return <div ref={root} className="custom-cursor" aria-hidden="true"><span ref={dot} className="cursor-dot" /><motion.span className="cursor-position" style={{ x: ringX, y: ringY }}><span className="cursor-ring"><span ref={label} /></span></motion.span></div>;
 }
