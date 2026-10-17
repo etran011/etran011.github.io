@@ -19,13 +19,13 @@ let dots = "";
 const paths = new Map();
 for (let i = 0; i < lines.length; i += particleStride * 2) {
   const a = project(lines.slice(i, i + 3)), b = project(lines.slice(i + particleStride, i + particleStride + 3));
-  const opacity = (0.22 + Math.max(0, Math.min(1, (1.8 - (a[2] + b[2]) / 2) / 3.6)) * 0.3).toFixed(1);
+  const opacity = (0.35 + Math.max(0, Math.min(1, (1.8 - (a[2] + b[2]) / 2) / 3.6)) * 0.3).toFixed(1);
   paths.set(opacity, (paths.get(opacity) ?? "") + `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`);
 }
 for (let i = 0; i < points.length; i += particleStride) {
   const [x, y] = project(points.slice(i, i + 3));
   const density = points[i + 12];
-  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(2.1 + density * 0.4).toFixed(2)}" opacity="${(0.3 + density * 0.4 + points[i + 7] * 0.15).toFixed(2)}"/>`;
+  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(2.8 + density * 0.45).toFixed(2)}" opacity="${(0.5 + density * 0.3 + points[i + 7] * 0.12).toFixed(2)}"/>`;
 }
 const trail = createTrajectoryGeometry().data;
 let trajectoryPath = "";

@@ -78,7 +78,7 @@ void main() {
   gl_Position = vec4(screen, 0.0, 1.0);
   float visualDepth = mix(p.z, depth * 2.0, phase);
   float front = clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0);
-  float illumination = 0.5 + max(0.0, dot(normal, normalize(vec3(-0.4, 0.8, 0.5)))) * 0.45;
+  float illumination = 0.65 + max(0.0, dot(normal, normalize(vec3(-0.4, 0.8, 0.5)))) * 0.35;
   float formationLight = illumination * (0.75 + front * 0.25);
   vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
@@ -92,7 +92,7 @@ void main() {
       pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
     vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
   }
-  float pointSize = mix(5.0 + aSeed.z * 0.9, 1.15 + aSeed.z * 0.65, uShrink);
+  float pointSize = mix(6.3 + aSeed.z * 1.0, 1.15 + aSeed.z * 0.65, uShrink);
   if (uKind > 0.5) vLight = 1.0;
   if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
