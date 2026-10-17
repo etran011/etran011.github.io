@@ -103,6 +103,26 @@ html { scroll-padding-top: 7rem; }
     }
   }
 }
+.auto-scrollbar { display: none; }
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  @media not (any-pointer: coarse) {
+    html[data-scrollbar-state] { scrollbar-width: none; }
+    html[data-scrollbar-state]::-webkit-scrollbar { display: none; }
+    html[data-scrollbar-state] .auto-scrollbar {
+      display: block; position: fixed; inset: 0 0 0 auto; width: 10px; z-index: 45;
+      opacity: 0; pointer-events: none; transition: opacity 360ms var(--ease-standard);
+    }
+    html[data-scrollbar-state="visible"] .auto-scrollbar { opacity: 1; transition-duration: 180ms; }
+    html[data-scrollbar-state] .auto-scrollbar:has(:focus-visible) { opacity: 1; }
+    .auto-scrollbar-thumb {
+      width: 10px; min-height: 44px; box-sizing: border-box; pointer-events: auto; touch-action: none;
+      background: var(--background); border: 1.5px solid color-mix(in srgb, var(--accent) 65%, var(--background));
+      border-radius: 999px; transition: border-color var(--duration-fast) var(--ease-standard);
+    }
+    .auto-scrollbar-thumb:hover { border-color: var(--accent); }
+    .auto-scrollbar-thumb[data-dragging] { border-color: var(--accent-strong); }
+  }
+}
 body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transparent 50%); }
 .surface-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow-panel); }
 .text-link { color: var(--muted); transition: color var(--duration-fast); }
