@@ -13,9 +13,7 @@ export function Hero() {
             <h1 id="hero-heading">{profile.name}<span>.</span></h1>
             <p className="hero-role">{profile.institution} <span aria-hidden="true">·</span> {profile.discipline} <span aria-hidden="true">·</span> Class of {profile.graduationYear}</p>
             <div className="hero-narrative">
-              <div className="hero-narrative-original"><HeroHeadline /></div>
-              <p className="hero-story-phrase hero-story-software" aria-hidden="true">Building software.</p>
-              <p className="hero-story-phrase hero-story-intelligence" aria-hidden="true">Exploring AI &amp;<br />machine learning.</p>
+              <HeroHeadline />
             </div>
           </div>
         </div>
