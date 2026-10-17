@@ -37,9 +37,10 @@ void main() {
   vec3 p = uKind > 1.5 && uKind < 2.5 ? uMarker : aPosition;
   vPath = aSeed.x;
   vec3 normal = aSurface.xyz;
-  float density = clamp(aSurface.w, 0.0, 1.0);
+  float breath = idleBreath(uTime);
+  float formation = 1.0 - smoothstep(0.0, 1.0, uRelease);
   vPulse = 0.83 + sin(uTime * 0.95 + aPosition.x * 3.0 - aPosition.z * 2.0) * 0.17;
-  // A tiny common display offset keeps the trail and marker attached to the surface.
+  // A coherent common display offset keeps the trail and marker attached to the surface.
   // Optimization still evaluates the original objective and analytic gradient.
   if (uKind < 2.5 && uRelease < 0.999) p.y += displayWave(p.xz, uTime) * (1.0 - uRelease);
   // Larger displacements belong exclusively to dissolution.
@@ -99,7 +100,9 @@ void main() {
       pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
     vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
   }
+  vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
   float pointSize = mix(6.3 + aSeed.z * 1.0, 1.15 + aSeed.z * 0.65, uShrink);
+  pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation;
   if (uKind > 0.5) vLight = 1.0;
   if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
