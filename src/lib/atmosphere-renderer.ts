@@ -1,3 +1,4 @@
+import { displayWaveGLSL, resolveIdleRotation } from "./atmosphere-idle.mjs";
 import { createRingGeometry } from "./atmosphere-rings";
 import { descentPlayback } from "./loss-landscape.mjs";
 import { resolveParticleChoreography, resolveRingChoreography } from "./particle-transition";
@@ -31,13 +32,17 @@ uniform float uScroll;
 varying float vLight;
 varying float vPulse;
 varying float vPath;
+${displayWaveGLSL}
 void main() {
   vec3 p = uKind > 1.5 && uKind < 2.5 ? uMarker : aPosition;
   vPath = aSeed.x;
   vec3 normal = aSurface.xyz;
   float density = clamp(aSurface.w, 0.0, 1.0);
-  vPulse = 0.94 + sin(uTime * 0.35 + aSeed.x * 8.0) * 0.06;
-  // Geometry stays on the exact loss surface at rest; only dissolution displaces it.
+  vPulse = 0.83 + sin(uTime * 0.95 + aPosition.x * 3.0 - aPosition.z * 2.0) * 0.17;
+  // A tiny common display offset keeps the trail and marker attached to the surface.
+  // Optimization still evaluates the original objective and analytic gradient.
+  if (uKind < 2.5) p.y += displayWave(p.xz, uTime) * (1.0 - uRelease);
+  // Larger displacements belong exclusively to dissolution.
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
   if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
   if (uKind > 2.5) {
@@ -80,7 +85,7 @@ void main() {
   gl_Position = vec4(screen, 0.0, 1.0);
   float visualDepth = mix(p.z, depth * 2.0, phase);
   float front = clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0);
-  float illumination = 0.65 + max(0.0, dot(normal, normalize(vec3(-0.4, 0.8, 0.5)))) * 0.35;
+  float illumination = 0.65 + max(0.0, dot(normal, normalize(vec3(-0.4 + sin(uTime * 0.21) * 0.12, 0.8, 0.5 + cos(uTime * 0.17) * 0.1)))) * 0.35;
   float formationLight = illumination * (0.75 + front * 0.25);
   vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
@@ -186,6 +191,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     const trajectoryModel = createTrajectoryGeometry();
     const trail = allocate(trajectoryModel.data);
     const rings = allocate(createRingGeometry());
+    const idleRotation = { yaw: 0, pitch: 0, roll: 0 };
     const playback = { x: 0, y: 0, z: 0, progress: 0, alpha: 0 };
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
     for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
@@ -222,7 +228,8 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
         gl.uniform1f(uniforms.uSeparation, choreography.separation); gl.uniform1f(uniforms.uRelease, choreography.release); gl.uniform1f(uniforms.uLinks, choreography.links);
         gl.uniform1f(uniforms.uShrink, choreography.shrink);
-        gl.uniform3f(uniforms.uRotation, pose.yaw + Math.sin(time * 0.075) * 0.12, pose.pitch + Math.sin(time * 0.12) * 0.025, pose.roll + Math.sin(time * 0.08) * 0.012);
+        resolveIdleRotation(time, pose, idleRotation);
+        gl.uniform3f(uniforms.uRotation, idleRotation.yaw, idleRotation.pitch, idleRotation.roll);
         gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
