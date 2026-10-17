@@ -1,6 +1,7 @@
+import { descentPlayback } from "./loss-landscape.mjs";
 import { resolveParticleChoreography } from "./particle-transition";
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
-import { atmosphereQuality, createParticleGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
+import { atmosphereQuality, createParticleGeometry, createTrajectoryGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
 export const restingPose: AtmospherePose = { ...formationView, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
@@ -11,6 +12,8 @@ attribute vec3 aDestination;
 attribute vec3 aSeed;
 attribute vec4 aSurface;
 uniform float uTime;
+uniform mediump float uKind;
+uniform vec3 uMarker;
 uniform float uSeparation;
 uniform float uRelease;
 uniform mediump float uExpansion;
@@ -22,14 +25,16 @@ uniform float uPointerStrength;
 uniform float uScroll;
 varying float vLight;
 varying float vPulse;
+varying float vPath;
 void main() {
-  vec3 p = aPosition;
+  vec3 p = uKind > 1.5 ? uMarker : aPosition;
+  vPath = aSeed.x;
   vec3 normal = aSurface.xyz;
   float density = clamp(aSurface.w, 0.0, 1.0);
   vPulse = 0.94 + sin(uTime * 0.35 + aSeed.x * 8.0) * 0.06;
   // Geometry stays on the exact loss surface at rest; only dissolution displaces it.
-  p += normal * uSeparation * 0.045;
-  p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
+  if (uKind < 0.5) p += normal * uSeparation * 0.045;
+  if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
@@ -41,6 +46,7 @@ void main() {
   projected.x /= uProjection.y;
   // Slightly staggered departures flow along curved paths, with exact endpoints.
   float phase = smoothstep(0.0, 1.0, clamp((uRelease - aSeed.x * 0.06) / 0.94, 0.0, 1.0));
+  if (uKind > 0.5) phase = 0.0;
   vec2 destination = aDestination.xy;
   // Depth is independent of formation rotation once the data fills the viewport.
   float depth = aDestination.z - 0.5;
@@ -63,21 +69,34 @@ void main() {
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
   float pointSize = mix(4.3 + aSeed.z * 1.0 + density * 0.35, 1.5 + aSeed.z * 1.1, phase);
+  if (uKind > 0.5) vLight = 1.0;
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
+  if (uKind > 1.5) gl_PointSize = 7.5 * uRatio;
 }`;
 const fragmentSource = `
 precision mediump float;
 uniform vec3 uColor;
 uniform float uPoint;
+uniform mediump float uKind;
+uniform float uTrajectoryAlpha;
+uniform float uHead;
 uniform float uLinks;
 uniform float uDetail;
 varying float vLight;
 varying float vPulse;
+varying float vPath;
 void main() {
   float alpha = vLight;
   if (uPoint < 0.5) alpha *= vPulse * 0.48 * uLinks;
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
-  gl_FragColor = vec4(uColor, alpha);
+  vec3 color = uColor;
+  if (uKind > 0.5) {
+    alpha = uTrajectoryAlpha;
+    color = mix(uColor, vec3(0.71, 0.804, 1.0), 0.7);
+    if (uKind < 1.5) alpha *= 1.0 - smoothstep(uHead - 0.002, uHead + 0.002, vPath);
+    else alpha *= 1.0 - smoothstep(0.12, 0.5, length(gl_PointCoord - vec2(0.5)));
+  }
+  gl_FragColor = vec4(color, alpha);
 }`;
 
 /** At most two batched draws; expanded fields need only the points pass. */
@@ -111,7 +130,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uExpansion", "uRelease", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -121,6 +140,9 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     const geometry = createParticleGeometry(quality);
     let lines = allocate(geometry.lines);
     let points = allocate(geometry.points);
+    const trajectoryModel = createTrajectoryGeometry();
+    const trail = allocate(trajectoryModel.data);
+    const playback = { x: 0, y: 0, z: 0, progress: 0, alpha: 0 };
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
     for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -128,8 +150,8 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
     const choreography = { separation: 0, release: 0, links: 1 };
-    const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number) => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, geometry.count);
+    const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number, count = geometry.count) => {
+      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, count);
     };
     return {
       resize(w: number, h: number) {
@@ -157,9 +179,20 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);
+        gl.uniform1f(uniforms.uKind, 0);
         // Expanded sections have no visible relationships; omit their entire draw.
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }
         if (pose.detail > 0.01) { gl.uniform1f(uniforms.uPoint, 1); draw(points, gl.POINTS); }
+        if (choreography.links > 0.001) {
+          descentPlayback(time, trajectoryModel.trajectory, playback);
+          gl.uniform1f(uniforms.uTrajectoryAlpha, playback.alpha * choreography.links * 0.85);
+          gl.uniform1f(uniforms.uHead, playback.progress);
+          gl.uniform3f(uniforms.uMarker, playback.x, playback.y, playback.z);
+          if (playback.alpha > 0.001) {
+            gl.uniform1f(uniforms.uKind, 1); draw(trail, gl.LINE_STRIP);
+            gl.uniform1f(uniforms.uKind, 2); draw(trail, gl.POINTS, 1);
+          }
+        }
         return true;
       },
       destroy() { if (!disposed) { disposed = true; cleanup(); } },

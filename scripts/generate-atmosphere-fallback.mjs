@@ -1,5 +1,5 @@
 import { writeFileSync } from "node:fs";
-import { createParticleGeometry, projectFormationPoint, particleStride } from "../src/lib/atmosphere-geometry.ts";
+import { createParticleGeometry, projectFormationPoint, particleStride, createTrajectoryGeometry } from "../src/lib/atmosphere-geometry.ts";
 import { formationView } from "../src/lib/atmosphere-view.mjs";
 
 const { lines, points } = createParticleGeometry("low");
@@ -20,4 +20,11 @@ for (let i = 0; i < points.length; i += particleStride) {
   const density = points[i + 12];
   dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(2.1 + density * 0.4).toFixed(2)}" opacity="${(0.3 + density * 0.4 + points[i + 7] * 0.15).toFixed(2)}"/>`;
 }
-writeFileSync(new URL("../public/images/atmosphere/data-formation.svg", import.meta.url), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none"><g stroke="#88adf5" stroke-width=".8">${[...paths].map(([opacity, d]) => `<path vector-effect="non-scaling-stroke" d="${d}" opacity="${opacity}"/>`).join("")}</g><g fill="#b5cdff" stroke="#b5cdff" stroke-width=".65">${dots}</g></svg>\n`);
+const trail = createTrajectoryGeometry().data;
+let trajectoryPath = "";
+for (let i = 0; i < trail.length; i += particleStride) {
+  const [x, y] = project(trail.slice(i, i + 3));
+  trajectoryPath += `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
+}
+const end = project(trail.slice(-particleStride, -particleStride + 3));
+writeFileSync(new URL("../public/images/atmosphere/data-formation.svg", import.meta.url), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" fill="none"><g stroke="#88adf5" stroke-width=".8">${[...paths].map(([opacity, d]) => `<path vector-effect="non-scaling-stroke" d="${d}" opacity="${opacity}"/>`).join("")}</g><g fill="#b5cdff" stroke="#b5cdff" stroke-width=".65">${dots}</g><path d="${trajectoryPath}" stroke="#b5cdff" stroke-width="1.2" vector-effect="non-scaling-stroke" opacity=".8"/><circle cx="${end[0].toFixed(1)}" cy="${end[1].toFixed(1)}" r="3.5" fill="#b5cdff"/></svg>\n`);

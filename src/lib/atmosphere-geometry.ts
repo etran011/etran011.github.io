@@ -1,4 +1,4 @@
-import { landscapeDomain, surfacePoint, surfaceNormal, loss } from "./loss-landscape.mjs";
+import { landscapeDomain, surfacePoint, surfaceNormal, loss, descentPath } from "./loss-landscape.mjs";
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
 
 export const particleCount = 1248;
@@ -44,6 +44,16 @@ export function createParticleGeometry(quality: AtmosphereQuality = "high") {
   }
   for (const { from, to } of connections) lines.push(...vertices.get(from)!, ...vertices.get(to)!);
   return { points: new Float32Array(points), lines: new Float32Array(lines), connections };
+}
+
+/** One static trail buffer; the moving marker reuses its first vertex. */
+export function createTrajectoryGeometry() {
+  const trajectory = descentPath(), data: number[] = [];
+  trajectory.path.forEach(({ x, z }, index) => {
+    const position = surfacePoint(x, z); position[1] += 0.012;
+    data.push(...position, 0, 0, 0, trajectory.progress[index], 0.5, 0.5, ...surfaceNormal(x, z), 0);
+  });
+  return { data: new Float32Array(data), trajectory };
 }
 
 /** Same rest projection as the shader, for the no-script/static vector fallback. */
