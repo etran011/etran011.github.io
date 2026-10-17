@@ -570,9 +570,13 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 [data-scroll-story="project"][data-pinned] .gallery-story-hint { visibility: visible; }
 [data-scroll-story="project"][data-pinned] .project-featured { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
 @media(prefers-reduced-motion: no-preference) {
- [data-scroll-story="project"][data-pinned] .gallery-stage img { animation: project-frame 380ms var(--ease-standard); }
+ .gallery-stage img { animation: project-frame 620ms var(--ease-standard); }
+ .project-preview figcaption > span { display: inline-block; animation: project-caption var(--duration-reveal) var(--ease-standard); }
+ .gallery-stage:focus-visible img { animation: none; }
 }
-@keyframes project-frame { from { opacity: 0.92; transform: scale(1.005); } to { opacity: 1; transform: none; } }
+@keyframes project-frame { from { opacity: 0.88; transform: translateX(calc(var(--frame-direction, 1) * 10px)) scale(1.012); } to { opacity: 1; transform: none; } }
+@keyframes project-caption { from { opacity: 0.75; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media(max-width: 767px) and (prefers-reduced-motion: no-preference) { .gallery-stage img, .project-preview figcaption > span { animation-duration: 320ms; } }
 
 .scroll-story[data-pinned] .project-card:hover { transform: none; }
 

@@ -22,6 +22,28 @@ try {
   assert(await page.locator('.hero-scroll-link').isVisible());
   await page.locator('.hero-scroll-link').click();
   await page.waitForFunction(() => document.activeElement.id === 'about');
+  await page.getByRole('link', { name: 'See what I’m building' }).click();
+  await page.waitForFunction(() => document.activeElement.id === 'projects');
+  const project = page.locator('[data-scroll-story="project"]');
+  const gallery = project.locator('.screenshot-gallery');
+  const headingBefore = await project.locator('#projects-heading').boundingBox();
+  const first = await gallery.locator('.gallery-stage img').getAttribute('src');
+  await gallery.getByRole('button', { name: 'Next screenshot' }).click();
+  assert.notEqual(await gallery.locator('.gallery-stage img').getAttribute('src'), first);
+  assert.equal(await gallery.locator('.project-preview').evaluate(e => e.style.getPropertyValue('--frame-direction')), '1');
+  await gallery.getByRole('button', { name: 'Previous screenshot' }).click();
+  assert.equal(await gallery.locator('.gallery-stage img').getAttribute('src'), first);
+  assert.equal(await gallery.locator('.project-preview').evaluate(e => e.style.getPropertyValue('--frame-direction')), '-1');
+  await page.waitForTimeout(750);
+  assert.equal(await gallery.locator('.gallery-stage img').evaluate(e => getComputedStyle(e).transform), 'none');
+  const headingAfter = await project.locator('#projects-heading').boundingBox();
+  assert(Math.abs(headingAfter.y - headingBefore.y) < 2, 'Image transitions must not move the pinned heading');
+  await gallery.locator('.gallery-stage').click();
+  assert(await gallery.getByRole('dialog').isVisible());
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Escape');
+  assert.equal(await gallery.getByRole('dialog').count(), 0);
+  assert(await gallery.locator('.gallery-stage').evaluate(e => e === document.activeElement));
   for (const section of ['experience', 'skills', 'education', 'contact']) {
     await page.locator(`#${section}`).scrollIntoViewIfNeeded();
     await page.waitForFunction(id => document.querySelector('.ambient-background').dataset.section === id, section);

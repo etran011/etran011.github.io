@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Expand, X, ZoomIn, ZoomOut } from "lucide-react";
 import type { Project } from "@/types/portfolio";
 
@@ -9,6 +9,8 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
   const gallery = useRef<HTMLDivElement>(null);
   const manual = useRef(false);
   const [selected, setSelected] = useState(0);
+  const selection = useRef(0);
+  const [direction, setDirection] = useState(1);
   const [expanded, setExpanded] = useState(false);
   const [zoomed, setZoomed] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
@@ -18,8 +20,12 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
   const expandButton = useRef<HTMLButtonElement>(null);
   const id = useId();
   const shot = screenshots[selected];
-  const select = (index: number) => { manual.current = true; setSelected(index); setZoomed(false); };
-  const move = (direction: number) => { manual.current = true; setSelected((current) => (current + direction + screenshots.length) % screenshots.length); setZoomed(false); };
+  const show = useCallback((index: number, travel?: number) => {
+    setDirection(travel ?? (index >= selection.current ? 1 : -1));
+    selection.current = index; setSelected(index); setZoomed(false);
+  }, []);
+  const select = (index: number) => { manual.current = true; show(index); };
+  const move = (direction: number) => { manual.current = true; show((selection.current + direction + screenshots.length) % screenshots.length, direction); };
 
   useEffect(() => { viewport.current?.scrollTo(0, 0); }, [selected, zoomed]);
 
@@ -31,8 +37,7 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
     const update = (event: Event) => {
       if (manual.current || scene.dataset.pinned !== "true" || element.contains(document.activeElement)) return;
       const step = (event as CustomEvent<{ step: number }>).detail.step;
-      setSelected(Math.min(Math.max(0, step), screenshots.length - 1));
-      setZoomed(false);
+      show(Math.min(Math.max(0, step), screenshots.length - 1));
     };
     scene.addEventListener("story-step", update);
     const preload = new IntersectionObserver((entries) => {
@@ -42,7 +47,7 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
     }, { rootMargin: "500px" });
     preload.observe(scene);
     return () => { scene.removeEventListener("story-step", update); preload.disconnect(); };
-  }, [scrollLinked, screenshots]);
+  }, [scrollLinked, screenshots, show]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -61,7 +66,7 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
   if (!shot) return null;
   return (
     <div ref={gallery} className="screenshot-gallery" onFocusCapture={() => { manual.current = true; }} onPointerDownCapture={() => { manual.current = true; }} role="region" aria-label={`${title} screenshots`}>
-      <figure className="project-preview">
+      <figure className="project-preview" style={{ "--frame-direction": direction } as CSSProperties}>
         <button ref={expandButton} className="gallery-stage" aria-label={`Enlarge ${title} screenshot: ${shot.caption}`} onClick={() => { if (swiped.current) { swiped.current = false; return; } setZoomed(false); setExpanded(true); }}
           onPointerDown={(event) => { swiped.current = false; if (event.pointerType === "touch") { gesture.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); } }}
           onPointerCancel={() => { gesture.current = null; }}
@@ -75,7 +80,7 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
           <Image key={shot.src} src={shot.src} alt={shot.alt} width={shot.width} height={shot.height} sizes="(max-width: 767px) 100vw, 1000px" />
           <span className="expand-label"><Expand size={15} aria-hidden="true" /> Enlarge</span>
         </button>
-        <figcaption aria-live="polite">{shot.caption}</figcaption>
+        <figcaption aria-live="polite"><span key={shot.src}>{shot.caption}</span></figcaption>
         {scrollLinked && <p className="gallery-story-hint">Scroll through the preview, or choose a view below.</p>}
         <div className="gallery-controls">
           <div className="gallery-selectors">
