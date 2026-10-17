@@ -31,10 +31,9 @@ test('typing is slower than backspacing, with natural timing and punctuation pau
   assert(characterDelay(',',4)>characterDelay('a',4)+90);
 });
 
-test('all original hero phrases retain their exact wording and order',()=>{
+test('remaining hero phrases retain their exact wording and order',()=>{
   assert.deepEqual(heroHeadlinePhrases.map(p=>p.lines.join(' ')),[
     'Building intelligent systems, one idea at a time.',
-    'Building software.',
     'Exploring AI & machine learning.',
   ]);
 });
@@ -50,5 +49,5 @@ test('cycle types and deletes one character at a time, holding and looping in or
     if(after.phase==='gap')assert(after.delay>=300&&after.delay<=500);
     assert(after.count>=0);
   }
-  assert.deepEqual(holds,[0,1,2,0,1,2,0]);
+  assert.deepEqual(holds,[0,1,0,1,0,1,0]);
 });

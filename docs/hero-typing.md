@@ -3,8 +3,7 @@
 The hero preserves the original phrase order, wording, punctuation and line breaks from the previous scroll presentation:
 
 1. Building intelligent systems, / one idea at a time.
-2. Building software.
-3. Exploring AI & / machine learning.
+2. Exploring AI & / machine learning.
 
 `heroHeadlinePhrases` is the reusable source. The name, surrounding layout and particle scroll story remain unchanged. The rotating phrases use the already-bundled Geist Mono font with responsive 20–40px sizing and the existing primary text color. A stationary `~/portfolio ❯` prompt uses the accent and brighter accent tokens, with one faint separator stroke and no window chrome. The text cycle never reads scroll distance, direction, velocity or pointer position.
 
@@ -16,7 +15,7 @@ All full phrases occupy the same CSS grid cell. Hidden glyphs retain their layou
 
 One timeout controls playback with no per-character React state updates. Visibility changes preserve the phrase, character count, phase and remaining timeout; the loop pauses while offscreen or in a hidden tab and resumes without resetting. The caret pauses with it. Timers, font readiness timeout, observers and listeners are cleaned up on unmount.
 
-Screen readers receive one static complete text containing all three phrases, outside the aria-hidden visual layers. No aria-live announcements are emitted. Reduced motion and forced colors display the complete first phrase immediately and disable the loop, retaining the terminal prompt and monospace presentation. No JavaScript, unavailable IntersectionObserver, deep links and history restoration also retain a readable static first phrase. Live reduced-motion changes stop the cycle without leaving a partial sentence.
+Screen readers receive one static complete text containing both remaining phrases, outside the aria-hidden visual layers. No aria-live announcements are emitted. Reduced motion and forced colors display the complete first phrase immediately and disable the loop, retaining the terminal prompt and monospace presentation. No JavaScript, unavailable IntersectionObserver, deep links and history restoration also retain a readable static first phrase. Live reduced-motion changes stop the cycle without leaving a partial sentence.
 
 ## Verification
 

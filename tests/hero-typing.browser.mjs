@@ -17,6 +17,7 @@ try {
   assert.equal(await p.locator('.hero-command-prompt').evaluate(e=>getComputedStyle(e).animationPlayState),'paused');
   assert.equal(await p.locator('.hero-headline .sr-only').textContent(),heroHeadlineText);
   assert.deepEqual(await p.locator('.hero-phrase').allTextContents(),heroHeadlinePhrases.map(v=>v.lines.join(' ')));
+  assert(!/Building software/i.test(await p.locator('.hero-terminal').textContent()));
   await p.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='cycling'&&!document.documentElement.hasAttribute('data-intro'));
   await p.evaluate(()=>document.fonts.ready);const initial=await box(p);
   await p.waitForFunction(()=>document.querySelectorAll('.hero-phrase[data-active] [data-typed]').length>3);
@@ -48,7 +49,7 @@ try {
   assert.equal((await cursorStyle()).animation,'none','Cursor remains solid while deleting');
   const beforeDelete=await read(p);await p.waitForTimeout(120);assert((await read(p)).count<beforeDelete.count,'Backspacing visibly removes individual characters');
   await p.screenshot({path:'tmp/hero-loop-backspace.png'});
-  for(const index of [1,2,0,1,2,0]) {
+  for(const index of Array.from({length:heroHeadlinePhrases.length*2},(_,i)=>(i+1)%heroHeadlinePhrases.length)) {
     await hold(p,index);
     const state=await read(p), expected=heroHeadlinePhrases[index].lines.join(' ').length;
     assert.equal(state.count,expected);
@@ -74,7 +75,7 @@ try {
     await page.addInitScript(()=>sessionStorage.setItem('portfolio:intro:v1','seen'));await page.goto(base,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='cycling');
     const before=await box(page);
-    for(const index of [0,1,2]) {
+    for(const index of heroHeadlinePhrases.keys()) {
       await hold(page,index);const after=await box(page);
       assert(Math.abs(before.height-after.height)<.1&&Math.abs(before.width-after.width)<.1,`Stable multiline phrases at ${width}`);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`No overflow at ${width}`);
@@ -82,7 +83,7 @@ try {
       const bounds=await box(page);
       assert(caret.right<=bounds.x+bounds.width+1,`Block cursor stays within wrapped command line at ${width}`);
       if(width===390)await page.screenshot({path:`tmp/hero-loop-mobile-${index}.png`});
-      if(index<2)await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.phase!=='hold');
+      if(index<heroHeadlinePhrases.length-1)await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.phase!=='hold');
     }
     console.log('Responsive phrase cycle passed at',width);await page.close();
   }

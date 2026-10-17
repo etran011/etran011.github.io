@@ -1,7 +1,6 @@
 /** Exact wording, order and line breaks from the original scroll-driven hero. */
 export const heroHeadlinePhrases = [
   { lines: ["Building intelligent systems,", "one idea at a time."] },
-  { lines: ["Building software."] },
   { lines: ["Exploring AI &", "machine learning."] },
 ] as const;
 export const heroHeadlineText = heroHeadlinePhrases.map(phrase => phrase.lines.join(" ")).join(" ");
