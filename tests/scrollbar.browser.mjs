@@ -14,6 +14,12 @@ try {
   const assertNoProgress = async () => assert.equal(await page.locator('.scroll-progress, .nav-progress').count(), 0);
   await assertNoProgress();
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar').width), '10px');
+  assert(await page.evaluate(() => ['::-webkit-scrollbar', '::-webkit-scrollbar-track', '::-webkit-scrollbar-track-piece'].every(pseudo => getComputedStyle(document.documentElement, pseudo).backgroundColor === 'rgba(0, 0, 0, 0)')), 'Rail and scrollbar backing remain transparent');
+  assert(await page.evaluate(() => ['::-webkit-scrollbar-track', '::-webkit-scrollbar-track-piece'].every(pseudo => {
+    const style = getComputedStyle(document.documentElement, pseudo);
+    return style.borderLeftWidth === '0px' && style.boxShadow === 'none';
+  })), 'No rail borders or shadows');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar-button').display), 'none', 'No scrollbar buttons');
   const thumb = await page.evaluate(() => {
     const style = getComputedStyle(document.documentElement, '::-webkit-scrollbar-thumb');
     return { interior: style.backgroundColor, background: getComputedStyle(document.documentElement).getPropertyValue('--background').trim(), border: style.borderLeftWidth, radius: style.borderRadius };
