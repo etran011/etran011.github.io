@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import vm from 'node:vm';
-import { characterDelay, heroTypingBootstrap, heroHeadlineText, heroHeadlinePhrases } from '../src/lib/hero-typing.ts';
+import { characterDelay, heroTypingBootstrap, heroHeadlinePhrases, createHeroTypingCycle, backspaceDelay } from '../src/lib/hero-typing.ts';
 const run = ({ hash = '', reduced = false, navigation = 'navigate' } = {}) => {
   const dataset = {}, timers = [];
   vm.runInNewContext(heroTypingBootstrap, {
@@ -18,13 +18,16 @@ test('reduced motion, deep links and history restores get immediate full text',(
   for(const options of [{reduced:true},{hash:'#projects'},{navigation:'back_forward'}]) assert.equal(run(options).dataset.heroTyping,undefined);
   assert.equal(run({hash:'#home'}).dataset.heroTyping,'waiting');
 });
-test('typing rhythm varies within requested intervals, pauses at punctuation and stays brief',()=>{
-  let duration=420;
-  Array.from(heroHeadlineText.replaceAll(' ','')).forEach((c,i)=>{
-    const delay=characterDelay(c,i); duration+=delay;
-    assert(delay>=40 && delay <= (/[,.!?]/.test(c)?200:65));
+test('typing is slower than backspacing, with natural timing and punctuation pauses',()=>{
+  heroHeadlinePhrases.forEach(phrase=>{
+    let duration=420;
+    Array.from(phrase.lines.join('').replaceAll(' ','')).forEach((c,i)=>{
+      const delay=characterDelay(c,i); duration+=delay;
+      assert(delay>=45 && delay <= (/[,.!?]/.test(c)?205:70));
+      assert(backspaceDelay(i)>=25 && backspaceDelay(i)<=45);
+    });
+    assert(duration>1000 && duration<4000);
   });
-  assert(duration>2000 && duration<3500);
   assert(characterDelay(',',4)>characterDelay('a',4)+100);
 });
 
@@ -34,4 +37,18 @@ test('all original hero phrases retain their exact wording and order',()=>{
     'Building software.',
     'Exploring AI & machine learning.',
   ]);
+});
+
+test('cycle types and deletes one character at a time, holding and looping in original order',()=>{
+  const cycle=createHeroTypingCycle(), holds=[];
+  for(let i=0;i<1000 && holds.length<7;i++){
+    const before={...cycle.state}, after=cycle.advance();
+    if(before.phase==='typing')assert.equal(after.count,before.count+1);
+    if(before.phase==='backspace')assert.equal(after.count,before.count-1);
+    if(after.phrase!==before.phrase){assert.equal(before.count,0);assert.equal(after.count,0);assert.equal(before.phase,'gap');}
+    if(after.phase==='hold'){holds.push(after.phrase);assert(after.delay>=1800&&after.delay<=2500);}
+    if(after.phase==='gap')assert(after.delay>=300&&after.delay<=500);
+    assert(after.count>=0);
+  }
+  assert.deepEqual(holds,[0,1,2,0,1,2,0]);
 });

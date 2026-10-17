@@ -1,73 +1,83 @@
 /* Optional: PLAYWRIGHT_MODULE=/path/to/playwright node tests/hero-typing.browser.mjs [baseURL] */
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {heroHeadlineText} from '../src/lib/hero-typing.ts';
+import {heroHeadlineText,heroHeadlinePhrases} from '../src/lib/hero-typing.ts';
 const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({headless:true,channel:'chrome'});
 const base=process.argv[2]||'http://127.0.0.1:4173';
-const count=p=>p.locator('.hero-character[data-typed]').count();
-const complete=p=>p.waitForFunction(()=>!document.documentElement.hasAttribute('data-hero-typing') && !document.documentElement.hasAttribute('data-intro'));
+const read=p=>p.locator('.hero-headline').evaluate(e=>({phrase:e.dataset.phrase,phase:e.dataset.phase,mode:e.dataset.typing,count:e.querySelector('.hero-phrase[data-active]')?.querySelectorAll('[data-typed]').length??0,paused:e.hasAttribute('data-paused')}));
+const hold=(p,index)=>p.waitForFunction(index=>{const e=document.querySelector('.hero-headline');return e.dataset.phrase===String(index)&&e.dataset.phase==='hold'},index);
 const box=p=>p.locator('.hero-headline').boundingBox();
 try {
   const p=await browser.newPage({viewport:{width:1440,height:1000}});
   const errors=[];p.on('pageerror',e=>errors.push(e.message));
   await p.goto(base,{waitUntil:'domcontentloaded'});
   await p.waitForFunction(()=>document.documentElement.hasAttribute('data-intro'));
-  assert.equal(await count(p),0,'No typing behind loader');
+  assert.equal(await p.locator('.hero-character[data-typed]').count(),0,'No typing behind loader');
   assert.equal(await p.locator('.hero-headline .sr-only').textContent(),heroHeadlineText);
-  await p.waitForFunction(()=>document.documentElement.dataset.heroTyping==='typing' && !document.documentElement.hasAttribute('data-intro'));
-  await p.evaluate(()=>document.fonts.ready);
-  const initial=await box(p);
-  await p.waitForFunction(()=>document.querySelectorAll('.hero-character[data-typed]').length>3);
-  const partial=await count(p);
-  assert(partial<await p.locator('.hero-character').count());
+  assert.deepEqual(await p.locator('.hero-phrase').allTextContents(),heroHeadlinePhrases.map(v=>v.lines.join(' ')));
+  await p.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='cycling'&&!document.documentElement.hasAttribute('data-intro'));
+  await p.evaluate(()=>document.fonts.ready);const initial=await box(p);
+  await p.waitForFunction(()=>document.querySelectorAll('.hero-phrase[data-active] [data-typed]').length>3);
   assert.equal(await p.locator('.hero-character[data-caret]').count(),1);
-  assert.equal(await p.locator('.hero-role').evaluate(e=>getComputedStyle(e).opacity),'0');
-  await p.screenshot({path:'tmp/hero-typing-active.png'});
-  await p.mouse.wheel(0,500);
-  await p.waitForTimeout(250);
-  assert(await count(p)>=partial,'Scrolling cannot erase characters');
-  await complete(p);
-  await p.keyboard.press('Home');
-  await p.waitForFunction(()=>scrollY<1);
-  await p.waitForTimeout(600);
-  const final=await box(p);
-  assert(Math.abs(initial.height-final.height)<.1 && Math.abs(initial.width-final.width)<.1,'Typing must reserve the final dimensions');
-  assert(Math.abs(initial.y-final.y)<.5,'No vertical layout shift');
-  assert.equal(await p.locator('.hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);
+  await p.screenshot({path:'tmp/hero-loop-typing.png'});
+  await p.mouse.wheel(0,150);await p.waitForTimeout(200);
+  assert.equal((await read(p)).phrase,'0','Scroll must not select another phrase');
+  await p.keyboard.press('Home');await p.waitForFunction(()=>scrollY<1);
+  await hold(p,0);
+  assert(Number(await p.locator('.hero-role').evaluate(e=>getComputedStyle(e).opacity))>=0);
+  // An offscreen pause preserves the exact phrase, phase, character count and remaining timer.
+  await p.keyboard.press('End');await p.waitForFunction(()=>document.querySelector('.hero-headline').hasAttribute('data-paused'));
+  const away=await read(p);await p.waitForTimeout(500);assert.deepEqual(await read(p),away);
+  await p.keyboard.press('Home');await p.waitForFunction(()=>scrollY<1&&!document.querySelector('.hero-headline').hasAttribute('data-paused'));
+  await p.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))});
+  const hidden=await read(p);await p.waitForTimeout(700);assert.deepEqual(await read(p),hidden);
+  await p.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))});
+  await p.waitForFunction(()=>{const e=document.querySelector('.hero-headline');return e.dataset.phase==='backspace'&&e.querySelector('.hero-phrase[data-active]').querySelectorAll('[data-typed]').length<42});
+  const beforeDelete=await read(p);await p.waitForTimeout(120);assert((await read(p)).count<beforeDelete.count,'Backspacing visibly removes individual characters');
+  await p.screenshot({path:'tmp/hero-loop-backspace.png'});
+  for(const index of [1,2,0,1,2,0]) {
+    await hold(p,index);
+    const state=await read(p), expected=heroHeadlinePhrases[index].lines.join('').replaceAll(' ','').length;
+    assert.equal(state.count,expected);
+    const current=await box(p);
+    assert(Math.abs(initial.height-current.height)<.1&&Math.abs(initial.width-current.width)<.1&&Math.abs(initial.y-current.y)<.5,'Every phrase must preserve hero dimensions');
+    assert.equal(await p.locator('.hero-character[data-caret]').count(),1);
+    await p.screenshot({path:`tmp/hero-loop-phrase-${index}.png`});
+    console.log('Completed phrase in order:',index+1);
+    await p.waitForFunction(index=>document.querySelector('.hero-headline').dataset.phase!=='hold'||document.querySelector('.hero-headline').dataset.phrase!==String(index),index);
+  }
   assert(Number(await p.locator('.hero-role').evaluate(e=>getComputedStyle(e).opacity))>.99);
-  const typed=await count(p);await p.keyboard.press('End');await p.waitForTimeout(250);await p.keyboard.press('Home');await p.waitForTimeout(700);
-  assert.equal(await count(p),typed,'Reentry must not restart typing');
-  assert.equal(await p.locator('.hero-story-phrase').count(),0);
-  await p.screenshot({path:'tmp/hero-typing-complete.png'});
   assert.deepEqual(errors,[]);
-  // Same page session skips the loader but types again on a real page reload.
   await p.reload({waitUntil:'domcontentloaded'});
   assert.equal(await p.locator('.portfolio-intro').evaluate(e=>getComputedStyle(e).display),'none');
-  await p.waitForFunction(()=>document.documentElement.dataset.heroTyping==='typing');
-  await p.emulateMedia({reducedMotion:'reduce'});await complete(p);
-  assert.equal(await p.locator('.hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);
+  await p.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='cycling');
+  await p.emulateMedia({reducedMotion:'reduce'});
+  await p.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='static');
+  assert.equal(await p.locator('.hero-phrase[data-initial] .hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);
   await p.close();
   for(const width of [320,390,768,1024]) {
     const page=await browser.newPage({viewport:{width,height:900}});
-    await page.addInitScript(()=>sessionStorage.setItem('portfolio:intro:v1','seen'));
-    await page.goto(base,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(()=>document.documentElement.dataset.heroTyping==='typing');
-    const before=await box(page);await complete(page);const after=await box(page);
-    assert(Math.abs(before.height-after.height)<.1&&Math.abs(before.width-after.width)<.1,`Stable multiline typing at ${width}`);
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`No overflow at ${width}`);
-    assert.equal(await page.locator('.hero-headline-line[aria-hidden=true]').count(),2);
-    if(width===390)await page.screenshot({path:'tmp/hero-typing-mobile.png'});
-    await page.close();
+    await page.addInitScript(()=>sessionStorage.setItem('portfolio:intro:v1','seen'));await page.goto(base,{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='cycling');
+    const before=await box(page);
+    for(const index of [0,1,2]) {
+      await hold(page,index);const after=await box(page);
+      assert(Math.abs(before.height-after.height)<.1&&Math.abs(before.width-after.width)<.1,`Stable multiline phrases at ${width}`);
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`No overflow at ${width}`);
+      if(width===390)await page.screenshot({path:`tmp/hero-loop-mobile-${index}.png`});
+      if(index<2)await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.phase!=='hold');
+    }
+    console.log('Responsive phrase cycle passed at',width);await page.close();
   }
   for(const options of [{reducedMotion:'reduce'},{forcedColors:'active'},{javaScriptEnabled:false}]) {
     const page=await browser.newPage({viewport:{width:390,height:900},...options});await page.goto(base,{waitUntil:'domcontentloaded'});
-    assert.equal(await page.locator('.hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);
+    assert.equal(await page.locator('.hero-phrase[data-initial] .hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);
     assert.equal(await page.locator('.hero-headline .sr-only').textContent(),heroHeadlineText);await page.close();
   }
   const blocked=await browser.newPage({viewport:{width:1440,height:1000}});
-  await blocked.route('**/_next/static/**/*.js',r=>r.abort());await blocked.goto(base,{waitUntil:'domcontentloaded'});await complete(blocked);
-  assert.equal(await blocked.locator('.hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0,'Independent watchdog exposes full text if hydration fails');
-  await blocked.close();
-  console.log('Loader handoff, automatic sequential typing/caret, scroll independence, stable dimensions at 320–1440px, return visit, reduced/forced/no-JS and hydration-failure fallbacks passed.');
+  await blocked.route('**/_next/static/**/*.js',r=>r.abort());await blocked.goto(base,{waitUntil:'domcontentloaded'});
+  await blocked.waitForFunction(()=>!document.documentElement.hasAttribute('data-hero-typing')&&!document.documentElement.hasAttribute('data-intro'));
+  assert.equal(await blocked.locator('.hero-phrase[data-initial] .hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);await blocked.close();
+  console.log('Two complete loops, exact phrases/order, visible deletion/caret, scroll independence, offscreen/tab pause-resume, stable 320–1440px layouts, loader and static fallbacks passed.');
 }finally{await browser.close();}
