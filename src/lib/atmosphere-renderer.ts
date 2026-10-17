@@ -41,7 +41,7 @@ void main() {
   vPulse = 0.83 + sin(uTime * 0.95 + aPosition.x * 3.0 - aPosition.z * 2.0) * 0.17;
   // A tiny common display offset keeps the trail and marker attached to the surface.
   // Optimization still evaluates the original objective and analytic gradient.
-  if (uKind < 2.5) p.y += displayWave(p.xz, uTime) * (1.0 - uRelease);
+  if (uKind < 2.5 && uRelease < 0.999) p.y += displayWave(p.xz, uTime) * (1.0 - uRelease);
   // Larger displacements belong exclusively to dissolution.
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
   if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
@@ -69,13 +69,13 @@ void main() {
   if (uKind > 0.5) phase = 0.0;
   vec2 destination = aDestination.xy;
   // Depth is independent of formation rotation once the data fills the viewport.
-  float depth = aDestination.z - 0.5 + sin(uTime * 0.08 + aSeed.x * 9.0) * 0.06;
+  float depth = aDestination.z - 0.5 + sin(uTime * 0.11 + aSeed.x * 9.0) * 0.085;
   destination += uLight * depth * 0.018 * uPointerStrength;
   destination.y += sin(uScroll * 0.25 + aSeed.y * 6.28) * depth * 0.055;
   // Time-driven, smoothly varying velocities continue while scroll and cursor idle.
-  destination += vec2(sin(uTime * (0.12 + aSeed.z * 0.045) + aSeed.x * 18.0),
-    cos(uTime * (0.10 + aSeed.y * 0.04) + aSeed.y * 8.0)) * 0.065;
-  destination += vec2(cos(uTime * 0.075 + aSeed.z * 14.0), sin(uTime * 0.085 + aSeed.x * 11.0)) * 0.012;
+  destination += vec2(sin(uTime * (0.18 + aSeed.z * 0.065) + aSeed.x * 18.0),
+    cos(uTime * (0.15 + aSeed.y * 0.055) + aSeed.y * 8.0)) * 0.095 * (0.75 + aDestination.z * 0.25);
+  destination += vec2(cos(uTime * 0.105 + aSeed.z * 14.0), sin(uTime * 0.12 + aSeed.x * 11.0)) * 0.018;
   vec2 flow = vec2(sin(aSeed.x * 6.28), cos(aSeed.y * 6.28)) * sin(phase * 3.141593) * 0.13;
   vec2 screen = mix(projected + uProjection.zw, destination, phase) + flow;
   vec2 offset = (screen - uLight) * vec2(uProjection.y, 1.0);
