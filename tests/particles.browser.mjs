@@ -60,13 +60,15 @@ async function ready(page) {
     await page.mouse.wheel(0, 60);
     await page.waitForTimeout(750);
     const loosening = await inspect(page);
-    assert(loosening.separation > 0.02 && loosening.release < 0.001 && loosening.links > 0.5);
+    assert(loosening.expansion > .02 && loosening.expansion < .051, 'Small input should advance only the first part of the longer sequence');
+    assert(loosening.separation > 0 && loosening.release < 0.001 && loosening.links > .98);
     await page.mouse.wheel(0, 140);
     await page.waitForTimeout(650);
     const partial = (await inspect(page)).expansion;
     assert(partial > 0.02 && partial < 0.65);
-    await page.mouse.wheel(0, 400);
-    await page.waitForTimeout(2300);
+    const heroTravel = Number(await page.locator('[data-scroll-story="hero"]').getAttribute('data-story-travel'));
+    await page.mouse.wheel(0, heroTravel - 200);
+    await page.waitForTimeout(3300);
     assert((await inspect(page)).expansion > 0.95);
     assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
     assert((await inspect(page)).shrink > 0.99);
