@@ -15,7 +15,7 @@ try {
   const start = await page.evaluate(() => Number(document.documentElement.dataset.introStart));
   assert.equal(await page.locator('.portfolio-intro').evaluate(e => getComputedStyle(e).display), 'grid');
   assert.equal(await page.locator('main').evaluate(e => getComputedStyle(e).visibility), 'hidden');
-  assert.equal(await page.locator('.hero-word').first().evaluate(e => getComputedStyle(e).animationPlayState), 'paused');
+  assert.equal(await page.locator('.hero-character[data-typed]').count(), 0, 'Headline must wait until the loading screen clears');
   const code = await page.locator('.intro-line > span:last-child').allTextContents();
   assert.equal(new Function(`${code.join('\n')}; return developer.name;`)(), 'Erik Tran', 'Displayed code is valid');
   await page.mouse.move(700, 400);

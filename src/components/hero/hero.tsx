@@ -2,11 +2,13 @@ import { ScrollStory } from "@/components/interaction/scroll-story";
 import { ArrowDown } from "lucide-react";
 import { HeroHeadline } from "./hero-headline";
 import { Container } from "@/components/ui/container";
+import { heroTypingBootstrap } from "@/lib/hero-typing";
 import { profile } from "@/data/portfolio";
 
 export function Hero() {
   return (
     <section id="home" className="hero" aria-labelledby="hero-heading">
+      <script dangerouslySetInnerHTML={{ __html: heroTypingBootstrap }} />
       <ScrollStory kind="hero" steps={3}><Container className="hero-scene">
         <div className="hero-grid hero-identity">
           <div className="hero-copy">

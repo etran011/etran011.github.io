@@ -200,10 +200,8 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
   .hero-copy > h1 { animation-delay: 100ms; }
   .hero-copy > .hero-role { animation-delay: 190ms; }
   .hero-copy > .hero-actions { animation-delay: 650ms; }
-  .hero-word { animation: hero-word-arrive var(--duration-reveal) var(--ease-standard) both; animation-delay: calc(280ms + var(--word-index) * 38ms); }
   .signal-graphic { animation: signal-arrive 1000ms var(--ease-standard) both; }
 }
-@keyframes hero-word-arrive { from { opacity: 0.65; transform: translateY(12px) rotateX(6deg); } to { opacity: 1; transform: none; } }
 @keyframes hero-arrive { from { opacity: 0.86; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes signal-arrive { from { opacity: 0; } to { opacity: 1; } }
 
@@ -528,10 +526,6 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .hero-baseline { margin-top: 2rem; }
 }
 
-@media(max-width: 767px) and (prefers-reduced-motion: no-preference) {
- .hero-word { animation-duration: 500ms; animation-delay: calc(160ms + var(--word-index) * 45ms); }
-}
-
 /* Fine-pointer enhancement: the exact dot stays on the real hit target. */
 .custom-cursor { pointer-events: none; opacity: 0; }
 .custom-cursor[data-visible] { opacity: 1; }
@@ -558,7 +552,6 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
 .hero-narrative { position: relative; }
 [data-scroll-story="hero"][data-pinned] .hero-project { transform: translateY(calc(var(--story-progress, 0) * -8px)); }
 [data-scroll-story="hero"][data-pinned] .hero-baseline { border-color: color-mix(in srgb, var(--accent) calc(var(--story-progress, 0) * 50%), var(--border)); }
-
 
 /* One bounded timeline connects the path, headline, and chapter emphasis.
    All body copy stays visible, even during aggressive or reverse scrolling. */
@@ -692,7 +685,7 @@ body { isolation: isolate; }
 .portfolio-intro { display: none; }
 html[data-intro], html[data-intro] body { overflow: hidden; }
 html[data-intro] :is(main, .site-header, footer, .skip-link, .auto-scrollbar) { visibility: hidden; }
-html[data-intro] .hero-copy > :not(.hero-narrative), html[data-intro] .hero-word { animation-play-state: paused; }
+html[data-intro] .hero-copy > :not(.hero-narrative) { animation-play-state: paused; }
 html[data-intro] .portfolio-intro {
   display: grid; position: fixed; inset: 0; z-index: 80; place-items: center;
   padding: 1.25rem; color: var(--foreground);
@@ -738,3 +731,15 @@ html[data-intro] .hero-copy { opacity: 0; }
 @keyframes intro-blink { 50% { opacity: 0; } }
 @keyframes intro-safety-release { to { visibility: hidden; pointer-events: none; } }
 @media (max-width: 380px) { .intro-code { padding-inline: 0.85rem; } .intro-line { gap: 0.65rem; } .intro-terminal-header, .intro-terminal-footer { padding-inline: 0.85rem; } }
+
+/* Terminal rhythm changes visibility only: every word keeps its final dimensions. */
+.hero-character { position: relative; }
+.hero-role { transition: opacity 450ms var(--ease-standard); }
+@media(prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-hero-typing] .hero-character:not([data-typed]) { visibility: hidden; }
+  html[data-hero-typing] .hero-role { opacity: 0 !important; }
+  .hero-headline[data-typing] .hero-character[data-caret]::after { content: ""; position: absolute; width: 2px; height: .85em; top: .12em; right: -.04em; background: var(--accent); visibility: visible; pointer-events: none; animation: hero-caret-blink 600ms step-end infinite; }
+  .hero-headline[data-typing] .hero-character[data-caret="before"]::after { left: 0; right: auto; }
+  .hero-headline[data-typing="complete"] .hero-character[data-caret]::after { animation-iteration-count: 4; animation-fill-mode: forwards; }
+}
+@keyframes hero-caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
