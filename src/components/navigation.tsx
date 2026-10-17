@@ -21,8 +21,6 @@ export function Navigation() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("home");
   const pathname = usePathname();
-  const progress = useRef<HTMLDivElement>(null);
-  const edgeProgress = useRef<HTMLSpanElement>(null);
   const header = useRef<HTMLElement>(null);
   const activeHref = pathname === "/" ? `/#${active}` : pathname.startsWith("/projects/") ? "/#projects" : undefined;
 
@@ -35,9 +33,6 @@ export function Navigation() {
       visible = pathname !== "/" || (visible ? window.scrollY > 48 : window.scrollY > 120);
       if (header.current && header.current.dataset.navVisible !== String(visible)) header.current.dataset.navVisible = String(visible);
       const maximum = document.documentElement.scrollHeight - window.innerHeight;
-      const fraction = maximum > 0 ? Math.min(1, Math.max(0, window.scrollY / maximum)) : 0;
-      if (progress.current) progress.current.style.transform = `scaleX(${fraction})`;
-      if (edgeProgress.current) edgeProgress.current.style.transform = `scaleY(${fraction})`;
       if (pathname !== "/") return;
       const sections = links.filter((link) => link.href.startsWith("/#")).map((link) => document.getElementById(link.href.slice(2))).filter((section): section is HTMLElement => Boolean(section));
       let current = sections[0]?.id ?? "home";
@@ -78,7 +73,6 @@ export function Navigation() {
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <div className="scroll-progress" aria-hidden="true"><span ref={edgeProgress} /></div>
       <header ref={header} className="site-header" data-home={pathname === "/" ? "true" : undefined} data-menu-open={open ? "true" : undefined}>
         <div className="nav-bar">
           <Link className="brand" href="/#home" onClick={() => setOpen(false)}>
@@ -103,7 +97,6 @@ export function Navigation() {
             {links.map((link) => <a key={link.label} href={link.href}>{link.label}</a>)}
           </nav>
         </noscript>
-        <div ref={progress} className="nav-progress" aria-hidden="true" />
       </header>
     </>
   );
