@@ -11,16 +11,22 @@ export function PortfolioIntro() {
     if (root.dataset.intro !== "loading") return;
     const reduced = matchMedia("(prefers-reduced-motion: reduce), (forced-colors: active)");
     let finishTimer: ReturnType<typeof setTimeout> | undefined;
+    let handoffTimer: ReturnType<typeof setTimeout> | undefined;
+    let completing = false;
     let sequenceReady = false;
     let assetsReady = false;
     let disposed = false;
-    const dismiss = () => { delete root.dataset.intro; delete root.dataset.introStart; };
+    const dismiss = () => { delete root.dataset.intro; delete root.dataset.introStart; cleanup(); };
     const reveal = () => {
-      if (root.dataset.intro !== "loading") return;
-      root.dataset.intro = "revealing";
+      if (root.dataset.intro !== "loading" || completing) return;
+      completing = true;
       if (screen.current) screen.current.dataset.phase = "ready";
       if (status.current) status.current.textContent = "Portfolio ready.";
-      finishTimer = setTimeout(dismiss, 620);
+      handoffTimer = setTimeout(() => {
+        if (root.dataset.intro !== "loading") return;
+        root.dataset.intro = "revealing";
+        finishTimer = setTimeout(dismiss, 620);
+      }, 160);
     };
     const maybeReveal = () => {
       if (!disposed && sequenceReady && assetsReady && document.querySelector<HTMLElement>(".ambient-background")?.dataset.rendererReady === "true") reveal();
@@ -32,12 +38,13 @@ export function PortfolioIntro() {
     const observer = new MutationObserver(maybeReveal);
     if (atmosphere) observer.observe(atmosphere, { attributes: true, attributeFilter: ["data-renderer-ready"] });
     const image = atmosphere?.querySelector("img");
-    void Promise.allSettled([document.fonts.ready, image?.decode()]).then(() => { assetsReady = true; maybeReveal(); });
+    void Promise.allSettled([document.fonts?.ready, image?.decode?.()]).then(() => { assetsReady = true; maybeReveal(); });
     const preference = () => { if (reduced.matches) dismiss(); };
     const visibility = () => { if (document.hidden) dismiss(); };
     reduced.addEventListener("change", preference);
     document.addEventListener("visibilitychange", visibility);
-    return () => { disposed = true; clearTimeout(timer); clearTimeout(deadline); clearTimeout(finishTimer); observer.disconnect(); reduced.removeEventListener("change", preference); document.removeEventListener("visibilitychange", visibility); };
+    const cleanup = () => { disposed = true; clearTimeout(timer); clearTimeout(deadline); clearTimeout(handoffTimer); clearTimeout(finishTimer); observer.disconnect(); reduced.removeEventListener("change", preference); document.removeEventListener("visibilitychange", visibility); };
+    return cleanup;
   }, []);
 
   return <div ref={screen} className="portfolio-intro" role="status" aria-live="polite" aria-atomic="true">

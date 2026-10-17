@@ -118,6 +118,7 @@ try {
   const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const mobile = await touch.newPage();
   await mobile.goto(base);
+  await mobile.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   assert.equal(await mobile.locator('.scroll-progress, .nav-progress').count(), 0);
   assert.equal(await mobile.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar').width), 'auto');
   assert(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth));

@@ -731,7 +731,8 @@ html[data-intro] .portfolio-intro {
 .intro-terminal-footer { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; border-top: 1px solid var(--border); padding: 0.85rem 1.2rem; font-size: 0.625rem; }
 .intro-command { color: var(--muted); }
 .intro-caret { display: inline-block; width: 0.4rem; height: 0.7rem; vertical-align: -0.1rem; margin-left: 0.4rem; background: var(--accent); animation: intro-blink 700ms steps(1) infinite; }
-.intro-ready { color: var(--accent); opacity: 0; animation: intro-ready 150ms 650ms both; }
+.intro-ready { color: var(--accent); opacity: 0; transition: opacity 140ms var(--ease-standard); }
+.portfolio-intro[data-phase="ready"] .intro-ready { opacity: 1; }
 .intro-ready > span { margin-left: 0.4rem; }
 .intro-curtain { position: absolute; inset: 0; background: var(--background); }
 .intro-fragments { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
@@ -751,7 +752,6 @@ html[data-intro] .hero-copy { opacity: 0; }
 @media (max-width: 767px) { .intro-fragments > span:nth-child(n + 9) { display: none; } }
 @media (prefers-reduced-motion: reduce), (forced-colors: active) { .portfolio-intro { display: none !important; } }
 @keyframes intro-type { from { clip-path: inset(0 100% 0 0); opacity: 0.3; } to { clip-path: inset(0); opacity: 1; } }
-@keyframes intro-ready { to { opacity: 1; } }
 @keyframes intro-blink { 50% { opacity: 0; } }
 @keyframes intro-safety-release { to { visibility: hidden; pointer-events: none; } }
 @media (max-width: 380px) { .intro-code { padding-inline: 0.85rem; } .intro-line { gap: 0.65rem; } .intro-terminal-header, .intro-terminal-footer { padding-inline: 0.85rem; } }

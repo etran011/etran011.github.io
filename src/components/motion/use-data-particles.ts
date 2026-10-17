@@ -107,8 +107,8 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     const contextLost = (event: Event) => { event.preventDefault(); lost = true; generation++; fallback(); };
     const contextRestored = () => { lost = false; void configure(); };
     root.dataset.renderer = "static";
-    const intro = new MutationObserver(() => { if (!introPending()) start(); });
-    intro.observe(document.documentElement, { attributes: true, attributeFilter: ["data-intro"] });
+    const intro = new MutationObserver(() => { if (!introPending()) { start(); intro.disconnect(); } });
+    if (introPending()) intro.observe(document.documentElement, { attributes: true, attributeFilter: ["data-intro"] });
     for (const query of [desktop, reduce, forced, coarse]) query.addEventListener("change", configure);
     document.addEventListener("visibilitychange", visibility); window.addEventListener("resize", resize);
     document.addEventListener("pointermove", move, { passive: true }); document.addEventListener("pointerleave", leave); window.addEventListener("blur", leave);
