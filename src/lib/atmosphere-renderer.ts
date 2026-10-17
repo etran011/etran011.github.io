@@ -53,6 +53,8 @@ void main() {
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
   if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
   if (uKind > 2.5) {
+    // Staggered arrival and a moving arc highlight; ring dimensions stay fixed.
+    energy = energyWave(1.45 + aSeed.y * 0.22, max(0.0, uEnergy.w - aSeed.y * 0.18)) * formation;
     // Scroll adds a bounded rotation offset, avoiding time * progress discontinuities.
     float angle = uTime * aSeed.z + sign(aSeed.z) * uRings.x * 0.24;
     p *= 0.85 * (1.0 + uRings.x * 0.48);
@@ -61,6 +63,7 @@ void main() {
     else if (aSeed.y < 1.5) p.yz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.yz;
     else p.xy = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xy;
     vPulse = 0.42 + 0.58 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 0.65 + aSeed.y), 12.0);
+    vPulse += energy * (0.32 + 0.48 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 1.1 - aSeed.y * 1.7), 6.0));
   }
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
@@ -111,7 +114,7 @@ void main() {
   float pointSize = mix(6.3 + aSeed.z * 1.0, 1.15 + aSeed.z * 0.65, uShrink);
   pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation + energy * 0.24;
   if (uKind > 0.5) vLight = 1.0;
-  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x);
+  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x) * (1.0 + energy * 0.2);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
   if (uKind > 1.5 && uKind < 2.5) gl_PointSize = (22.0 + breath * 4.0) * uRatio;
 }`;
