@@ -26,14 +26,7 @@
 .education-gpa dd { margin-top: .4rem; font-size: 2rem; font-weight: 400; letter-spacing: -.04em; line-height: 1.25; }
 .education-gpa dd span { font-family: var(--font-code); color: var(--muted); font-size: .75rem; letter-spacing: 0; }
 .education-field { color: var(--muted); font-size: .55rem; letter-spacing: .08em; margin-top: 2.75rem; }
-.education-progression { display: flex; align-items: center; gap: 1.5rem; margin-top: clamp(2.5rem, 5vw, 4rem); padding-block: 1.75rem; border-block: 1px solid var(--border); font-family: var(--font-code); font-size: .625rem; color: var(--muted); }
-.education-progression-label { display: flex; align-items: center; gap: .65rem; }
-.education-status-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; flex: none; }
-.education-timeline { position: relative; flex: 1; height: 1px; background: var(--border); }
-.education-timeline span { display: block; height: 1px; width: 100%; background: linear-gradient(90deg, var(--accent), var(--border)); transform-origin: left; }
-.education-timeline i { position: absolute; right: 0; top: -3px; width: 7px; height: 7px; border: 1px solid var(--accent); border-radius: 50%; background: var(--background); }
-.education-progression > p span { color: var(--foreground); margin-left: .5rem; }
-.education-coursework { border-bottom: 1px solid var(--border); }
+.education-coursework { margin-top: clamp(2.5rem, 5vw, 4rem); border-block: 1px solid var(--border); }
 .education-coursework summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-block: 1.5rem; list-style: none; cursor: pointer; font-size: .875rem; }
 .education-coursework summary::-webkit-details-marker { display: none; }
 .education-coursework-hint { font-family: var(--font-code); font-size: .625rem; color: var(--muted); }
@@ -55,8 +48,6 @@
   .education-gpa { margin-top: 0; padding-bottom: .75rem; }
   .education-gpa dd { font-size: 1.75rem; }
   .education-field { margin-top: 1.75rem; }
-  .education-progression { gap: .75rem; font-size: .55rem; margin-top: 1rem; }
-  .education-progression > p span { margin-left: .25rem; }
   .education-coursework ul { grid-template-columns: 1fr; }
   .education-coursework summary { font-size: .8rem; }
   .education-coursework-hint { font-size: .55rem; }
@@ -85,4 +76,4 @@
 @keyframes academic-drift { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
 @keyframes academic-flow { to { stroke-dashoffset: -845; } }
 @keyframes academic-light { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-@media(forced-colors: active) { .academic-study { display: none; } .education-status-dot { background: CanvasText; } .education-timeline { background: CanvasText; } .education-timeline i { border-color: CanvasText; } }
+@media(forced-colors: active) { .academic-study { display: none; } }

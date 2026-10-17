@@ -33,15 +33,12 @@ export function EducationMotion({ children }: { children: ReactNode }) {
             [".education-kicker", 0], [".education-identity h2 > span:first-child", 90],
             [".education-identity h2 > span:last-child", 190], [".education-introduction", 320],
             [".education-graduation", 440], [".education-gpa", 550],
-            [".academic-study, .education-field", 650], [".education-progression", 750],
-            [".education-coursework", 850], [".education-timeline > span", 800],
+            [".academic-study, .education-field", 650],
+            [".education-coursework", 850],
           ] as const;
           for (const [selector, delay] of stages) {
             for (const target of element.querySelectorAll(selector)) {
-              const timeline = target.matches(".education-timeline > span");
-              const frames = timeline
-                ? [{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }]
-                : [{ opacity: .08, translate: `0 ${compact.matches ? 8 : 18}px` }, { opacity: 1, translate: "0 0" }];
+              const frames = [{ opacity: .08, translate: `0 ${compact.matches ? 8 : 18}px` }, { opacity: 1, translate: "0 0" }];
               const animation = target.animate(frames, {
                 duration: compact.matches ? 500 : 800, delay: delay * (compact.matches ? .65 : 1),
                 easing: cinematicMotion.easing, fill: "backwards",

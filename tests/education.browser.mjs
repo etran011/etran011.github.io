@@ -58,7 +58,8 @@ try {
     assert.equal(await section.locator('h2').getAttribute('aria-label'), 'College of William & Mary');
     assert.equal(await section.locator('.education-graduation dd').textContent(), '2028');
     assert.match(await section.locator('.education-gpa dd').textContent(), /3\.92.*4\.00/);
-    assert.match(await section.locator('.education-progression').textContent(), /Degree in progress.*Expected 2028/);
+    assert.equal(await section.locator('.education-progression, .education-timeline, [role=progressbar]').count(), 0);
+    assert(!/Degree in progress/i.test(await section.textContent()));
     await section.locator('summary').focus(); await p.keyboard.press('Space');
     assert.equal(await section.locator('details').getAttribute('open'), '');
     for (const el of await section.locator('h2, dt, dd, li').all()) {
