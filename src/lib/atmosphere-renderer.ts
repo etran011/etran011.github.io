@@ -1,3 +1,4 @@
+import { createRingGeometry } from "./atmosphere-rings";
 import { descentPlayback } from "./loss-landscape.mjs";
 import { resolveParticleChoreography } from "./particle-transition";
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
@@ -28,7 +29,7 @@ varying float vLight;
 varying float vPulse;
 varying float vPath;
 void main() {
-  vec3 p = uKind > 1.5 ? uMarker : aPosition;
+  vec3 p = uKind > 1.5 && uKind < 2.5 ? uMarker : aPosition;
   vPath = aSeed.x;
   vec3 normal = aSurface.xyz;
   float density = clamp(aSurface.w, 0.0, 1.0);
@@ -36,6 +37,11 @@ void main() {
   // Geometry stays on the exact loss surface at rest; only dissolution displaces it.
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
   if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
+  if (uKind > 2.5) {
+    float angle = uTime * aSeed.z;
+    p.xz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xz;
+    vPulse = 0.75 + 0.25 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 0.35 + aSeed.y), 8.0);
+  }
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
@@ -75,7 +81,7 @@ void main() {
   float pointSize = mix(5.0 + aSeed.z * 0.9, 1.15 + aSeed.z * 0.65, uShrink);
   if (uKind > 0.5) vLight = 1.0;
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
-  if (uKind > 1.5) gl_PointSize = 7.5 * uRatio;
+  if (uKind > 1.5 && uKind < 2.5) gl_PointSize = 7.5 * uRatio;
 }`;
 const fragmentSource = `
 precision mediump float;
@@ -94,16 +100,17 @@ void main() {
   if (uPoint < 0.5) alpha *= vPulse * 0.48 * uLinks;
   if (uPoint > 0.5) alpha *= (1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)))) * uDetail;
   vec3 color = uColor;
-  if (uKind > 0.5) {
+  if (uKind > 0.5 && uKind < 2.5) {
     alpha = uTrajectoryAlpha;
     color = mix(uColor, vec3(0.71, 0.804, 1.0), 0.7);
     if (uKind < 1.5) alpha *= 1.0 - smoothstep(uHead - 0.002, uHead + 0.002, vPath);
     else alpha *= 1.0 - smoothstep(0.12, 0.5, length(gl_PointCoord - vec2(0.5)));
   }
+  if (uKind > 2.5) alpha = (0.12 + vPulse * 0.1) * uLinks;
   gl_FragColor = vec4(color, alpha);
 }`;
 
-/** At most two batched draws; expanded fields need only the points pass. */
+/** Shared program and static buffers; expanded fields need only the points pass. */
 export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuality: AtmosphereQuality, color: readonly number[]) {
   const gl = canvas.getContext("webgl", { alpha: true, antialias: false, depth: false, stencil: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: "low-power" });
   if (!gl) throw new Error("WebGL unavailable");
@@ -146,6 +153,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     let points = allocate(geometry.points);
     const trajectoryModel = createTrajectoryGeometry();
     const trail = allocate(trajectoryModel.data);
+    const rings = allocate(createRingGeometry());
     const playback = { x: 0, y: 0, z: 0, progress: 0, alpha: 0 };
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
     for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
@@ -184,6 +192,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);
+        if (choreography.links > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.LINES); }
         gl.uniform1f(uniforms.uKind, 0);
         // Expanded sections have no visible relationships; omit their entire draw.
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }
