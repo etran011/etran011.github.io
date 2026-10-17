@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { displayWave, idleWave, idleBreath, resolveIdleRotation } from '../src/lib/atmosphere-idle.mjs';
+import { displayWave, idleWave, idleBreath, energyWave, energyCycle, resolveIdleRotation } from '../src/lib/atmosphere-idle.mjs';
 
 test('display breathing is bounded, smooth and common to surface and trajectory coordinates', () => {
   for (let i = 0; i < 1000; i++) {
@@ -32,5 +32,20 @@ test('breathing is visible within seconds and repeats smoothly over 4.4 seconds'
   for (let time = 0; time < 100; time += .07) {
     assert(Math.abs(idleBreath(time) - idleBreath(time + 4.4)) < 1e-12);
     assert(Math.abs(idleBreath(time + 1/60) - idleBreath(time)) < .013);
+  }
+});
+
+test('energy travels outward with smooth emissions, bounded displacement and a fading wake', () => {
+  assert(energyWave(.62, 1) > .8);
+  assert(energyWave(1.24, 2) > .7);
+  assert(energyWave(.62, 2) < .001, 'Wake fades behind the advancing crest');
+  for (const distance of [0, .3, 1, 2, 3]) {
+    assert.equal(energyWave(distance, 0), 0);
+    assert.equal(energyWave(distance, energyCycle), 0);
+    for (let age = 0; age < energyCycle; age += .013) {
+      const value = energyWave(distance, age);
+      assert(value >= 0 && value <= 1);
+      assert(Math.abs(value - energyWave(distance, age + 1/60)) < .07);
+    }
   }
 });

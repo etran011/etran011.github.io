@@ -1,3 +1,5 @@
+import { landscapeDomain } from "./loss-landscape.mjs";
+
 /** One active clock drives the sculpture; the renderer already pauses it while hidden. */
 export const idleWave = { amplitude: 0.065, detail: 0.022 };
 export function displayWave(x, z, seconds) {
@@ -18,3 +20,27 @@ export function resolveIdleRotation(seconds, pose, target) {
   target.pitch = pose.pitch + Math.sin(seconds * 0.16) * 0.055;
   target.roll = pose.roll + Math.sin(seconds * 0.13) * 0.025;
 }
+
+/** An emission lasts one secondary cycle; its origin is sampled once, never chased. */
+export const energyCycle = 6.8;
+export function energyWave(distance, age) {
+  const front = distance - age * 0.62;
+  const launch = Math.min(1, Math.max(0, age / 0.55));
+  const fade = Math.min(1, Math.max(0, (energyCycle - age) / 0.8));
+  return Math.exp(-front * front / 0.0441) * launch * launch * (3 - 2 * launch) * fade * fade * (3 - 2 * fade) / (1 + distance * 0.22);
+}
+export const energyWaveGLSL = `
+float energyWave(float distance, float age) {
+  float front = distance - age * 0.62;
+  return exp(-front * front / 0.0441) * smoothstep(0.0, 0.55, age) *
+    (1.0 - smoothstep(${(energyCycle - .8).toFixed(1)}, ${energyCycle.toFixed(1)}, age)) / (1.0 + distance * 0.22);
+}
+// The marker reuses the trail buffer, so evaluate its actual current normal.
+vec3 markerNormal(vec2 p) {
+  vec2 q = p / ${landscapeDomain.horizontalScale};
+  float a = q.x * q.x + q.y - 11.0;
+  float b = q.x + q.y * q.y - 7.0;
+  vec2 gradient = vec2(4.0 * q.x * a + 2.0 * b, 2.0 * a + 4.0 * q.y * b);
+  vec2 slope = gradient * (${landscapeDomain.heightScale} / ${landscapeDomain.horizontalScale}) / (${landscapeDomain.compression.toFixed(1)} + a * a + b * b);
+  return normalize(vec3(-slope.x, 1.0, -slope.y));
+}`;

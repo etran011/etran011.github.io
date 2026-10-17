@@ -1,4 +1,4 @@
-import { displayWaveGLSL, resolveIdleRotation } from "./atmosphere-idle.mjs";
+import { displayWaveGLSL, energyWaveGLSL, energyCycle, resolveIdleRotation } from "./atmosphere-idle.mjs";
 import { createRingGeometry } from "./atmosphere-rings";
 import { descentPlayback } from "./loss-landscape.mjs";
 import { resolveParticleChoreography, resolveRingChoreography } from "./particle-transition";
@@ -17,6 +17,7 @@ uniform float uTime;
 uniform mediump float uKind;
 uniform highp vec3 uRings;
 uniform vec3 uMarker;
+uniform vec4 uEnergy;
 uniform highp float uTrajectoryAlpha;
 uniform highp float uHead;
 uniform float uSeparation;
@@ -33,16 +34,21 @@ varying float vLight;
 varying float vPulse;
 varying float vPath;
 ${displayWaveGLSL}
+${energyWaveGLSL}
 void main() {
   vec3 p = uKind > 1.5 && uKind < 2.5 ? uMarker : aPosition;
   vPath = aSeed.x;
-  vec3 normal = aSurface.xyz;
+  vec3 normal = uKind > 1.5 && uKind < 2.5 ? markerNormal(p.xz) : aSurface.xyz;
   float breath = idleBreath(uTime);
   float formation = 1.0 - smoothstep(0.0, 1.0, uRelease);
+  float energy = 0.0;
+  if (uKind < 2.5 && formation > 0.001) energy = energyWave(length(p.xz - uEnergy.xz), uEnergy.w) * formation;
   vPulse = 0.83 + sin(uTime * 0.95 + aPosition.x * 3.0 - aPosition.z * 2.0) * 0.17;
   // A coherent common display offset keeps the trail and marker attached to the surface.
   // Optimization still evaluates the original objective and analytic gradient.
-  if (uKind < 2.5 && uRelease < 0.999) p.y += displayWave(p.xz, uTime) * (1.0 - uRelease);
+  if (uKind < 2.5 && uRelease < 0.999) {
+    p += normal * (displayWave(p.xz, uTime) * formation + energy * 0.045);
+  }
   // Larger displacements belong exclusively to dissolution.
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
   if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
@@ -100,13 +106,14 @@ void main() {
       pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
     vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
   }
+  vLight += energy * 0.48;
   vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
   float pointSize = mix(6.3 + aSeed.z * 1.0, 1.15 + aSeed.z * 0.65, uShrink);
-  pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation;
+  pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation + energy * 0.24;
   if (uKind > 0.5) vLight = 1.0;
   if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
-  if (uKind > 1.5 && uKind < 2.5) gl_PointSize = 22.0 * uRatio;
+  if (uKind > 1.5 && uKind < 2.5) gl_PointSize = (22.0 + breath * 4.0) * uRatio;
 }`;
 const fragmentSource = `
 precision mediump float;
@@ -132,12 +139,13 @@ void main() {
     color = mix(uColor, vec3(0.71, 0.804, 1.0), 0.7);
     if (uKind < 1.5) {
       alpha *= (0.16 + 0.84 * smoothstep(uHead - 0.32, uHead, vPath)) *
+        (0.88 + 0.12 * sin(vPath * 42.0 - uTime * 3.0)) *
         (1.0 - smoothstep(uHead - 0.002, uHead + 0.002, vPath));
     } else {
       float radius = length(gl_PointCoord - vec2(0.5));
       float core = 1.0 - smoothstep(0.07, 0.16, radius);
       float halo = exp(-radius * radius * 20.0) * (1.0 - smoothstep(0.35, 0.5, radius));
-      alpha *= max(core, halo * (0.3 + sin(uTime * 2.0) * 0.035));
+      alpha *= max(core, halo * (0.42 + sin(uTime * 1.427997) * 0.14));
     }
   }
   if (uKind > 2.5) {
@@ -181,7 +189,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uRings", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uShrink", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uEnergy", "uRings", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uShrink", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -196,6 +204,8 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     const rings = allocate(createRingGeometry());
     const idleRotation = { yaw: 0, pitch: 0, roll: 0 };
     const playback = { x: 0, y: 0, z: 0, progress: 0, alpha: 0 };
+    const emission = { x: 0, y: 0, z: 0, progress: 0, alpha: 0 };
+    let emissionIndex = -1;
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
     for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -237,6 +247,12 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);
+        const cycle = Math.floor(time / energyCycle);
+        if (cycle !== emissionIndex) {
+          descentPlayback(cycle * energyCycle, trajectoryModel.trajectory, emission);
+          emissionIndex = cycle;
+        }
+        gl.uniform4f(uniforms.uEnergy, emission.x, emission.y, emission.z, time - cycle * energyCycle);
         descentPlayback(time, trajectoryModel.trajectory, playback);
         gl.uniform1f(uniforms.uTrajectoryAlpha, playback.alpha * choreography.links * 0.85);
         gl.uniform1f(uniforms.uHead, playback.progress);
