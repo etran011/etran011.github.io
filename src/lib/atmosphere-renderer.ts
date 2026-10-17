@@ -43,10 +43,12 @@ void main() {
   if (uKind > 2.5) {
     // Scroll adds a bounded rotation offset, avoiding time * progress discontinuities.
     float angle = uTime * aSeed.z + sign(aSeed.z) * uRings.x * 0.24;
-    p *= 1.0 + uRings.x * 0.48;
+    p *= 0.85 * (1.0 + uRings.x * 0.48);
     p += vec3(sin(aSeed.x * 75.0), cos(aSeed.x * 62.0), sin(aSeed.x * 43.0)) * uRings.y * 0.065;
-    p.xz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xz;
-    vPulse = 0.75 + 0.25 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 0.35 + aSeed.y), 8.0);
+    if (aSeed.y < 0.5) p.xz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xz;
+    else if (aSeed.y < 1.5) p.yz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.yz;
+    else p.xy = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xy;
+    vPulse = 0.42 + 0.58 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 0.65 + aSeed.y), 12.0);
   }
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
@@ -133,8 +135,9 @@ void main() {
   if (uKind > 2.5) {
     float segment = fract(vPath * 36.0);
     float intact = smoothstep(uRings.y * 0.88, uRings.y * 0.88 + 0.1, segment);
-    alpha = (0.12 + vPulse * 0.1) * uRings.z * mix(1.0, intact, uRings.y);
+    alpha = (0.28 + vPulse * 0.32) * uRings.z * mix(1.0, intact, uRings.y);
     alpha *= vLight;
+    color = mix(uColor, vec3(0.71, 0.804, 1.0), vPulse * 0.25);
   }
   gl_FragColor = vec4(color, alpha);
 }`;
@@ -228,7 +231,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uTrajectoryAlpha, playback.alpha * choreography.links * 0.85);
         gl.uniform1f(uniforms.uHead, playback.progress);
         gl.uniform3f(uniforms.uMarker, playback.x, playback.y, playback.z);
-        if (ringChoreography.opacity > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.LINES); }
+        if (ringChoreography.opacity > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.TRIANGLES); }
         gl.uniform1f(uniforms.uKind, 0);
         // Expanded sections have no visible relationships; omit their entire draw.
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }
