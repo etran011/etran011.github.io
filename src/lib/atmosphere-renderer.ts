@@ -16,6 +16,7 @@ uniform mediump float uKind;
 uniform vec3 uMarker;
 uniform float uSeparation;
 uniform float uRelease;
+uniform float uShrink;
 uniform mediump float uExpansion;
 uniform vec3 uRotation;
 uniform vec4 uProjection;
@@ -49,10 +50,13 @@ void main() {
   if (uKind > 0.5) phase = 0.0;
   vec2 destination = aDestination.xy;
   // Depth is independent of formation rotation once the data fills the viewport.
-  float depth = aDestination.z - 0.5;
+  float depth = aDestination.z - 0.5 + sin(uTime * 0.08 + aSeed.x * 9.0) * 0.06;
   destination += uLight * depth * 0.018 * uPointerStrength;
   destination.y += sin(uScroll * 0.25 + aSeed.y * 6.28) * depth * 0.055;
-  destination += vec2(sin(uTime * 0.09 + aSeed.x * 18.0), cos(uTime * 0.07 + aSeed.y * 8.0)) * 0.028;
+  // Time-driven, smoothly varying velocities continue while scroll and cursor idle.
+  destination += vec2(sin(uTime * (0.12 + aSeed.z * 0.045) + aSeed.x * 18.0),
+    cos(uTime * (0.10 + aSeed.y * 0.04) + aSeed.y * 8.0)) * 0.065;
+  destination += vec2(cos(uTime * 0.075 + aSeed.z * 14.0), sin(uTime * 0.085 + aSeed.x * 11.0)) * 0.012;
   vec2 flow = vec2(sin(aSeed.x * 6.28), cos(aSeed.y * 6.28)) * sin(phase * 3.141593) * 0.13;
   vec2 screen = mix(projected + uProjection.zw, destination, phase) + flow;
   vec2 offset = (screen - uLight) * vec2(uProjection.y, 1.0);
@@ -68,7 +72,7 @@ void main() {
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
-  float pointSize = mix(4.3 + aSeed.z * 1.0 + density * 0.35, 1.5 + aSeed.z * 1.1, phase);
+  float pointSize = mix(5.0 + aSeed.z * 0.9, 1.15 + aSeed.z * 0.65, uShrink);
   if (uKind > 0.5) vLight = 1.0;
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
   if (uKind > 1.5) gl_PointSize = 7.5 * uRatio;
@@ -130,7 +134,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uShrink", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -149,7 +153,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
-    const choreography = { separation: 0, release: 0, links: 1 };
+    const choreography = { separation: 0, release: 0, links: 1, shrink: 0 };
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number, count = geometry.count) => {
       gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, count);
     };
@@ -174,6 +178,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         resolveParticleChoreography(expansion, choreography);
         gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
         gl.uniform1f(uniforms.uSeparation, choreography.separation); gl.uniform1f(uniforms.uRelease, choreography.release); gl.uniform1f(uniforms.uLinks, choreography.links);
+        gl.uniform1f(uniforms.uShrink, choreography.shrink);
         gl.uniform3f(uniforms.uRotation, pose.yaw + Math.sin(time * 0.075) * 0.12, pose.pitch + Math.sin(time * 0.12) * 0.025, pose.roll + Math.sin(time * 0.08) * 0.012);
         gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);

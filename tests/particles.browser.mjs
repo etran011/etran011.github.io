@@ -10,7 +10,7 @@ async function inspect(page) {
     const gl = canvas.getContext('webgl');
     const program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), strength: uniform('uPointerStrength'), error: gl.getError() };
+    return { time: uniform('uTime'), expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
   });
 }
 async function ready(page) {
@@ -53,6 +53,7 @@ async function ready(page) {
     await page.waitForTimeout(2300);
     assert((await inspect(page)).expansion > 0.95);
     assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
+    assert((await inspect(page)).shrink > 0.99);
     const releasedLineDraws = await page.evaluate(() => window.particleLineDraws);
     await page.waitForTimeout(200);
     assert.equal(await page.evaluate(() => window.particleLineDraws), releasedLineDraws, 'Invisible connections must not issue GPU draws');
@@ -62,6 +63,7 @@ async function ready(page) {
     await page.waitForTimeout(2900);
     assert((await inspect(page)).expansion < 0.02);
     assert((await inspect(page)).links > 0.98 && (await inspect(page)).release < 0.001);
+    assert((await inspect(page)).shrink < 0.001);
     assert(await page.evaluate(n => window.particleLineDraws > n, releasedLineDraws));
     await page.mouse.move(1250, 350);
     await page.waitForTimeout(900);
@@ -73,6 +75,14 @@ async function ready(page) {
     await page.locator('.hero-scroll-link').click();
     await page.waitForTimeout(2500);
     assert((await inspect(page)).expansion > 0.98);
+    const idleY = await page.evaluate(() => scrollY), idleBefore = await inspect(page);
+    const imageBefore = await page.screenshot();
+    await page.waitForTimeout(1400);
+    const imageAfter = await page.screenshot(), idleAfter = await inspect(page);
+    assert(Math.abs(await page.evaluate(() => scrollY) - idleY) < 1);
+    assert(idleAfter.time - idleBefore.time > 1, 'Ambient animation must advance without scroll input');
+    assert(!imageBefore.equals(imageAfter), 'The rendered idle background must keep moving');
+
     assert.equal(await page.locator('[data-scroll-story="about"]').getAttribute('data-pinned'), 'true');
     await page.getByRole('link', { name: 'See what I’m building' }).click();
     await page.waitForTimeout(1200);
