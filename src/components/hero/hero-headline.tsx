@@ -41,7 +41,7 @@ export function HeroHeadline() {
       caret = characters[phrase][Math.max(0, count - 1)];
       caret.dataset.caret = count ? "after" : "before";
       element.dataset.phrase = String(phrase);
-      element.dataset.phase = phase;
+      element.dataset.phase = phase === "typing" && count === 0 ? "prompt" : phase;
       if (phase === "hold" && copy) copy.dataset.headline = "ready";
     };
     const schedule = () => {
@@ -95,7 +95,7 @@ export function HeroHeadline() {
     <span className="sr-only">{heroHeadlineText}</span>
     {heroHeadlinePhrases.map((phrase, phraseIndex) => <span className="hero-phrase" data-initial={phraseIndex === 0 ? "true" : undefined} aria-hidden="true" key={phraseIndex}>
       {phrase.lines.map((line, lineIndex) => <span className="hero-headline-line" key={line}>
-        {line.split(" ").map((word, wordIndex, words) => <Fragment key={wordIndex}><span className="hero-word">{Array.from(word).map((character, i) => <span className="hero-character" key={i}>{character}</span>)}</span>{wordIndex < words.length - 1 ? " " : null}</Fragment>)}{lineIndex < phrase.lines.length - 1 ? " " : null}
+        {line.split(" ").map((word, wordIndex, words) => <Fragment key={wordIndex}><span className="hero-word">{Array.from(word).map((character, i) => <span className="hero-character" key={i}>{character}</span>)}</span>{wordIndex < words.length - 1 ? <span className="hero-character hero-space"> </span> : null}</Fragment>)}{lineIndex < phrase.lines.length - 1 ? <span className="hero-character hero-space"> </span> : null}
       </span>)}
     </span>)}
     </p>

@@ -4,11 +4,11 @@ export const heroHeadlinePhrases = [
   { lines: ["Building software."] },
   { lines: ["Exploring AI &", "machine learning."] },
 ] as const;
-export const heroHeadlineLines = heroHeadlinePhrases[0].lines;
 export const heroHeadlineText = heroHeadlinePhrases.map(phrase => phrase.lines.join(" ")).join(" ");
 /** Deterministic variation keeps playback natural and reproducible without random jitter. */
 export function characterDelay(character: string, index: number) {
-  return 45 + (index * 17 % 26) + (/[,.!?]/.test(character) ? 135 : 0);
+  if (character === " ") return 20 + index * 7 % 11;
+  return 35 + (index * 13 % 31) + (/[,.!?]/.test(character) ? 100 : 0);
 }
 /** Runs ahead of the headline markup; no JavaScript leaves the complete SSR text visible. */
 export const heroTypingBootstrap = `(() => {
@@ -22,11 +22,11 @@ export const heroTypingBootstrap = `(() => {
   } catch { delete root.dataset.heroTyping; }
 })();`;
 
-export function backspaceDelay(index: number) { return 25 + index * 13 % 21; }
+export function backspaceDelay(index: number) { return 20 + index * 7 % 16; }
 
 /** One reusable state, advanced only by the active timer; no scroll input. */
 export function createHeroTypingCycle() {
-  const phrases = heroHeadlinePhrases.map(phrase => phrase.lines.join("").replaceAll(" ", ""));
+  const phrases = heroHeadlinePhrases.map(phrase => phrase.lines.join(" "));
   const state = { phrase: 0, count: 0, phase: "typing" as "typing" | "hold" | "backspace" | "gap", delay: 420 };
   return {
     state,

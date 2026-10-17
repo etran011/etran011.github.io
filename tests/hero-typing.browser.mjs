@@ -14,18 +14,29 @@ try {
   await p.goto(base,{waitUntil:'domcontentloaded'});
   await p.waitForFunction(()=>document.documentElement.hasAttribute('data-intro'));
   assert.equal(await p.locator('.hero-character[data-typed]').count(),0,'No typing behind loader');
+  assert.equal(await p.locator('.hero-command-prompt').evaluate(e=>getComputedStyle(e).animationPlayState),'paused');
   assert.equal(await p.locator('.hero-headline .sr-only').textContent(),heroHeadlineText);
   assert.deepEqual(await p.locator('.hero-phrase').allTextContents(),heroHeadlinePhrases.map(v=>v.lines.join(' ')));
   await p.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='cycling'&&!document.documentElement.hasAttribute('data-intro'));
   await p.evaluate(()=>document.fonts.ready);const initial=await box(p);
   await p.waitForFunction(()=>document.querySelectorAll('.hero-phrase[data-active] [data-typed]').length>3);
   assert.equal(await p.locator('.hero-character[data-caret]').count(),1);
+  const promptBox=await p.locator('.hero-command-prompt').boundingBox();
+  assert.equal(await p.locator('.hero-command-prompt').textContent(),'~/portfolio❯');
+  assert(await p.locator('.hero-headline').evaluate(e=>getComputedStyle(e).fontFamily.includes('Geist Mono')));
+  const cursorStyle=()=>p.locator('.hero-character[data-caret]').evaluate(e=>{
+    const c=getComputedStyle(e,'::after'),font=parseFloat(getComputedStyle(e).fontSize);
+    return {width:parseFloat(c.width),height:parseFloat(c.height),font,animation:c.animationName};
+  });
+  const typingCursor=await cursorStyle();
+  assert(typingCursor.width>typingCursor.font*.4&&typingCursor.height>=typingCursor.font*.9,'Block cursor must fill a monospace cell');
+  assert.equal(typingCursor.animation,'none','Cursor remains solid during typing');
   await p.screenshot({path:'tmp/hero-loop-typing.png'});
   await p.mouse.wheel(0,150);await p.waitForTimeout(200);
   assert.equal((await read(p)).phrase,'0','Scroll must not select another phrase');
   await p.keyboard.press('Home');await p.waitForFunction(()=>scrollY<1);
   await hold(p,0);
-  assert(Number(await p.locator('.hero-role').evaluate(e=>getComputedStyle(e).opacity))>=0);
+  assert.equal((await cursorStyle()).animation,'hero-caret-blink','Block cursor blinks during reading hold');
   // An offscreen pause preserves the exact phrase, phase, character count and remaining timer.
   await p.keyboard.press('End');await p.waitForFunction(()=>document.querySelector('.hero-headline').hasAttribute('data-paused'));
   const away=await read(p);await p.waitForTimeout(500);assert.deepEqual(await read(p),away);
@@ -33,16 +44,18 @@ try {
   await p.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'))});
   const hidden=await read(p);await p.waitForTimeout(700);assert.deepEqual(await read(p),hidden);
   await p.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))});
-  await p.waitForFunction(()=>{const e=document.querySelector('.hero-headline');return e.dataset.phase==='backspace'&&e.querySelector('.hero-phrase[data-active]').querySelectorAll('[data-typed]').length<42});
+  await p.waitForFunction(()=>{const e=document.querySelector('.hero-headline');const layer=e.querySelector('.hero-phrase[data-active]');return e.dataset.phase==='backspace'&&layer.querySelectorAll('[data-typed]').length<layer.querySelectorAll('.hero-character').length});
+  assert.equal((await cursorStyle()).animation,'none','Cursor remains solid while deleting');
   const beforeDelete=await read(p);await p.waitForTimeout(120);assert((await read(p)).count<beforeDelete.count,'Backspacing visibly removes individual characters');
   await p.screenshot({path:'tmp/hero-loop-backspace.png'});
   for(const index of [1,2,0,1,2,0]) {
     await hold(p,index);
-    const state=await read(p), expected=heroHeadlinePhrases[index].lines.join('').replaceAll(' ','').length;
+    const state=await read(p), expected=heroHeadlinePhrases[index].lines.join(' ').length;
     assert.equal(state.count,expected);
     const current=await box(p);
     assert(Math.abs(initial.height-current.height)<.1&&Math.abs(initial.width-current.width)<.1&&Math.abs(initial.y-current.y)<.5,'Every phrase must preserve hero dimensions');
     assert.equal(await p.locator('.hero-character[data-caret]').count(),1);
+    assert.deepEqual(await p.locator('.hero-command-prompt').boundingBox(),promptBox,'Command prompt must stay stationary');
     await p.screenshot({path:`tmp/hero-loop-phrase-${index}.png`});
     console.log('Completed phrase in order:',index+1);
     await p.waitForFunction(index=>document.querySelector('.hero-headline').dataset.phase!=='hold'||document.querySelector('.hero-headline').dataset.phrase!==String(index),index);
@@ -65,6 +78,9 @@ try {
       await hold(page,index);const after=await box(page);
       assert(Math.abs(before.height-after.height)<.1&&Math.abs(before.width-after.width)<.1,`Stable multiline phrases at ${width}`);
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`No overflow at ${width}`);
+      const caret=await page.locator('.hero-character[data-caret]').evaluate(e=>{const r=e.getBoundingClientRect(),c=getComputedStyle(e,'::after');return {right:r.x+parseFloat(c.left)+parseFloat(c.width)}});
+      const bounds=await box(page);
+      assert(caret.right<=bounds.x+bounds.width+1,`Block cursor stays within wrapped command line at ${width}`);
       if(width===390)await page.screenshot({path:`tmp/hero-loop-mobile-${index}.png`});
       if(index<2)await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.phase!=='hold');
     }
@@ -79,5 +95,5 @@ try {
   await blocked.route('**/_next/static/**/*.js',r=>r.abort());await blocked.goto(base,{waitUntil:'domcontentloaded'});
   await blocked.waitForFunction(()=>!document.documentElement.hasAttribute('data-hero-typing')&&!document.documentElement.hasAttribute('data-intro'));
   assert.equal(await blocked.locator('.hero-phrase[data-initial] .hero-character').evaluateAll(cs=>cs.filter(c=>getComputedStyle(c).visibility!=='visible').length),0);await blocked.close();
-  console.log('Two complete loops, exact phrases/order, visible deletion/caret, scroll independence, offscreen/tab pause-resume, stable 320–1440px layouts, loader and static fallbacks passed.');
+  console.log('Two complete loops, exact phrases/order, visible deletion/block caret and stationary prompt, scroll independence, offscreen/tab pause-resume, stable 320–1440px layouts, loader and static fallbacks passed.');
 }finally{await browser.close();}

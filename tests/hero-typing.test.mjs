@@ -21,14 +21,14 @@ test('reduced motion, deep links and history restores get immediate full text',(
 test('typing is slower than backspacing, with natural timing and punctuation pauses',()=>{
   heroHeadlinePhrases.forEach(phrase=>{
     let duration=420;
-    Array.from(phrase.lines.join('').replaceAll(' ','')).forEach((c,i)=>{
+    Array.from(phrase.lines.join(' ')).forEach((c,i)=>{
       const delay=characterDelay(c,i); duration+=delay;
-      assert(delay>=45 && delay <= (/[,.!?]/.test(c)?205:70));
-      assert(backspaceDelay(i)>=25 && backspaceDelay(i)<=45);
+      assert(delay >= (c===' '?20:35) && delay <= (c===' '?30:/[,.!?]/.test(c)?165:65));
+      assert(backspaceDelay(i)>=20 && backspaceDelay(i)<=35);
     });
     assert(duration>1000 && duration<4000);
   });
-  assert(characterDelay(',',4)>characterDelay('a',4)+100);
+  assert(characterDelay(',',4)>characterDelay('a',4)+90);
 });
 
 test('all original hero phrases retain their exact wording and order',()=>{
