@@ -10,6 +10,7 @@ try {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(base);
+  await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
   const assertNoProgress = async () => assert.equal(await page.locator('.scroll-progress, .nav-progress').count(), 0);
   await assertNoProgress();

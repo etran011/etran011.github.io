@@ -24,9 +24,10 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     let frame = 0, generation = 0, previous = 0, previousFrame = 0, time = 0, expansion = 0;
     let budget = createAtmosphereBudget("medium");
     let disposed = false, lost = false, needsResize = true;
+    const introPending = () => document.documentElement.dataset.intro === "loading";
     const eligible = () => desktop.matches && !reduce.matches && !forced.matches && !coarse.matches && navigator.maxTouchPoints === 0;
     const pause = () => { cancelAnimationFrame(frame); frame = 0; previous = 0; previousFrame = 0; root.dataset.playing = "false"; };
-    const fallback = () => { pause(); renderer?.destroy(); renderer = undefined; root.dataset.renderer = "static"; };
+    const fallback = () => { pause(); renderer?.destroy(); renderer = undefined; root.dataset.renderer = "static"; root.dataset.rendererReady = "true"; };
     const tick = (now: number) => {
       frame = 0;
       if (!renderer) return;
@@ -40,7 +41,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       if (cadence === 30 && previous && now - previous < 1000 / 30 - 1) { frame = requestAnimationFrame(tick); return; }
       const delta = previous ? Math.min(50, now - previous) / 1000 : 1 / 60;
       expansion = advanceExpansion(expansion, input.current.heroProgress, delta);
-      time += previous ? delta : 0; previous = now;
+      time += previous && !introPending() ? delta : 0; previous = now;
       const follow = 1 - Math.exp(-delta / 0.18);
       pointer.x += (targetPointer.x - pointer.x) * follow; pointer.y += (targetPointer.y - pointer.y) * follow;
       pointer.strength += (targetPointer.strength - pointer.strength) * follow;
@@ -68,8 +69,11 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
         if (needsResize) { renderer.resize(innerWidth, innerHeight); needsResize = false; }
         if (!renderer.render(time, pose, expansion)) { fallback(); return; }
         if (root.dataset.renderer !== "webgl") root.dataset.renderer = "webgl";
+        if (root.dataset.rendererReady !== "true") root.dataset.rendererReady = "true";
         if (root.dataset.playing !== "true") root.dataset.playing = "true";
       } catch { fallback(); return; }
+      // Prepare one complete frame under the terminal, then preserve the opening clock.
+      if (introPending()) { pause(); return; }
       frame = requestAnimationFrame(tick);
     };
     const start = () => { if (!frame && renderer && !document.hidden && eligible()) frame = requestAnimationFrame(tick); };
@@ -77,6 +81,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       const current = ++generation;
       fallback();
       if (!eligible() || lost || disposed || document.hidden) return;
+      delete root.dataset.rendererReady;
       try {
         const { createAtmosphereRenderer, restingPose } = await import("@/lib/atmosphere-renderer");
         if (current !== generation || !eligible() || lost || disposed || document.hidden) return;
@@ -102,13 +107,15 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     const contextLost = (event: Event) => { event.preventDefault(); lost = true; generation++; fallback(); };
     const contextRestored = () => { lost = false; void configure(); };
     root.dataset.renderer = "static";
+    const intro = new MutationObserver(() => { if (!introPending()) start(); });
+    intro.observe(document.documentElement, { attributes: true, attributeFilter: ["data-intro"] });
     for (const query of [desktop, reduce, forced, coarse]) query.addEventListener("change", configure);
     document.addEventListener("visibilitychange", visibility); window.addEventListener("resize", resize);
     document.addEventListener("pointermove", move, { passive: true }); document.addEventListener("pointerleave", leave); window.addEventListener("blur", leave);
     canvas.addEventListener("webglcontextlost", contextLost); canvas.addEventListener("webglcontextrestored", contextRestored);
     void configure();
     return () => {
-      disposed = true; generation++; fallback();
+      disposed = true; generation++; fallback(); intro.disconnect();
       for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure);
       document.removeEventListener("visibilitychange", visibility); window.removeEventListener("resize", resize);
       document.removeEventListener("pointermove", move); document.removeEventListener("pointerleave", leave); window.removeEventListener("blur", leave);

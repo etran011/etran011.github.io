@@ -11,6 +11,7 @@ try {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
   const hero = page.locator('[data-scroll-story="hero"]');
   assert.equal(Number(await hero.getAttribute('data-story-travel')), 1200);

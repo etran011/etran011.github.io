@@ -17,6 +17,7 @@ try {
     };
   });
   await page.goto(base, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
   assert(await page.locator('h1').evaluate(e => Number(getComputedStyle(e).opacity) >= .7));
   assert(await page.locator('.hero-role').evaluate(e => Number(getComputedStyle(e).opacity) >= .85));
