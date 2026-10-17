@@ -76,8 +76,27 @@
 
 html { scroll-padding-top: 7rem; }
 /* Preserve system scrollbars on touch devices and in high-contrast mode. */
+.scroll-progress { display: none; }
 @media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (forced-colors: none) {
   @media not (any-pointer: coarse) {
+    .scroll-progress {
+      display: block;
+      position: fixed;
+      z-index: 25;
+      top: 0.75rem;
+      bottom: 0.75rem;
+      right: 8px;
+      width: 1px;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+    .scroll-progress span {
+      display: block;
+      height: 100%;
+      background: color-mix(in srgb, var(--accent) 60%, transparent);
+      transform: scaleY(0);
+      transform-origin: top;
+    }
     html {
       scrollbar-width: thin;
       scrollbar-color: color-mix(in srgb, var(--accent) 65%, var(--background)) var(--surface);
@@ -101,6 +120,7 @@ html { scroll-padding-top: 7rem; }
     }
   }
 }
+@media print { .scroll-progress { display: none; } }
 body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transparent 50%); }
 .surface-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow-panel); }
 .text-link { color: var(--muted); transition: color var(--duration-fast); }
