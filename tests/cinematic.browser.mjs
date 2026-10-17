@@ -50,6 +50,19 @@ try {
     await page.waitForTimeout(950);
     assert(await page.locator(`#${section} h2`).isVisible());
     assert(await page.evaluate(id => window.reveals.some(r => r.section === id), section));
+    if (section === 'skills') {
+      assert.equal(await page.locator('.technology-button').count(), 19);
+      assert(await page.locator('#skills img').evaluateAll(images => images.every(i => i.complete && i.naturalWidth > 0 && i.alt === '')));
+      assert.equal(await page.locator('[data-technology="Git"] svg').evaluate(e => getComputedStyle(e).color), 'rgb(240, 60, 46)');
+      assert((await page.locator('[data-technology="Python"] img').getAttribute('src')).endsWith('python-original.svg'));
+      const python = page.getByRole('button', { name: 'Python', exact: true });
+      await python.hover(); await page.waitForTimeout(300);
+      assert.notEqual(await python.locator('.technology-glyph').evaluate(e => getComputedStyle(e).transform), 'none');
+      await python.press('Enter');
+      assert.equal(await python.getAttribute('aria-pressed'), 'true');
+      await python.press('Space');
+      assert.equal(await python.getAttribute('aria-pressed'), 'false');
+    }
   }
   const revealCount = await page.evaluate(() => window.reveals.filter(r => r.section === 'contact').length);
   await page.keyboard.press('Home');

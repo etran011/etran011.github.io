@@ -328,9 +328,10 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .technology-button .technology-glyph { transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 .technology-name { transition: color 180ms ease; }
 @media (hover: hover) and (pointer: fine) {
- .stack-collection:has(.technology-button:hover) .technology-name { color: var(--foreground); }
- .technology-button:hover .technology-glyph { transform: translateY(-4px) scale(1.08); }
- .technology-button:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+ .technology-button:hover .technology-name { color: var(--foreground); }
+ .technology-button:hover .technology-glyph { transform: translateY(-3px) scale(1.06); }
+ .technology-button:hover { background: color-mix(in srgb, var(--brand-color, var(--accent)) 5%, transparent); }
+ .technology-button:hover .technology-glyph::before { opacity: 0.7; }
 }
 .stack-collection:has(.technology-button:focus-visible) .technology-name { color: var(--foreground); }
 .technology-stack[data-active-group="languages"] [data-collection="languages"] .stack-collection-heading h3,
@@ -341,8 +342,8 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .technology-button:hover .technology-glyph { transform: none; }
 }
 @media (forced-colors: active) { .technology-button[aria-pressed="true"] { outline: 2px solid Highlight; } .technology-logo { background: CanvasText; } }
-.technology-glyph { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; }
-.technology-icon { display: inline-block; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; color: var(--accent); }
+.technology-glyph { position: relative; isolation: isolate; display: grid; place-items: center; width: 3.5rem; height: 3.5rem; }
+.technology-icon { position: relative; z-index: 1; display: inline-block; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; color: var(--brand-color, var(--accent)); }
 .technology-logo { background: currentColor; mask-size: contain; mask-position: center; mask-repeat: no-repeat; }
 .technology-name { color: var(--muted); font-size: 0.72rem; text-align: center; line-height: 1.6; }
 .technology-initials { display: inline-grid; place-items: center; font-family: var(--font-code); font-size: 0.8rem; letter-spacing: -0.04em; border: 1px solid var(--border); border-radius: 0.45rem; }
@@ -649,3 +650,9 @@ body { isolation: isolate; }
 .ambient-background[data-section="experience"] .ambient-halo { opacity: 0.12; }
 .ambient-background[data-section="education"] .ambient-halo { opacity: 0.14; }
 .ambient-background[data-section="contact"] .ambient-halo { opacity: 0.3; transform: translateY(5vh) scale(1.06); }
+
+.technology-glyph::before { content: ""; position: absolute; inset: -0.75rem; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--brand-color, var(--accent)) 22%, transparent), transparent 70%); opacity: 0; transition: opacity var(--duration-normal) var(--ease-standard); pointer-events: none; }
+[data-brand-surface="light"] .technology-icon { background: #f5f5f7; border-radius: 0.35rem; padding: 0.25rem; }
+.technology-button:focus-visible .technology-glyph::before { opacity: 0.5; }
+@media(prefers-reduced-motion: reduce) { .technology-glyph::before { transition: none; } }
+@media(forced-colors: active) { .technology-glyph::before { display: none; } .technology-icon { color: CanvasText !important; } }
