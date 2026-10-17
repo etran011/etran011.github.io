@@ -15,6 +15,8 @@ attribute vec4 aSurface;
 uniform float uTime;
 uniform mediump float uKind;
 uniform vec3 uMarker;
+uniform highp float uTrajectoryAlpha;
+uniform highp float uHead;
 uniform float uSeparation;
 uniform float uRelease;
 uniform float uShrink;
@@ -78,18 +80,25 @@ void main() {
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
+  // Illuminate the sampled surface without moving it away from the objective.
+  float markerDistance = length(aPosition - uMarker);
+  float proximity = exp(-markerDistance * markerDistance * 18.0);
+  float minimumPulse = smoothstep(0.94, 0.99, uHead) *
+    pow(0.5 + 0.5 * cos(markerDistance * 24.0 - uTime * 3.0), 8.0) * exp(-markerDistance * 3.0);
+  if (uKind < 0.5) vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
   float pointSize = mix(5.0 + aSeed.z * 0.9, 1.15 + aSeed.z * 0.65, uShrink);
   if (uKind > 0.5) vLight = 1.0;
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
-  if (uKind > 1.5 && uKind < 2.5) gl_PointSize = 7.5 * uRatio;
+  if (uKind > 1.5 && uKind < 2.5) gl_PointSize = 22.0 * uRatio;
 }`;
 const fragmentSource = `
 precision mediump float;
+uniform highp float uTime;
 uniform vec3 uColor;
 uniform float uPoint;
 uniform mediump float uKind;
-uniform float uTrajectoryAlpha;
-uniform float uHead;
+uniform highp float uTrajectoryAlpha;
+uniform highp float uHead;
 uniform float uLinks;
 uniform float uDetail;
 varying float vLight;
@@ -103,8 +112,15 @@ void main() {
   if (uKind > 0.5 && uKind < 2.5) {
     alpha = uTrajectoryAlpha;
     color = mix(uColor, vec3(0.71, 0.804, 1.0), 0.7);
-    if (uKind < 1.5) alpha *= 1.0 - smoothstep(uHead - 0.002, uHead + 0.002, vPath);
-    else alpha *= 1.0 - smoothstep(0.12, 0.5, length(gl_PointCoord - vec2(0.5)));
+    if (uKind < 1.5) {
+      alpha *= (0.16 + 0.84 * smoothstep(uHead - 0.32, uHead, vPath)) *
+        (1.0 - smoothstep(uHead - 0.002, uHead + 0.002, vPath));
+    } else {
+      float radius = length(gl_PointCoord - vec2(0.5));
+      float core = 1.0 - smoothstep(0.07, 0.16, radius);
+      float halo = exp(-radius * radius * 20.0) * (1.0 - smoothstep(0.35, 0.5, radius));
+      alpha *= max(core, halo * (0.3 + sin(uTime * 2.0) * 0.035));
+    }
   }
   if (uKind > 2.5) alpha = (0.12 + vPulse * 0.1) * uLinks;
   gl_FragColor = vec4(color, alpha);
@@ -192,16 +208,16 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);
+        descentPlayback(time, trajectoryModel.trajectory, playback);
+        gl.uniform1f(uniforms.uTrajectoryAlpha, playback.alpha * choreography.links * 0.85);
+        gl.uniform1f(uniforms.uHead, playback.progress);
+        gl.uniform3f(uniforms.uMarker, playback.x, playback.y, playback.z);
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.LINES); }
         gl.uniform1f(uniforms.uKind, 0);
         // Expanded sections have no visible relationships; omit their entire draw.
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }
         if (pose.detail > 0.01) { gl.uniform1f(uniforms.uPoint, 1); draw(points, gl.POINTS); }
         if (choreography.links > 0.001) {
-          descentPlayback(time, trajectoryModel.trajectory, playback);
-          gl.uniform1f(uniforms.uTrajectoryAlpha, playback.alpha * choreography.links * 0.85);
-          gl.uniform1f(uniforms.uHead, playback.progress);
-          gl.uniform3f(uniforms.uMarker, playback.x, playback.y, playback.z);
           if (playback.alpha > 0.001) {
             gl.uniform1f(uniforms.uKind, 1); draw(trail, gl.LINE_STRIP);
             gl.uniform1f(uniforms.uKind, 2); draw(trail, gl.POINTS, 1);
