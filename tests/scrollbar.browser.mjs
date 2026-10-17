@@ -20,12 +20,38 @@ try {
     return style.borderLeftWidth === '0px' && style.boxShadow === 'none';
   })), 'No rail borders or shadows');
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar-button').display), 'none', 'No scrollbar buttons');
+  const assertPosition = () => page.waitForFunction(() => {
+    const handle = document.querySelector('.auto-scrollbar-thumb');
+    const rect = handle.getBoundingClientRect();
+    const maximum = document.documentElement.scrollHeight - innerHeight;
+    const fraction = maximum > 0 ? Math.max(0, Math.min(1, scrollY / maximum)) : 0;
+    return Math.abs(rect.top - fraction * (innerHeight - rect.height)) < 1
+      && Number(handle.getAttribute('aria-valuenow')) === Math.round(fraction * 100);
+  });
+  const initialWidth = await page.evaluate(() => document.documentElement.clientWidth);
+  const alpha = () => page.evaluate(() => Number(getComputedStyle(document.querySelector('.auto-scrollbar')).opacity));
+  assert.equal(await alpha(), 0, 'Initial page has no visible thumb');
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement?.className), 'skip-link', 'Skip link remains first in the keyboard order');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => document.activeElement.blur());
+  await page.mouse.move(1420, 400);
+  await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.auto-scrollbar')).opacity) === 1);
+  await page.waitForTimeout(1400);
+  assert.equal(await alpha(), 1, 'Near-edge hover stays visible beyond the idle timeout');
+  assert.equal(await page.evaluate(() => document.documentElement.clientWidth), initialWidth, 'Revealing the thumb never changes layout width');
   const thumb = await page.evaluate(() => {
-    const style = getComputedStyle(document.documentElement, '::-webkit-scrollbar-thumb');
+    const style = getComputedStyle(document.querySelector('.auto-scrollbar-thumb'));
     return { interior: style.backgroundColor, background: getComputedStyle(document.documentElement).getPropertyValue('--background').trim(), border: style.borderLeftWidth, radius: style.borderRadius };
   });
-  assert.equal(thumb.interior, 'rgb(11, 13, 18)', 'Thumb retains the existing dark background');
-  assert(Number.parseFloat(thumb.border) >= 1 && Number.parseFloat(thumb.border) <= 2, 'Thin native outline');
+  assert.deepEqual(await page.evaluate(() => {
+    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = getComputedStyle(document.querySelector('.auto-scrollbar-thumb')).backgroundColor;
+    ctx.fillRect(0, 0, 1, 1);
+    return Array.from(ctx.getImageData(0, 0, 1, 1).data);
+  }), [11, 13, 18, 255], 'Visible thumb retains the existing dark background');
+  assert(Number.parseFloat(thumb.border) >= 1 && Number.parseFloat(thumb.border) <= 2, 'Thin accent outline');
   assert.equal(thumb.radius, '999px');
   const thumbBox = { x: 1430, y: 0, width: 10, height: 70 };
   await page.mouse.move(900, 400);
@@ -33,26 +59,37 @@ try {
   await page.mouse.move(1435, 22);
   await page.waitForTimeout(200);
   const hover = await page.screenshot({ clip: thumbBox });
-  assert(!idle.equals(hover), 'Native thumb visibly emphasizes hover');
+  assert(!idle.equals(hover), 'Outlined thumb visibly emphasizes hover');
   await page.mouse.down();
   const pressed = await page.screenshot({ clip: thumbBox });
-  assert(!hover.equals(pressed), 'Native thumb visibly emphasizes dragging');
-  assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar-thumb').backgroundColor), thumb.interior, 'Hover and pressed states preserve the dark interior');
+  await page.waitForTimeout(1700);
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.auto-scrollbar-thumb')).borderTopColor), 'rgb(181, 205, 255)', 'Stationary drag remains emphasized beyond idle timeout');
+  assert(!hover.equals(pressed), 'Outlined thumb visibly emphasizes dragging');
+  assert.equal(await page.evaluate(() => getComputedStyle(document.querySelector('.auto-scrollbar-thumb')).backgroundColor), thumb.interior, 'Hover and pressed states preserve the dark interior');
   await page.mouse.move(1435, 500, { steps: 20 });
   await page.mouse.up();
-  assert(await page.evaluate(() => scrollY) > 1000, 'Real native thumb drag scrolls');
+  assert(await page.evaluate(() => scrollY) > 1000, 'Thumb dragging updates the native document');
+  await assertPosition();
   await assertNoProgress();
   await page.mouse.move(900, 400);
+  await page.waitForTimeout(1250);
+  assert((await alpha()) > 0 && (await alpha()) < 1, 'Idle thumb fades rather than disappears abruptly');
+  await page.waitForTimeout(450);
+  assert.equal(await alpha(), 0, 'Idle thumb disappears completely');
   for (const delta of [-1600, 2200, -350]) {
     await page.mouse.wheel(0, delta);
+    await page.waitForTimeout(60);
+    assert((await alpha()) > 0, 'Scrolling begins revealing the thumb immediately');
     for (let frame = 0; frame < 5; frame++) { await page.waitForTimeout(70); await assertNoProgress(); }
     await page.waitForTimeout(1000);
     await assertNoProgress();
+    await assertPosition();
   }
   // Anchors exercise each pinned section using the actual navigation links.
   for (const section of ['about', 'projects', 'contact']) {
     await page.locator(`.desktop-nav a[href="/#${section}"]`).click();
     await page.waitForFunction(id => document.activeElement?.id === id, section);
+    await assertPosition();
     await assertNoProgress();
   }
   await page.goBack();
@@ -65,12 +102,16 @@ try {
   await page.waitForTimeout(600);
   await assertNoProgress();
   await page.setViewportSize({ width: 1280, height: 800 });
+  await assertPosition();
   await assertNoProgress();
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.locator('.auto-scrollbar-thumb').focus();
   await page.keyboard.press('Home');
   await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => scrollY), 0, 'Keyboard scrolling remains native when the thumb has focus');
   await assertNoProgress();
   await page.emulateMedia({ forcedColors: 'active' });
+  assert.equal(await page.locator('.auto-scrollbar').evaluate(e => getComputedStyle(e).display), 'none');
   await assertNoProgress();
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).scrollbarColor), 'auto');
   const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -90,6 +131,13 @@ try {
   await page.keyboard.press('End');
   await page.waitForTimeout(400);
   await assertNoProgress();
+  await assertPosition();
+  const fallback = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 1000 } });
+  const nojs = await fallback.newPage();
+  await nojs.goto(base);
+  assert.equal(await nojs.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar').display), 'block', 'JavaScript-disabled pages retain a native scrollbar');
+  assert.equal(await nojs.locator('.auto-scrollbar').evaluate(e => getComputedStyle(e).display), 'none');
+  await fallback.close();
   assert.deepEqual(errors, []);
-  console.log('Native hover/pressed states and dragging; no progress overlays during wheel, reversal, pins, anchors, history, reload, resize and keyboard; reduced-motion, forced-colors and touch fallbacks passed.');
+  console.log('Auto-hide, hover/pressed states and dragging; no progress overlays during wheel, reversal, pins, anchors, history, reload, resize and keyboard; reduced-motion, forced-colors and touch fallbacks passed.');
 } finally { await browser.close(); }
