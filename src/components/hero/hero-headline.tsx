@@ -89,12 +89,15 @@ export function HeroHeadline() {
     };
   }, []);
 
-  return <p ref={headline} className="hero-headline">
+  return <div className="hero-terminal">
+    <p className="hero-command-prompt" aria-hidden="true"><span>~/portfolio</span><b>❯</b></p>
+    <p ref={headline} className="hero-headline">
     <span className="sr-only">{heroHeadlineText}</span>
     {heroHeadlinePhrases.map((phrase, phraseIndex) => <span className="hero-phrase" data-initial={phraseIndex === 0 ? "true" : undefined} aria-hidden="true" key={phraseIndex}>
-      {phrase.lines.map((line, lineIndex) => <span className="hero-headline-line" data-tone={phrase.tone === "accent" || phrase.tone === "mixed" && lineIndex > 0 ? "accent" : undefined} key={line}>
+      {phrase.lines.map((line, lineIndex) => <span className="hero-headline-line" key={line}>
         {line.split(" ").map((word, wordIndex, words) => <Fragment key={wordIndex}><span className="hero-word">{Array.from(word).map((character, i) => <span className="hero-character" key={i}>{character}</span>)}</span>{wordIndex < words.length - 1 ? " " : null}</Fragment>)}{lineIndex < phrase.lines.length - 1 ? " " : null}
       </span>)}
     </span>)}
-  </p>;
+    </p>
+  </div>;
 }

@@ -1,8 +1,8 @@
-/** Exact wording, order, line breaks and tones from the original scroll-driven hero. */
+/** Exact wording, order and line breaks from the original scroll-driven hero. */
 export const heroHeadlinePhrases = [
-  { lines: ["Building intelligent systems,", "one idea at a time."], tone: "mixed" },
-  { lines: ["Building software."], tone: "foreground" },
-  { lines: ["Exploring AI &", "machine learning."], tone: "accent" },
+  { lines: ["Building intelligent systems,", "one idea at a time."] },
+  { lines: ["Building software."] },
+  { lines: ["Exploring AI &", "machine learning."] },
 ] as const;
 export const heroHeadlineLines = heroHeadlinePhrases[0].lines;
 export const heroHeadlineText = heroHeadlinePhrases.map(phrase => phrase.lines.join(" ")).join(" ");
