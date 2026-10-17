@@ -111,7 +111,7 @@ void main() {
   }
   vLight += energy * 0.48;
   vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
-  float pointSize = mix(6.3 + aSeed.z * 1.0, 1.15 + aSeed.z * 0.65, uShrink);
+  float pointSize = mix(4.8 + aSeed.z * 0.8, 1.15 + aSeed.z * 0.65, uShrink);
   pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation + energy * 0.24;
   if (uKind > 0.5) vLight = 1.0;
   if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x) * (1.0 + energy * 0.2);

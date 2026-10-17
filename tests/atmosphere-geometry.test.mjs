@@ -1,23 +1,24 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createParticleGeometry, particleVertex, projectFormationPoint, formationPoint, surfaceCoordinates, particleStride } from "../src/lib/atmosphere-geometry.ts";
+import { createParticleGeometry, particleVertex, projectFormationPoint, formationPoint, surfaceCoordinates, surfaceColumns, surfaceCount, particleCount, particleStride } from "../src/lib/atmosphere-geometry.ts";
 
 test("quality reductions retain exact particle identities and bounded GPU buffers", () => {
   const high = createParticleGeometry("high");
-  assert.equal(high.points.length / particleStride, 1248);
-  for (const [quality, stride] of [["medium", 2], ["low", 3]]) {
+  assert.equal(surfaceCount, 3024);
+  assert.equal(high.points.length / particleStride, particleCount);
+  for (const [quality, stride] of [["medium", 3], ["low", 6]]) {
     const geometry = createParticleGeometry(quality);
-    assert.equal(geometry.points.length / particleStride, 1248 / stride);
+    assert.equal(geometry.points.length / particleStride, particleCount / stride);
     assert(geometry.lines.length % (particleStride * 2) === 0);
     for (let i = 0; i < geometry.points.length / particleStride; i++) {
       assert.deepEqual(geometry.points.slice(i * particleStride, i * particleStride + particleStride), high.points.slice(i * stride * particleStride, i * stride * particleStride + particleStride));
     }
   }
-  assert(high.points.byteLength + high.lines.byteLength < 110_000);
+  assert(high.points.byteLength + high.lines.byteLength < 330_000);
 });
 test("landscape samples the exact objective and analytic display normals at every quality", async () => {
   const { loss, lossGradient, surfacePoint, surfaceNormal } = await import("../src/lib/loss-landscape.mjs");
-  for (let id = 0; id < 1248; id++) {
+  for (let id = 0; id < particleCount; id++) {
     const [x, z] = surfaceCoordinates(id), normal = surfaceNormal(x, z);
     assert.deepEqual(formationPoint(id), surfacePoint(x, z));
     assert(Math.abs(Math.hypot(...normal) - 1) < 1e-12 && normal[1] > 0);
@@ -27,19 +28,19 @@ test("landscape samples the exact objective and analytic display normals at ever
   }
 });
 test("surface links connect parameter neighbors and retain every endpoint at lower quality", () => {
-  for (const [quality, stride] of [["high", 1], ["medium", 2], ["low", 3]]) {
+  for (const [quality, stride] of [["high", 1], ["medium", 3], ["low", 6]]) {
     const { connections } = createParticleGeometry(quality);
-    assert(connections.length > 100 && connections.length < 400);
+    assert(connections.length > 100 && connections.length < 1200);
     for (const edge of connections) {
       assert.equal(edge.from % stride, 0); assert.equal(edge.to % stride, 0);
-      assert(edge.to - edge.from === 48 || (edge.to - edge.from === stride && Math.floor(edge.to / 48) === Math.floor(edge.from / 48)));
+      assert(edge.to - edge.from === surfaceColumns || edge.to - edge.from === surfaceColumns + stride || (edge.to - edge.from === stride && Math.floor(edge.to / surfaceColumns) === Math.floor(edge.from / surfaceColumns)));
     }
   }
 });
 
 test("destinations cover all viewport quadrants with finite depth and no random regeneration", () => {
   const quadrants = [0, 0, 0, 0];
-  for (let id = 0; id < 1248; id++) {
+  for (let id = 0; id < particleCount; id++) {
     const vertex = particleVertex(id);
     assert.deepEqual(vertex, particleVertex(id));
     assert(vertex.every(Number.isFinite));
@@ -50,7 +51,7 @@ test("destinations cover all viewport quadrants with finite depth and no random 
     assert(projected.every(Number.isFinite));
     assert(Math.abs(projected[0]) < 2 && Math.abs(projected[1]) < 2);
   }
-  assert(quadrants.every(count => count > 280 && count < 345));
+  assert(quadrants.every(count => Math.abs(count - particleCount / 4) < 40));
 });
 
 test("scene poses keep the model restrained and respond to real narrative states", async () => {
