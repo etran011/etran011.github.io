@@ -36,14 +36,19 @@ try {
   assert(after.rings[2] > .99 && after.expansion < .001);
   assert(await page.evaluate(() => window.orbitalDraws > 0));
   await page.screenshot({ path: 'tmp/sculpture-hero.png' });
-  await page.keyboard.press('End'); await page.waitForTimeout(2600);
+  const settleExpansion = goal => page.waitForFunction(goal => {
+    const gl = document.querySelector('.ambient-canvas').getContext('webgl'), program = gl.getParameter(gl.CURRENT_PROGRAM);
+    const value = gl.getUniform(program, gl.getUniformLocation(program, 'uExpansion'));
+    return goal === 1 ? value > .98 : value < .01;
+  }, goal);
+  await page.keyboard.press('End'); await settleExpansion(1);
   assert((await read()).rings[2] === 0 && (await read()).expansion > .98);
   const ambient = await page.screenshot(), idleY = await page.evaluate(() => scrollY);
   await page.waitForTimeout(1700);
   assert.equal(await page.evaluate(() => scrollY), idleY);
   assert(!ambient.equals(await page.screenshot()), 'Dispersed particles must keep drifting while idle');
   const ambientTime = (await read()).time;
-  await page.keyboard.press('Home'); await page.waitForTimeout(3200);
+  await page.keyboard.press('Home'); await settleExpansion(0);
   const restored = await read();
   assert(restored.rings[2] > .99 && restored.expansion < .01);
   assert(restored.time > ambientTime, 'Reconstruction must preserve the active clock');

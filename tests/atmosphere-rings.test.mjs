@@ -35,3 +35,21 @@ test('rings expand, fragment and fade continuously with exact reverse reconstruc
   assert.equal(sample(.1).fragments, 0, 'Initial scroll preserves coherent coordinate arcs');
   assert(sample(.5).opacity > 0, 'Fragments remain after surface links disappear');
 });
+
+import { formationCamera, formationView, sculptureRadius, fitSculptureScale } from '../src/lib/atmosphere-view.mjs';
+test('ribbon envelope fits desktop and tall-window frames with safe margins', () => {
+  const geometry = createRingGeometry();
+  let radius = 0;
+  for (let i = 0; i < geometry.length; i += 13) radius = Math.max(radius, Math.hypot(...geometry.slice(i, i + 3)) * .85);
+  const projectedEnvelope = radius / Math.sqrt(1 - (radius / formationCamera) ** 2);
+  assert(projectedEnvelope <= sculptureRadius);
+  for (const aspect of [1.7778, 1.6, 1.44, 1.3333, 1.024, .8533]) {
+    for (const dx of [-.025, 0, .025]) {
+      const pose = { ...formationView, centerX: formationView.centerX + dx, centerY: .018 };
+      const scale = fitSculptureScale(pose, aspect);
+      assert(scale <= pose.scale && scale > .25);
+      assert(Math.abs(pose.centerX) + projectedEnvelope * scale / aspect <= .961);
+      assert(Math.abs(pose.centerY) + projectedEnvelope * scale <= .961);
+    }
+  }
+});

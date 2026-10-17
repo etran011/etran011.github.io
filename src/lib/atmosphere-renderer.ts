@@ -2,7 +2,7 @@ import { displayWaveGLSL, resolveIdleRotation } from "./atmosphere-idle.mjs";
 import { createRingGeometry } from "./atmosphere-rings";
 import { descentPlayback } from "./loss-landscape.mjs";
 import { resolveParticleChoreography, resolveRingChoreography } from "./particle-transition";
-import { formationCamera, formationView } from "./atmosphere-view.mjs";
+import { formationCamera, formationView, fitSculptureScale } from "./atmosphere-view.mjs";
 import { atmosphereQuality, createParticleGeometry, createTrajectoryGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
 
 export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
@@ -230,7 +230,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uShrink, choreography.shrink);
         resolveIdleRotation(time, pose, idleRotation);
         gl.uniform3f(uniforms.uRotation, idleRotation.yaw, idleRotation.pitch, idleRotation.roll);
-        gl.uniform4f(uniforms.uProjection, pose.scale, width / height, pose.centerX, pose.centerY);
+        gl.uniform4f(uniforms.uProjection, fitSculptureScale(pose, width / height), width / height, pose.centerX, pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
         gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);

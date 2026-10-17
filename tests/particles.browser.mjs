@@ -109,6 +109,7 @@ async function ready(page) {
     await page.getByRole('link', { name: 'See what I’m building' }).click();
     await page.waitForTimeout(1200);
     assert.equal(await page.locator('.ambient-background').getAttribute('data-scene'), 'projects');
+    await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.ambient-canvas')).opacity) <= .12);
     assert(Number(await page.locator('.ambient-canvas').evaluate(e => getComputedStyle(e).opacity)) <= 0.12);
     assert.equal(await page.locator('[data-scroll-story="project"]').getAttribute('data-pinned'), 'true');
     assert.equal(await page.locator('.ambient-canvas').count(), 1);

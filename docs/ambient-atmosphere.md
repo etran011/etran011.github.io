@@ -11,7 +11,7 @@ Its analytic gradient is:
 - `∂f/∂x = 4x(x² + z − 11) + 2(x + z² − 7)`
 - `∂f/∂z = 2(x² + z − 11) + 4z(x + z² − 7)`
 
-Display height is `0.5 log(1 + f/16) − 0.85`, with horizontal coordinates scaled by 0.31. This monotone height compression makes the valleys legible. **Optimization uses the original objective, not the compressed display height.** Analytic display normals provide restrained lighting; the structured surface does not undergo an arbitrary idle deformation.
+Display height is `0.5 log(1 + f/16) − 0.85`, with horizontal coordinates scaled by 0.31. This monotone height compression makes the valleys legible. **Optimization uses the original objective, not the compressed display height.** Analytic display normals provide restrained lighting; the structured surface retains its recognizable geometry. A shared display-only breathing offset of at most ±0.016 world units moves the samples, trail, and marker together; optimization still uses the unmodified objective and gradient.
 
 `loss-landscape.mjs` precomputes actual gradient descent from `(0.6, 3.8)`. Each update is `p_next = p − α∇f(p)`, starting with `α = 0.004`. This lies below the reciprocal Hessian row-sum bound on the domain. Domain checks and [Armijo backtracking](https://optax.readthedocs.io/en/latest/api/generated/optax.scale_by_backtracking_linesearch.html) halve the rate if sufficient decrease is not met. The default run takes 192 updates and converges to `(3, 2)` with loss below `10⁻¹²`. Other starting basins converge to their own minima in tests.
 
@@ -21,7 +21,7 @@ Playback retimes the precomputed parameter-space segments by distance, then re-e
 
 - `loss-landscape.mjs`: objective, analytic gradient, display height/normals, descent solver, and playback.
 - `atmosphere-geometry.ts`: a 48 × 26 deterministic sampling grid, stable identities, ambient destinations, sparse parameter-neighbor links, and the static trajectory buffer.
-- `atmosphere-rings.ts`: three open coordinate ellipses, differently tilted and sized, with sparse ticks; one deterministic buffer under 40 KB.
+- `atmosphere-rings.ts`: three open coordinate ellipses, differently tilted and sized, with sparse ticks; one deterministic ribbon buffer under 120 KB.
 - `atmosphere-view.mjs`: shared resting view and camera for WebGL and the SVG generator.
 - `atmosphere-renderer.ts`: native WebGL 1 and original GLSL, with static buffers and no per-frame geometry upload.
 - `particle-transition.ts`: bounded expansion catch-up and reversible release, connection opacity, loosening, and shrinking.
@@ -29,7 +29,7 @@ Playback retimes the precomputed parameter-space segments by distance, then re-e
 
 There are 1,248 / 624 / 416 landscape points at high / medium / low quality. Each quality tier retains the exact identities of its samples. Connections follow adjacent surface parameters; there are no unrelated nearest-neighbor cluster links. The trajectory uses one additional static buffer; its marker reuses the same buffer with a position uniform. The rings use one additional static buffer. There are four live GPU buffers, cleaned up on disposal. The hero uses at most five batched draws; fully dispersed sections use one points draw.
 
-All three rings are batched into one lines draw, with different slow angular speeds and a faint traveling highlight. Depth and a left-side mask keep them subordinate to the surface and text. Invisible rings issue no draw; fully expanded particles skip trajectory illumination calculations.
+All three rings are batched into one triangles draw. Narrow ribbons provide a reliable visible width instead of relying on unsupported wider WebGL lines. Original local radii are 2.02/2.17/2.32 units with a shared 0.85 framing factor. They rotate around different axes at 0.065/−0.045/0.03 radians per second, with traveling highlights, sparse ticks, and depth-controlled opacity. Depth and a left-side mask keep them subordinate to the surface and text. Invisible rings issue no draw; fully expanded particles skip trajectory illumination calculations.
 
 No new runtime library, mesh texture, downloaded model, or post-processing pass is required. All layers remain decorative, `aria-hidden`, and `pointer-events: none`.
 
@@ -40,7 +40,7 @@ The existing paced hero `story-progress` event still drives the animation. No ad
 1. The prominent loss surface, coordinate rings, and trajectory remain coherent at the top.
 2. Early progress expands the rings and adds a bounded rotation offset. This accelerates them during scroll without multiplying active time by changing progress (which would jump). Samples loosen along their surface normals as connections and trajectory fade.
 3. Ring arcs develop fine angular gaps and slight geometric separation before fading completely. Their opacity persists beyond the surface links. Deterministic curved paths disperse the samples into the viewport.
-4. A smooth shrinking value follows particle release: formation points are approximately 5–6 CSS pixels before perspective; ambient points are approximately 1.15–1.8 CSS pixels.
+4. A smooth shrinking value follows particle release: formation points are approximately 6.3–7.3 CSS pixels before perspective; ambient points are approximately 1.15–1.8 CSS pixels.
 5. Reversing the same progress restores ring fragments into intact arcs along with particle size, structure, connections, and trajectory. No irreversible expansion flag or new random layout is used.
 
 ### Deliberate storytelling, natural input
@@ -57,7 +57,7 @@ Travel scales down on smaller eligible desktops and remains capped on large moni
 
 Lenis remains the sole input controller, with wheel multiplier 1, lerp 0.115, and native touch. No input is discarded, queued, or held until an animation completes. Ordinary content retains its previous motion. Keys interrupt smoothing, anchors preserve destination/focus, and deliberate navigation can leave a scene without waiting. Ineligible short/mobile/touch, reduced-motion, forced-colors, oversized-text, or overflowing layouts retain natural flow rather than pins. Synthetic wheel bursts cover fine and coarse patterns; physical MacBook trackpad testing still requires a person.
 
-Ambient motion uses active animation time, independent of scroll and pointer changes. Two low-frequency sinusoidal fields vary horizontal/vertical velocities by stable particle seeds; slow depth variation supplies parallax. Motion remains gentle while reading with a stationary cursor. Hidden documents pause the loop and reset its clock, so resuming does not jump ahead.
+Ambient motion uses active animation time, independent of scroll and pointer changes. Two sinusoidal fields vary horizontal/vertical velocities by stable particle seeds, with stronger drift than the earlier implementation. The primary amplitude is 0.095 NDC scaled by stable depth, with a secondary 0.018 field; smooth depth variation supplies parallax. Ambient point sizes and section opacities remain restrained. Motion remains gentle while reading with a stationary cursor. Hidden documents pause the loop and reset its clock, so resuming does not jump ahead.
 
 Projects lower opacity and detail so screenshots retain focus. Skills retain their existing selection response. Experience, education, contact, and case studies use the quiet profile. Each section shares the same canvas and particle identities.
 
@@ -84,15 +84,27 @@ npm run lint
 npm run build
 ```
 
-Twenty-one unit tests cover loss/gradient agreement with finite differences, display samples/normals, valid surface links, stable quality subsets, bounded buffers, viewport destinations, scene restraint, adaptive budgets, exact negative-gradient updates, sufficient decrease, continuous downhill interpolation, multiple starting basins, surface-following playback, invisible restarts, reversible shrinking, ring geometry/reversible phases, capped story distances, and the weighted story pacer.
+Twenty-five unit tests cover loss/gradient agreement with finite differences, display samples/normals, valid surface links, stable quality subsets, bounded buffers, viewport destinations, scene restraint, adaptive budgets, exact negative-gradient updates, sufficient decrease, continuous downhill interpolation, multiple starting basins, surface-following playback, invisible restarts, reversible shrinking, ring geometry/reversible phases, ribbon framing bounds across desktop/tall windows, bounded display breathing and idle camera motion, capped story distances, and the weighted story pacer.
 
 The optional browser regression requires Playwright and Chrome without adding a runtime dependency:
 
 ```sh
 PLAYWRIGHT_MODULE=/absolute/path/to/playwright node tests/particles.browser.mjs http://127.0.0.1:4173
 PLAYWRIGHT_MODULE=/absolute/path/to/playwright node tests/scroll.browser.mjs http://127.0.0.1:4173
+PLAYWRIGHT_MODULE=/absolute/path/to/playwright node tests/sculpture.browser.mjs http://127.0.0.1:4173
 ```
 
 It checks live downhill marker movement, staged release, shrinking and reverse growth, ongoing idle changes at a fixed scroll position, cursor coexistence, About/Selected Work pinning, quiet Projects, omitted invisible line draws, hidden-tab pause, actual context loss/restoration, disposal/recreation of all four buffers, 320/390-pixel mobile views, reduced motion, no JavaScript, and unavailable WebGL. The scroll regression covers dense small-delta bursts, large wheel input, bounded initial progress, reversal, anchors/focus, keyboard bypass, unmodified ordinary-content distance, and no delayed input replay. Standalone visual checks review desktop framing and static fallbacks. Production output keeps `.nojekyll`, local assets, and both static case-study routes for GitHub Pages.
 
-The production Chrome sample at 1440×1000, device scale factor 2, measured approximately 60 FPS at high quality. Median and 95th-percentile frame intervals were 16.7 ms and 16.8 ms respectively, with 2,399,969 backing pixels. Quiet expanded sections used 30 draw calls per second (one points pass per frame). A 2560×1440 resize stayed within budget at 2066×1162 backing pixels with no GL error. Synthetic frame pressure reduced quality without losing the renderer, and data-saving mode began at low quality. These measurements describe this machine and sample, not every device.
+The production Chrome sample at 1440×1000, device scale factor 2, measured approximately 60 FPS at high quality. Median and 95th-percentile frame intervals were 16.7 ms and 16.7 ms respectively, with 2,399,969 backing pixels. Quiet expanded sections used 30 draw calls per second (one points pass per frame). A 2560×1440 resize stayed within budget at 2066×1162 backing pixels with no GL error. Synthetic frame pressure reduced quality without losing the renderer, and data-saving mode began at low quality. These measurements describe this machine and sample, not every device.
+
+
+## Sculpture prominence and continuous motion
+
+The shared view uses a 0.47 requested scale (previously 0.42), camera distance 8, yaw 0.68, pitch 0.52, and a more central horizontal placement. `fitSculptureScale` preserves a 4% projected edge margin using the ring envelope; normal desktop framing is approximately 0.462, with further fitting in tall windows. The shader's left-side text protection remains intact. Increased formation particle size, fuller directional light, 0.95 hero canvas opacity, and a less attenuated edge mask make the structure visible immediately. The static SVG shares the view and has brighter particles/rings; mobile/touch/reduced-motion continue to avoid continuous GPU animation.
+
+A single active clock drives the entire system. The bounded camera orbit uses yaw amplitudes 0.22 and 0.055 radians, pitch 0.055, and roll 0.025, producing visible movement over a few seconds while preserving the initial silhouette during a long visit. `atmosphere-idle.mjs` supplies both the tested display-wave math and GLSL. Network pulses and a gently changing light direction animate the surface. The trajectory follows the same small breathing displacement, so it remains attached; neither the gradient nor descent steps are modified.
+
+Scroll progress continues to control only the existing loosening, release, ring fragmentation, fading, and shrinking. Idle phase keeps advancing during the transition and reconstruction; returning to the top does not reset it. Fully dispersed fields skip the now-invisible breathing calculation. The renderer still uses one frame loop, four buffers, no per-frame geometry upload, and the same maximum five hero draws/one ambient draw. No particles or runtime libraries were added.
+
+`tests/sculpture.browser.mjs` verifies visible idle rotation and real pixel changes without input, stationary typography, ribbon draws, ongoing ambient drift at fixed scroll, reconstruction without clock reset, and exact active-clock pause/resume while hidden. Existing lifecycle tests cover context restoration, cleanup, static modes, and preference changes.
