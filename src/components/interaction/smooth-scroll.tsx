@@ -18,7 +18,7 @@ export function SmoothScroll() {
     const eligible = () => desktop.matches && !coarse.matches && !forced.matches && navigator.maxTouchPoints === 0 && !reduce.matches;
     const modalState = () => {
       if (!instance) return;
-      if (document.body.style.overflow === "hidden" || document.querySelector("dialog[open]")) { instance.stop(); }
+      if (document.documentElement.hasAttribute("data-intro") || document.body.style.overflow === "hidden" || document.querySelector("dialog[open]")) { instance.stop(); }
       else if (instance.isStopped) instance.start();
     };
     const configure = async () => {
@@ -62,6 +62,7 @@ export function SmoothScroll() {
     const keyboard = (event: KeyboardEvent) => { if (["Tab", "ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(event.key)) interrupt(); };
     const observer = new MutationObserver(modalState);
     observer.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-intro"] });
     for (const query of [desktop, coarse, reduce, forced]) query.addEventListener("change", configure);
     document.addEventListener("click", anchor);
     document.addEventListener("keydown", keyboard);

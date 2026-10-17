@@ -704,3 +704,38 @@ body { isolation: isolate; }
 .technology-button:focus-visible .technology-glyph::before { opacity: 0.5; }
 @media(prefers-reduced-motion: reduce) { .technology-glyph::before { transition: none; } }
 @media(forced-colors: active) { .technology-glyph::before { display: none; } .technology-icon { color: CanvasText !important; } }
+
+/* First-session introduction; no script means no overlay or interaction lock. */
+.portfolio-intro { display: none; }
+html[data-intro], html[data-intro] body { overflow: hidden; }
+html[data-intro] :is(main, .site-header, footer, .skip-link, .auto-scrollbar) { visibility: hidden; }
+html[data-intro] .hero-copy > :not(.hero-narrative), html[data-intro] .hero-word { animation-play-state: paused; }
+html[data-intro] .portfolio-intro {
+  display: grid; position: fixed; inset: 0; z-index: 80; place-items: center;
+  padding: 1.25rem; background: var(--background); color: var(--foreground);
+  animation: intro-safety-release 1ms 2950ms forwards;
+}
+.intro-terminal { width: min(100%, 32rem); border: 1px solid var(--border); border-radius: 0.75rem; background: var(--background); font-family: var(--font-code); font-size: clamp(0.625rem, 1.15vw, 0.8125rem); line-height: 1.8; }
+.intro-terminal-header { display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--border); padding: 0.85rem 1.2rem; color: var(--muted); font-size: 0.625rem; letter-spacing: 0.04em; }
+.intro-brackets { color: var(--accent); font-size: 0.875rem; }
+.intro-runtime { margin-left: auto; font-size: 0.5625rem; letter-spacing: 0.12em; }
+.intro-code { padding: 1.5rem 1.2rem; }
+.intro-line { display: flex; gap: 1.2rem; white-space: nowrap; }
+.intro-line-number { color: var(--muted); opacity: 0.5; user-select: none; }
+.intro-line > span:last-child { animation: intro-type 220ms steps(22, end) both; }
+.intro-line:nth-child(2) > span:last-child { animation-delay: 140ms; }
+.intro-line:nth-child(3) > span:last-child { animation-delay: 280ms; }
+.intro-line:nth-child(4) > span:last-child { animation-delay: 460ms; }
+.intro-line b { color: var(--accent); font-weight: 400; }
+.intro-line em { color: var(--accent-strong); font-style: normal; }
+.intro-terminal-footer { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; border-top: 1px solid var(--border); padding: 0.85rem 1.2rem; font-size: 0.625rem; }
+.intro-command { color: var(--muted); }
+.intro-caret { display: inline-block; width: 0.4rem; height: 0.7rem; vertical-align: -0.1rem; margin-left: 0.4rem; background: var(--accent); animation: intro-blink 700ms steps(1) infinite; }
+.intro-ready { color: var(--accent); opacity: 0; animation: intro-ready 150ms 650ms both; }
+.intro-ready > span { margin-left: 0.4rem; }
+html[data-intro="revealing"] .portfolio-intro { opacity: 0; transition: opacity 620ms var(--ease-standard); }
+@keyframes intro-type { from { clip-path: inset(0 100% 0 0); opacity: 0.3; } to { clip-path: inset(0); opacity: 1; } }
+@keyframes intro-ready { to { opacity: 1; } }
+@keyframes intro-blink { 50% { opacity: 0; } }
+@keyframes intro-safety-release { to { visibility: hidden; pointer-events: none; } }
+@media (max-width: 380px) { .intro-code { padding-inline: 0.85rem; } .intro-line { gap: 0.65rem; } .intro-terminal-header, .intro-terminal-footer { padding-inline: 0.85rem; } }

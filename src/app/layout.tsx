@@ -2,6 +2,8 @@ import { HoverEffects } from "@/components/interaction/hover-effects";
 import { AmbientBackground } from "@/components/motion/ambient-background";
 import { SmoothScroll } from "@/components/interaction/smooth-scroll";
 import { ScrollbarVisibility } from "@/components/interaction/scrollbar-visibility";
+import { PortfolioIntro } from "@/components/intro/portfolio-intro";
+import { introBootstrap } from "@/lib/intro-bootstrap";
 import { CustomCursor } from "@/components/interaction/custom-cursor";
 import { pageMetadata, site } from "@/lib/site-metadata";
 import { Footer } from "@/components/footer";
@@ -26,5 +28,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-scroll-behavior="smooth" data-scrollbar-state="idle"><body><AmbientBackground /><HoverEffects /><SmoothScroll /><CustomCursor /><Navigation /><ScrollbarVisibility /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
+  return <html lang="en" data-scroll-behavior="smooth" data-scrollbar-state="idle" suppressHydrationWarning><head><script id="portfolio-intro-bootstrap" dangerouslySetInnerHTML={{ __html: introBootstrap }} /></head><body><PortfolioIntro /><AmbientBackground /><HoverEffects /><SmoothScroll /><CustomCursor /><Navigation /><ScrollbarVisibility /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }
