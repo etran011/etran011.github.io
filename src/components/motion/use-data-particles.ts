@@ -3,6 +3,7 @@
 import { useEffect, type RefObject } from "react";
 import type { AtmospherePose, AtmosphereRenderer } from "@/lib/atmosphere-renderer";
 import { poseKeys, resolveAtmospherePose, type AtmosphereContext } from "@/lib/atmosphere-scene";
+import { openingCameraWeight } from "@/lib/cinematic-motion";
 import { advanceExpansion } from "@/lib/particle-transition";
 import { chooseAtmosphereQuality, createAtmosphereBudget } from "@/lib/atmosphere-budget";
 
@@ -47,6 +48,13 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
         resolveAtmospherePose(input.current, targetPose);
         const sceneFollow = 1 - Math.exp(-delta / 0.85);
         for (const key of poseKeys) { basePose[key] += (targetPose[key] - basePose[key]) * sceneFollow; pose[key] = basePose[key]; }
+        // A short settling move introduces the existing sculpture, never blocks input.
+        if (input.current.scene === "hero") {
+          const opening = openingCameraWeight(time) * (1 - expansion);
+          pose.yaw -= opening * 0.1; pose.pitch += opening * 0.05;
+          pose.scale *= 1 - opening * 0.045;
+          pose.centerX += opening * 0.015;
+        }
         pose.yaw += pointer.x * 0.13; pose.pitch -= pointer.y * 0.08;
         pose.centerX += pointer.x * 0.025; pose.centerY += pointer.y * 0.018;
         pose.lightX = pointer.x; pose.lightY = pointer.y;
