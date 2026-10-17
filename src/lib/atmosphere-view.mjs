@@ -9,3 +9,10 @@ export function fitSculptureScale(pose, aspect) {
   const vertical = Math.max(0.04, 0.96 - Math.abs(pose.centerY)) / sculptureRadius;
   return Math.min(pose.scale, horizontal, vertical);
 }
+
+/** Move the complete formation right using spare room, without changing its scale. */
+export function positionSculptureCenter(pose, aspect) {
+  const scale = fitSculptureScale(pose, aspect);
+  const spare = 0.96 - pose.centerX - sculptureRadius * scale / Math.max(0.1, aspect);
+  return pose.centerX + Math.min(0.16, Math.max(0, spare));
+}

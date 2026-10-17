@@ -1,13 +1,14 @@
 import { createRingGeometry } from "../src/lib/atmosphere-rings.ts";
 import { writeFileSync } from "node:fs";
 import { createParticleGeometry, projectFormationPoint, particleStride, createTrajectoryGeometry } from "../src/lib/atmosphere-geometry.ts";
-import { formationView, fitSculptureScale } from "../src/lib/atmosphere-view.mjs";
+import { formationView, fitSculptureScale, positionSculptureCenter } from "../src/lib/atmosphere-view.mjs";
 
+const centerX = positionSculptureCenter(formationView, 1440 / 1000);
 const viewScale = fitSculptureScale(formationView, 1440 / 1000);
 const { lines, points } = createParticleGeometry("low");
 const project = (p) => {
   const [x, y, depth] = projectFormationPoint(p);
-  return [(1 + formationView.centerX) * 720 + x * viewScale * 500,
+  return [(1 + centerX) * 720 + x * viewScale * 500,
     (1 - formationView.centerY) * 500 - y * viewScale * 500, depth];
 };
 let ringPath = "";

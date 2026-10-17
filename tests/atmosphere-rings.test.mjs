@@ -36,7 +36,7 @@ test('rings expand, fragment and fade continuously with exact reverse reconstruc
   assert(sample(.5).opacity > 0, 'Fragments remain after surface links disappear');
 });
 
-import { formationCamera, formationView, sculptureRadius, fitSculptureScale } from '../src/lib/atmosphere-view.mjs';
+import { formationCamera, formationView, sculptureRadius, fitSculptureScale, positionSculptureCenter } from '../src/lib/atmosphere-view.mjs';
 test('ribbon envelope fits desktop and tall-window frames with safe margins', () => {
   const geometry = createRingGeometry();
   let radius = 0;
@@ -52,4 +52,18 @@ test('ribbon envelope fits desktop and tall-window frames with safe margins', ()
       assert(Math.abs(pose.centerY) + projectedEnvelope * scale <= .961);
     }
   }
+});
+
+test('rightward positioning uses available space without altering scale or vertical placement', () => {
+  for (const aspect of [1.7778, 1.6, 1.44, 1.3333, 1.024, .8533]) {
+    const pose = { ...formationView };
+    const before = { ...pose }, scale = fitSculptureScale(pose, aspect);
+    const center = positionSculptureCenter(pose, aspect);
+    assert(center >= pose.centerX);
+    assert(center - pose.centerX <= .160001);
+    assert(center + sculptureRadius * scale / aspect <= .960001);
+    assert.equal(fitSculptureScale(pose, aspect), scale);
+    assert.deepEqual(pose, before, 'Positioning must not mutate the shared camera or animations');
+  }
+  assert(positionSculptureCenter(formationView, 1.6) - formationView.centerX > .1, 'Laptop composition should move noticeably right');
 });

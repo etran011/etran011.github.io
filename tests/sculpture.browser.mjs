@@ -1,6 +1,7 @@
 /* Optional: PLAYWRIGHT_MODULE=/path/to/playwright node tests/sculpture.browser.mjs [baseURL] */
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
+import { formationView, fitSculptureScale } from '../src/lib/atmosphere-view.mjs';
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.argv[2] || 'http://127.0.0.1:3001';
 const browser = await chromium.launch({ headless: true, channel: 'chrome' });
@@ -23,13 +24,15 @@ try {
   const read = () => page.locator('.ambient-canvas').evaluate(c => {
     const gl = c.getContext('webgl'), program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { time: uniform('uTime'), rotation: Array.from(uniform('uRotation')), rings: Array.from(uniform('uRings')), expansion: uniform('uExpansion'), error: gl.getError() };
+    return { projection: Array.from(uniform('uProjection')), time: uniform('uTime'), rotation: Array.from(uniform('uRotation')), rings: Array.from(uniform('uRings')), expansion: uniform('uExpansion'), error: gl.getError() };
   });
   const before = await read(), heading = await page.locator('h1').boundingBox();
   const first = await page.screenshot();
   await page.waitForTimeout(2500);
   const after = await read();
   assert(after.time - before.time > 2);
+  assert(Math.abs(after.projection[0] - fitSculptureScale(formationView, 1440 / 1000)) < 1e-6, 'Rightward positioning must preserve the previous fitted scale');
+  assert(after.projection[2] > formationView.centerX + .04, 'The whole sculpture should move right');
   assert(Math.abs(after.rotation[0] - before.rotation[0]) > .045, 'Idle orbit must be noticeable within a few seconds');
   assert(!first.equals(await page.screenshot()), 'The idle sculpture must keep moving without input');
   assert.deepEqual(await page.locator('h1').boundingBox(), heading, 'Sculpture motion must not move typography');
