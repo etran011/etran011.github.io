@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/container";
 import { education } from "@/data/background";
 import "./education-section.css";
+import { EducationMotion } from "./education-motion";
 
 /** Academic coordinate study: decorative geometry, never a claim about measured progress. */
 function AcademicStudy() {
@@ -21,7 +22,7 @@ function AcademicStudy() {
 export function EducationSection() {
   return (
     <section id="education" className="background-section education-section" aria-labelledby="education-heading">
-      <Container>
+      <Container><EducationMotion>
         <header className="education-kicker"><p className="eyebrow">Education / 05</p><p className="education-location">{education.location}</p></header>
         <div className="education-composition">
           <div className="education-identity">
@@ -37,13 +38,13 @@ export function EducationSection() {
             <p className="education-field eyebrow">Mathematics × Computing × Discovery</p>
           </div>
         </div>
-        <div className="education-progression" aria-label="Degree in progress, expected graduation in 2028">
+        <div className="education-progression" role="group" aria-label="Degree in progress, expected graduation in 2028">
           <div className="education-progression-label"><span className="education-status-dot" aria-hidden="true" /><span>Degree in progress</span></div>
           <div className="education-timeline" aria-hidden="true"><span /><i /></div>
           <p>Expected <span>2028</span></p>
         </div>
         <details className="education-coursework"><summary><span>Academic foundations</span><span className="education-coursework-hint">Explore coursework <span aria-hidden="true">+</span></span></summary><ul>{education.coursework.map((course, i) => <li key={course}><span aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>{course}</li>)}</ul></details>
-      </Container>
+      </EducationMotion></Container>
     </section>
   );
 }
