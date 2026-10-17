@@ -1,5 +1,6 @@
 /* Optional integration check: PLAYWRIGHT_MODULE=/path/to/playwright node tests/particles.browser.mjs [baseURL] */
 import assert from 'node:assert/strict';
+import { loss, landscapeDomain } from '../src/lib/loss-landscape.mjs';
 import { createRequire } from 'node:module';
 const loadPlaywright = createRequire(import.meta.url);
 const { chromium } = loadPlaywright(process.env.PLAYWRIGHT_MODULE || 'playwright');
@@ -10,7 +11,7 @@ async function inspect(page) {
     const gl = canvas.getContext('webgl');
     const program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { time: uniform('uTime'), expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
+    return { marker: Array.from(uniform('uMarker')), head: uniform('uHead'), time: uniform('uTime'), expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
   });
 }
 async function ready(page) {
@@ -27,10 +28,17 @@ async function ready(page) {
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(() => {
       window.particleFrames = 0;
+      window.trajectoryDraws = 0;
+      window.buffersCreated = 0; window.buffersDeleted = 0;
+      const createBuffer = WebGLRenderingContext.prototype.createBuffer;
+      const deleteBuffer = WebGLRenderingContext.prototype.deleteBuffer;
+      WebGLRenderingContext.prototype.createBuffer = function (...args) { window.buffersCreated++; return createBuffer.apply(this, args); };
+      WebGLRenderingContext.prototype.deleteBuffer = function (...args) { window.buffersDeleted++; return deleteBuffer.apply(this, args); };
       window.particleLineDraws = 0;
       const draw = WebGLRenderingContext.prototype.drawArrays;
       WebGLRenderingContext.prototype.drawArrays = function (...args) {
         if (args[0] === this.LINES) window.particleLineDraws++;
+        if (args[0] === this.LINE_STRIP) window.trajectoryDraws++;
         return draw.apply(this, args);
       };
       const clear = WebGLRenderingContext.prototype.clear;
@@ -40,6 +48,14 @@ async function ready(page) {
       };
     });
     await ready(page);
+    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 3);
+    await page.waitForTimeout(1100);
+    const descentBefore = await inspect(page);
+    await page.waitForTimeout(1000);
+    const descentAfter = await inspect(page);
+    const markerLoss = marker => loss(marker[0] / landscapeDomain.horizontalScale, marker[2] / landscapeDomain.horizontalScale);
+    assert(descentAfter.head > descentBefore.head && markerLoss(descentAfter.marker) < markerLoss(descentBefore.marker));
+    assert(await page.evaluate(() => window.trajectoryDraws > 0));
     assert((await inspect(page)).expansion < 0.01);
     await page.mouse.wheel(0, 60);
     await page.waitForTimeout(750);
@@ -55,8 +71,10 @@ async function ready(page) {
     assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
     assert((await inspect(page)).shrink > 0.99);
     const releasedLineDraws = await page.evaluate(() => window.particleLineDraws);
+    const releasedTrajectoryDraws = await page.evaluate(() => window.trajectoryDraws);
     await page.waitForTimeout(200);
     assert.equal(await page.evaluate(() => window.particleLineDraws), releasedLineDraws, 'Invisible connections must not issue GPU draws');
+    assert.equal(await page.evaluate(() => window.trajectoryDraws), releasedTrajectoryDraws);
     await page.keyboard.press('Home');
     await page.waitForTimeout(100);
     assert((await inspect(page)).expansion > 0.6, 'A reverse jump must not teleport particles');
@@ -115,8 +133,10 @@ async function ready(page) {
     await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'static');
+    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 0);
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
+    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 3);
     assert.deepEqual(errors, []);
     await page.close();
 

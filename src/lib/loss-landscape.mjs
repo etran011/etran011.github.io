@@ -8,9 +8,13 @@ export function lossGradient(x, z) {
 }
 export const landscapeDomain = { min: -4.2, max: 4.2, horizontalScale: 0.31, heightScale: 0.5, heightOffset: -0.85, compression: 16 };
 /** Log height is a display transform only; optimization uses the original loss. */
+export function surfaceHeight(x, z) {
+  const d = landscapeDomain;
+  return Math.log1p(loss(x, z) / d.compression) * d.heightScale + d.heightOffset;
+}
 export function surfacePoint(x, z) {
   const d = landscapeDomain;
-  return [x * d.horizontalScale, Math.log1p(loss(x, z) / d.compression) * d.heightScale + d.heightOffset, z * d.horizontalScale];
+  return [x * d.horizontalScale, surfaceHeight(x, z), z * d.horizontalScale];
 }
 export function surfaceNormal(x, z) {
   const d = landscapeDomain, [gx, gz] = lossGradient(x, z);
@@ -72,6 +76,8 @@ export function descentPlayback(time, trajectory, target) {
   }
   const a = trajectory.path[low], b = trajectory.path[high];
   const t = clamp((target.progress - trajectory.progress[low]) / Math.max(1e-12, trajectory.progress[high] - trajectory.progress[low]));
-  const point = surfacePoint(a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t);
-  target.x = point[0]; target.y = point[1] + 0.012; target.z = point[2];
+  const x = a.x + (b.x - a.x) * t, z = a.z + (b.z - a.z) * t;
+  target.x = x * landscapeDomain.horizontalScale;
+  target.y = surfaceHeight(x, z) + 0.012;
+  target.z = z * landscapeDomain.horizontalScale;
 }

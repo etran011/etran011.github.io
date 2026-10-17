@@ -1,61 +1,58 @@
-# Data particle atmosphere
+# Gradient descent particle landscape
 
-The latent-space sculpture refines the existing shared particle system without changing portfolio content, palette, fonts, layout, navigation, custom cursor, or weighted scrolling. Four differently shaped clusters form one synthetic computational structure on the open side of the hero. Local relationships and a few boundary links join the sculpture. Scrolling separates the clusters, fades their connections, and releases the same observations into a viewport-wide field. Reversing scroll reconstructs their deterministic positions.
+The hero uses a particle sampling of Himmelblau's loss landscape, a visible optimization trail, and one moving optimization point. It retains the portfolio's palette, typography, layout, weighted scrolling, pinned scenes, cursor, navigation, and project presentations. The same landscape particles disperse into a smaller ambient field and reconstruct on reverse scroll.
 
-## Mathematical formation
+## Mathematics
 
-This is a **synthetic mathematical visualization**, not actual PCA, UMAP, or neural-network output. A weighted mixture assigns 38% / 28% / 21% / 13% of the observations to four components. A low-discrepancy assignment keeps every component represented even when quality removes two thirds of the particles.
+The objective is `f(x,z) = (x² + z − 11)² + (x + z² − 7)²`, sampled over `[-4.2, 4.2]²`. Its four basins attain the global value zero; the visualization does not claim there is one unique global minimum.
 
-Deterministic Box–Muller sampling supplies normally distributed local coordinates. Rejection conditions the samples on a Mahalanobis radius of 2.8, so the model is a truncated Gaussian mixture rather than an unbounded distribution. Each component has a different center, a full-rank Cholesky factor (`covariance = L·Lᵀ`), and a rotation. Small nonlinear bends produce organic silhouettes. Shading uses each observation's relative component density; it is not presented as a measured embedding probability.
+Its analytic gradient is:
 
-A radius-sized spatial hash searches 27 neighboring cells for the two closest observations within 0.26 model units, using one eighth of the retained points as anchors. Three intended component relationships connect their nearest boundary samples rather than arbitrary centroids. Duplicate links are removed. The resulting high / medium / low tiers have 304 / 153 / 105 links. Unit tests compare local searches with a brute-force nearest-neighbor oracle.
+- `∂f/∂x = 4x(x² + z − 11) + 2(x + z² − 7)`
+- `∂f/∂z = 2(x² + z − 11) + 4z(x + z² − 7)`
 
-Each component shares gentle bounded drift and breathing. Slow bounded rotation preserves the composition; tiny local fluctuations do not erase cluster boundaries. Fine connection pulses remain restrained. The existing cursor interpolation, repulsion, parallax, and viewport-wide ambient destinations are retained.
+Display height is `0.5 log(1 + f/16) − 0.85`, with horizontal coordinates scaled by 0.31. This monotone height compression makes the valleys legible. **Optimization uses the original objective, not the compressed display height.** Analytic display normals provide restrained lighting; the structured surface does not undergo an arbitrary idle deformation.
 
-## Reversible scroll sequence
+`loss-landscape.mjs` precomputes actual gradient descent from `(0.6, 3.8)`. Each update is `p_next = p − α∇f(p)`, starting with `α = 0.004`. This lies below the reciprocal Hessian row-sum bound on the domain. Domain checks and [Armijo backtracking](https://optax.readthedocs.io/en/latest/api/generated/optax.scale_by_backtracking_linesearch.html) halve the rate if sufficient decrease is not met. The default run takes 192 updates and converges to `(3, 2)` with loss below `10⁻¹²`. Other starting basins converge to their own minima in tests.
 
-The existing paced hero progress still drives the renderer, with bounded catch-up for large jumps. `resolveParticleChoreography` writes three values into a reused object:
+Playback retimes the precomputed parameter-space segments by distance, then re-evaluates the exact display height. The thin trail therefore follows the surface instead of cutting through it. It does not fabricate a decorative optimization curve. The marker reaches the minimum, holds, fades to zero, and only then restarts. Reduced motion shows a static trail and endpoint.
 
-1. Clusters loosen and move slightly away from the sculpture's center.
-2. Connection opacity fades between progress 0.06 and 0.36.
-3. Individual release begins at 0.18 and finishes at 0.98, with a small deterministic departure stagger.
-4. Curved paths carry the observations into their existing ambient destinations.
+## Geometry and rendering
 
-The same functions run in reverse; there is no irreversible expansion flag or regenerated random layout. Connections return as the clusters reform. The fully dispersed field uses only the points draw, so invisible connections consume no rendering pass.
+- `loss-landscape.mjs`: objective, analytic gradient, display height/normals, descent solver, and playback.
+- `atmosphere-geometry.ts`: a 48 × 26 deterministic sampling grid, stable identities, ambient destinations, sparse parameter-neighbor links, and the static trajectory buffer.
+- `atmosphere-view.mjs`: shared resting view and camera for WebGL and the SVG generator.
+- `atmosphere-renderer.ts`: native WebGL 1 and original GLSL, with static buffers and no per-frame geometry upload.
+- `particle-transition.ts`: bounded expansion catch-up and reversible release, connection opacity, loosening, and shrinking.
+- `use-data-particles.ts`: one persistent renderer, one frame loop, pointer easing, adaptive quality, lifecycle handling, and no per-frame React state.
 
-## Architecture
+There are 1,248 / 624 / 416 landscape points at high / medium / low quality. Each quality tier retains the exact identities of its samples. Connections follow adjacent surface parameters; there are no unrelated nearest-neighbor cluster links. The trajectory uses one additional static buffer; its marker reuses the same buffer with a position uniform. There are three live GPU buffers, cleaned up on disposal. The hero uses at most four batched draws; fully dispersed sections use one points draw.
 
-- `src/lib/atmosphere-geometry.ts` generates deterministic mixture coordinates, stable particle identities, stratified viewport destinations, and sparse nearest-neighbor relationships. Quality tiers retain exact identities rather than generating a new cloud.
-- `src/lib/atmosphere-view.mjs` shares the rest view and camera distance across the shader, scene profile, static projection, and SVG generator.
-- `src/lib/atmosphere-renderer.ts` renders original GLSL with native WebGL 1. At most two batched draws use static interleaved buffers; vertex shaders handle deformation, curved dispersal, drifting depth layers, pointer repulsion, and parallax. Links fade before they can stretch into distracting lines. Expanded depth no longer depends on the rotating formation.
-- `ScrollStory` publishes its existing **paced** hero progress through `story-progress`. The atmosphere consumes that value; it adds no wheel handler, scroll controller, or pinning behavior. Short desktop viewports use the existing shared Motion observer's natural document progress instead.
-- `src/lib/particle-transition.ts` adds bounded, reversible catch-up. An offscreen story settling, a large wheel delta, an anchor jump, or a keyboard jump cannot teleport particles. There is no irreversible “has scrolled” flag.
-- `use-data-particles.ts` owns the persistent renderer and one animation loop. Pose, expansion, and pointer values live outside React state. Local repulsion fades in after mouse movement and eases away on pointer departure or blur.
-- `AmbientBackground` caches section measurements and reads the existing About story and Skills selection signals. A single canvas persists through client navigation.
+No new runtime library, mesh texture, downloaded model, or post-processing pass is required. All layers remain decorative, `aria-hidden`, and `pointer-events: none`.
 
-No new runtime dependencies, textures, downloaded models, post-processing passes, or per-frame geometry uploads are needed. Formation and dispersed positions are blended in the shader, so the particle system does not allocate hundreds of DOM elements or run CPU particle simulations.
+## Scroll, size, and idle motion
 
-## Section treatment
+The existing paced hero `story-progress` event still drives the animation. No additional wheel handler, scroll controller, or pinning system was added. Short desktop viewports continue using the shared Motion observer's natural section progress.
 
-| Context | Treatment |
-| --- | --- |
-| Hero | Latent-space clusters, coherent drift and bounded rotation; expansion follows the pinned story |
-| About | Shared expanded points drift across the viewport; story signals remain available to the scene |
-| Projects | Much lower opacity and point emphasis so screenshots remain dominant |
-| Skills | Collection selection gently increases point emphasis |
-| Experience, education, contact, case studies | Restrained ambient field with reduced rendering cadence |
+1. The prominent loss surface and trajectory remain coherent at the top.
+2. Early progress loosens the samples along their surface normals and fades their connections and trajectory.
+3. Deterministic curved paths disperse the samples into the viewport.
+4. A smooth shrinking value follows particle release: formation points are approximately 5–6 CSS pixels before perspective; ambient points are approximately 1.15–1.8 CSS pixels.
+5. Reversing the same progress restores size, structure, connections, and trajectory. No irreversible expansion flag or new random layout is used.
 
-The canvas spans the viewport after expansion. Before expansion, shader shading protects the hero text area. All layers are decorative, `aria-hidden`, and `pointer-events: none`. Existing controls retain normal hit testing and focus behavior.
+Ambient motion uses active animation time, independent of scroll and pointer changes. Two low-frequency sinusoidal fields vary horizontal/vertical velocities by stable particle seeds; slow depth variation supplies parallax. Motion remains gentle while reading with a stationary cursor. Hidden documents pause the loop and reset its clock, so resuming does not jump ahead.
+
+Projects lower opacity and detail so screenshots retain focus. Skills retain their existing selection response. Experience, education, contact, and case studies use the quiet profile. Each section shares the same canvas and particle identities.
 
 ## Budgets and fallbacks
 
-High / medium / low tiers contain 1,248 / 624 / 416 points, with fewer than 110 KB of vertex data at the highest tier. Core-count and data-saving hints choose an initial tier. Sustained frame pressure lowers density before cadence, with no upward oscillation. Projects and quiet sections render at 30 FPS; capable desktop hero/About/Skills scenes target 60 FPS.
+Initial quality uses core-count and data-saving hints. Sustained slow frames reduce density before lowering cadence, without upward oscillation. Quiet and project profiles render at 30 FPS. The target on capable desktop hardware remains 60 FPS.
 
-Pixel ratios cap at 1.5 / 1.25 / 1. Back buffers cap at approximately 2.4 million pixels and 4096 pixels per dimension. Resize work occurs only when needed. Hiding the tab stops rendering and resets its frame clock. Disposal releases buffers, shaders, programs, listeners, and pending frames.
+Pixel ratio caps are 1.5 / 1.25 / 1. Back buffers stay near 2.4 million pixels and below 4096 pixels per dimension. Geometry is generated only at initialization or quality changes; playback writes into a reused object. Buffers, programs, shaders, listeners, and pending frames are disposed cleanly.
 
-Mobile/touch and reduced-motion visitors receive a simplified static vector with 416 points and simplified neighbor links, and no GPU initialization, continuous movement, or scroll expansion. On mobile the static sculpture is framed above the headline. Non-scaling strokes keep its reduced-density points and connections legible when the SVG shrinks. Forced colors hide decorative layers. The vector is in server-rendered HTML and also works with JavaScript disabled, unavailable WebGL, or context loss. A complete WebGL frame hides the fallback; successful context restoration rebuilds one renderer. Preference changes are checked both through events and inside the render loop.
+Mobile/touch, reduced motion, unavailable WebGL, and context loss use the local static SVG or the existing CSS background. Static modes avoid GPU initialization. The low-density SVG preserves the surface, trajectory, and endpoint; non-scaling strokes keep details legible when it shrinks. Mobile framing keeps it above the headline. Forced colors hide decorative layers. The SVG is present in server-rendered HTML and works without JavaScript.
 
-Regenerate the vector after changing formation geometry:
+Regenerate the static visual after changing mathematics or framing:
 
 ```sh
 node --experimental-strip-types scripts/generate-atmosphere-fallback.mjs
@@ -70,19 +67,14 @@ npm run lint
 npm run build
 ```
 
-Fifteen unit tests cover deterministic truncated sampling, mixture weights at every quality tier, anisotropic components, spatial-hash neighbor correctness, stable identities, bounded GPU buffers, destination coverage, projection, scene restraint, adaptive budgets, staged reversible release, and the existing story pacer.
+Seventeen unit tests cover loss/gradient agreement with finite differences, display samples/normals, valid surface links, stable quality subsets, bounded buffers, viewport destinations, scene restraint, adaptive budgets, exact negative-gradient updates, sufficient decrease, continuous downhill interpolation, multiple starting basins, surface-following playback, invisible restarts, reversible shrinking, and the existing story pacer.
 
-An optional Chrome integration check runs against the dev server or the exported site. It requires an available Playwright installation and Chrome, without adding a portfolio runtime dependency:
+The optional browser regression requires Playwright and Chrome without adding a runtime dependency:
 
 ```sh
-# Omit PLAYWRIGHT_MODULE when playwright is already resolvable in your environment.
 PLAYWRIGHT_MODULE=/absolute/path/to/playwright node tests/particles.browser.mjs http://127.0.0.1:4173
 ```
 
-This exercises cluster separation before particle release, omission of invisible GPU line draws, first-scroll expansion, fast reversal and return to top, mouse interpolation, custom cursor coexistence, About/Selected Work pinning, quiet Projects, hidden-tab pause, real WebGL context loss/restoration, live reduced-motion changes, 320/390-pixel mobile views, no-JavaScript, and unavailable-WebGL fallbacks. Static modes also assert zero GPU initialization; reduced motion checks that decorative layers remain stationary after anchor navigation.
+It checks live downhill marker movement, staged release, shrinking and reverse growth, ongoing idle changes at a fixed scroll position, cursor coexistence, About/Selected Work pinning, quiet Projects, omitted invisible line draws, hidden-tab pause, actual context loss/restoration, disposal/recreation of all three buffers, 320/390-pixel mobile views, reduced motion, no JavaScript, and unavailable WebGL. Standalone visual checks review desktop framing and static fallbacks. Production output keeps `.nojekyll`, local assets, and both static case-study routes for GitHub Pages.
 
-The production Chrome sample at 1440×1000 and device scale factor 2 measured approximately 30 FPS after automatic density reduction, with median / 95th-percentile frame intervals of 33.3 / 33.4 ms. This matches the preceding Gaussian implementation's measurement in this environment, where an idle blank page also measured the same cadence. It does not establish a 60 FPS hardware benchmark. The 60 FPS target remains, with density/cadence adaptation for slower devices.
-
-Quiet expanded sections issued 30 draw calls per second, one points pass per frame rather than the previous two passes. A 2560×1440 resize stayed within the 2.4-million-pixel cap at 2066×1162 backing pixels with no GL error. Sustained synthetic frame pressure reached low quality without losing the model; data-saving mode started at low quality. Static export includes the local fallback and both case-study routes.
-
-Additional existing browser regressions check weighted wheel distances, anchors and keyboard navigation, forward/reverse Selected Work stages, About readability, gallery dialogs, cursor lifecycle, and technology selection. Visual review should include a slow first scroll, a fast jump to About and back, and a mobile/reduced-motion view. GitHub Pages continues using Next.js static export with local SVG assets and no server runtime.
+The production Chrome sample at 1440×1000, device scale factor 2, measured approximately 60 FPS at high quality. Median and 95th-percentile frame intervals were 16.7 ms, with 2,399,969 backing pixels. Quiet expanded sections used 30 draw calls per second (one points pass per frame). A 2560×1440 resize stayed within budget at 2066×1162 backing pixels with no GL error. Synthetic frame pressure reduced quality without losing the renderer, and data-saving mode began at low quality. These measurements describe this machine and sample, not every device.
