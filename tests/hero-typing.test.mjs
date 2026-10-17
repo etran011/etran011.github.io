@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import vm from 'node:vm';
-import { characterDelay, heroTypingBootstrap, heroHeadlineText } from '../src/lib/hero-typing.ts';
+import { characterDelay, heroTypingBootstrap, heroHeadlineText, heroHeadlinePhrases } from '../src/lib/hero-typing.ts';
 const run = ({ hash = '', reduced = false, navigation = 'navigate' } = {}) => {
   const dataset = {}, timers = [];
   vm.runInNewContext(heroTypingBootstrap, {
@@ -26,4 +26,12 @@ test('typing rhythm varies within requested intervals, pauses at punctuation and
   });
   assert(duration>2000 && duration<3500);
   assert(characterDelay(',',4)>characterDelay('a',4)+100);
+});
+
+test('all original hero phrases retain their exact wording and order',()=>{
+  assert.deepEqual(heroHeadlinePhrases.map(p=>p.lines.join(' ')),[
+    'Building intelligent systems, one idea at a time.',
+    'Building software.',
+    'Exploring AI & machine learning.',
+  ]);
 });

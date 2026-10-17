@@ -1,4 +1,10 @@
-export const heroHeadlineLines = ["Building intelligent systems,", "one idea at a time."] as const;
+/** Exact wording, order, line breaks and tones from the original scroll-driven hero. */
+export const heroHeadlinePhrases = [
+  { lines: ["Building intelligent systems,", "one idea at a time."], tone: "mixed" },
+  { lines: ["Building software."], tone: "foreground" },
+  { lines: ["Exploring AI &", "machine learning."], tone: "accent" },
+] as const;
+export const heroHeadlineLines = heroHeadlinePhrases[0].lines;
 export const heroHeadlineText = heroHeadlineLines.join(" ");
 /** Deterministic variation keeps playback natural and reproducible without random jitter. */
 export function characterDelay(character: string, index: number) {
