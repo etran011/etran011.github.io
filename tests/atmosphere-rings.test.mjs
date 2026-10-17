@@ -16,3 +16,21 @@ test('three sparse coordinate rings share one bounded static buffer', () => {
   assert.equal(rings.size, 3); assert.equal(speeds.size, 3);
   assert.equal(data.length % 26, 0, 'Every tick and arc segment has paired endpoints');
 });
+
+import { resolveRingChoreography } from '../src/lib/particle-transition.ts';
+test('rings expand, fragment and fade continuously with exact reverse reconstruction', () => {
+  const sample = p => { const state = {}; resolveRingChoreography(p, state); return state; };
+  assert.deepEqual(sample(0), { expansion: 0, fragments: 0, opacity: 1 });
+  assert.deepEqual(sample(1), { expansion: 1, fragments: 1, opacity: 0 });
+  let previous = sample(0);
+  const forward = [];
+  for (let i = 0; i <= 100; i++) {
+    const current = sample(i / 100); forward.push(current);
+    assert(current.expansion >= previous.expansion && current.fragments >= previous.fragments && current.opacity <= previous.opacity);
+    assert(Math.abs(current.opacity - previous.opacity) < .03);
+    previous = current;
+  }
+  for (let i = 100; i >= 0; i--) assert.deepEqual(sample(i / 100), forward[i]);
+  assert.equal(sample(.1).fragments, 0, 'Initial scroll preserves coherent coordinate arcs');
+  assert(sample(.5).opacity > 0, 'Fragments remain after surface links disappear');
+});

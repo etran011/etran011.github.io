@@ -11,7 +11,7 @@ async function inspect(page) {
     const gl = canvas.getContext('webgl');
     const program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { marker: Array.from(uniform('uMarker')), head: uniform('uHead'), time: uniform('uTime'), expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
+    return { rings: Array.from(uniform('uRings')), marker: Array.from(uniform('uMarker')), head: uniform('uHead'), time: uniform('uTime'), expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
   });
 }
 async function ready(page) {
@@ -48,7 +48,7 @@ async function ready(page) {
       };
     });
     await ready(page);
-    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 3);
+    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 4);
     await page.waitForTimeout(1100);
     const descentBefore = await inspect(page);
     await page.waitForTimeout(1000);
@@ -70,6 +70,7 @@ async function ready(page) {
     assert((await inspect(page)).expansion > 0.95);
     assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
     assert((await inspect(page)).shrink > 0.99);
+    assert((await inspect(page)).rings[2] === 0, 'Dissolved rings must be invisible');
     const releasedLineDraws = await page.evaluate(() => window.particleLineDraws);
     const releasedTrajectoryDraws = await page.evaluate(() => window.trajectoryDraws);
     await page.waitForTimeout(200);
@@ -82,6 +83,7 @@ async function ready(page) {
     assert((await inspect(page)).expansion < 0.02);
     assert((await inspect(page)).links > 0.98 && (await inspect(page)).release < 0.001);
     assert((await inspect(page)).shrink < 0.001);
+    assert((await inspect(page)).rings[2] > .99 && (await inspect(page)).rings[1] < .001, 'Reverse scroll must reform intact rings');
     assert(await page.evaluate(n => window.particleLineDraws > n, releasedLineDraws));
     await page.mouse.move(1250, 350);
     await page.waitForTimeout(900);
@@ -136,7 +138,7 @@ async function ready(page) {
     assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 0);
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
-    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 3);
+    assert.equal(await page.evaluate(() => window.buffersCreated - window.buffersDeleted), 4);
     assert.deepEqual(errors, []);
     await page.close();
 

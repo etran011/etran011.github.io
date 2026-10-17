@@ -1,6 +1,6 @@
 import { createRingGeometry } from "./atmosphere-rings";
 import { descentPlayback } from "./loss-landscape.mjs";
-import { resolveParticleChoreography } from "./particle-transition";
+import { resolveParticleChoreography, resolveRingChoreography } from "./particle-transition";
 import { formationCamera, formationView } from "./atmosphere-view.mjs";
 import { atmosphereQuality, createParticleGeometry, createTrajectoryGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
 
@@ -14,6 +14,7 @@ attribute vec3 aSeed;
 attribute vec4 aSurface;
 uniform float uTime;
 uniform mediump float uKind;
+uniform highp vec3 uRings;
 uniform vec3 uMarker;
 uniform highp float uTrajectoryAlpha;
 uniform highp float uHead;
@@ -40,7 +41,10 @@ void main() {
   if (uKind < 0.5) p += normal * uSeparation * 0.045;
   if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
   if (uKind > 2.5) {
-    float angle = uTime * aSeed.z;
+    // Scroll adds a bounded rotation offset, avoiding time * progress discontinuities.
+    float angle = uTime * aSeed.z + sign(aSeed.z) * uRings.x * 0.24;
+    p *= 1.0 + uRings.x * 0.48;
+    p += vec3(sin(aSeed.x * 75.0), cos(aSeed.x * 62.0), sin(aSeed.x * 43.0)) * uRings.y * 0.065;
     p.xz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xz;
     vPulse = 0.75 + 0.25 * pow(0.5 + 0.5 * cos(aSeed.x * 6.283185 - uTime * 0.35 + aSeed.y), 8.0);
   }
@@ -88,6 +92,7 @@ void main() {
   if (uKind < 0.5) vLight += (proximity * 0.55 + minimumPulse * 0.15) * uTrajectoryAlpha;
   float pointSize = mix(5.0 + aSeed.z * 0.9, 1.15 + aSeed.z * 0.65, uShrink);
   if (uKind > 0.5) vLight = 1.0;
+  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(-0.1, 0.4, screen.x);
   gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
   if (uKind > 1.5 && uKind < 2.5) gl_PointSize = 22.0 * uRatio;
 }`;
@@ -97,6 +102,7 @@ uniform highp float uTime;
 uniform vec3 uColor;
 uniform float uPoint;
 uniform mediump float uKind;
+uniform highp vec3 uRings;
 uniform highp float uTrajectoryAlpha;
 uniform highp float uHead;
 uniform float uLinks;
@@ -122,7 +128,12 @@ void main() {
       alpha *= max(core, halo * (0.3 + sin(uTime * 2.0) * 0.035));
     }
   }
-  if (uKind > 2.5) alpha = (0.12 + vPulse * 0.1) * uLinks;
+  if (uKind > 2.5) {
+    float segment = fract(vPath * 36.0);
+    float intact = smoothstep(uRings.y * 0.88, uRings.y * 0.88 + 0.1, segment);
+    alpha = (0.12 + vPulse * 0.1) * uRings.z * mix(1.0, intact, uRings.y);
+    alpha *= vLight;
+  }
   gl_FragColor = vec4(color, alpha);
 }`;
 
@@ -157,7 +168,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uShrink", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uRings", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uShrink", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -177,6 +188,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
+    const ringChoreography = { expansion: 0, fragments: 0, opacity: 1 };
     const choreography = { separation: 0, release: 0, links: 1, shrink: 0 };
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number, count = geometry.count) => {
       gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, count);
@@ -200,6 +212,8 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         if (disposed || gl.isContextLost()) return false;
         gl.clear(gl.COLOR_BUFFER_BIT);
         resolveParticleChoreography(expansion, choreography);
+        resolveRingChoreography(expansion, ringChoreography);
+        gl.uniform3f(uniforms.uRings, ringChoreography.expansion, ringChoreography.fragments, ringChoreography.opacity);
         gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
         gl.uniform1f(uniforms.uSeparation, choreography.separation); gl.uniform1f(uniforms.uRelease, choreography.release); gl.uniform1f(uniforms.uLinks, choreography.links);
         gl.uniform1f(uniforms.uShrink, choreography.shrink);
@@ -212,7 +226,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform1f(uniforms.uTrajectoryAlpha, playback.alpha * choreography.links * 0.85);
         gl.uniform1f(uniforms.uHead, playback.progress);
         gl.uniform3f(uniforms.uMarker, playback.x, playback.y, playback.z);
-        if (choreography.links > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.LINES); }
+        if (ringChoreography.opacity > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.LINES); }
         gl.uniform1f(uniforms.uKind, 0);
         // Expanded sections have no visible relationships; omit their entire draw.
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }

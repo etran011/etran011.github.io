@@ -21,3 +21,11 @@ export function resolveParticleChoreography(progress: number, target: ParticleCh
   target.shrink = smoothstep(0.03, 0.95, target.release);
   target.links = 1 - smoothstep(0.06, 0.36, progress);
 }
+
+export interface RingChoreography { expansion: number; fragments: number; opacity: number; }
+/** The same paced hero value drives both directions; no one-way completion flags. */
+export function resolveRingChoreography(progress: number, target: RingChoreography) {
+  target.expansion = smoothstep(0.02, 0.72, progress);
+  target.fragments = smoothstep(0.12, 0.7, progress);
+  target.opacity = 1 - smoothstep(0.08, 0.78, progress);
+}
