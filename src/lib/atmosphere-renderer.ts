@@ -9,7 +9,7 @@ const vertexSource = `
 attribute vec3 aPosition;
 attribute vec3 aDestination;
 attribute vec3 aSeed;
-attribute vec4 aCluster;
+attribute vec4 aSurface;
 uniform float uTime;
 uniform float uSeparation;
 uniform float uRelease;
@@ -24,16 +24,12 @@ varying float vLight;
 varying float vPulse;
 void main() {
   vec3 p = aPosition;
-  float density = sqrt(aCluster.w);
-  vPulse = 0.88 + sin(uTime * 0.5 + aCluster.x * 3.0 + aCluster.y * 2.0) * 0.12;
-  // All observations in a component share bounded movement; identities stay fixed.
-  vec3 origin = aCluster.xyz;
-  float breath = (sin(uTime * 0.13 + origin.x * 2.0) - sin(origin.x * 2.0)) * 0.008;
-  vec3 drift = vec3(sin(uTime * 0.14 + origin.x * 3.0) - sin(origin.x * 3.0),
-    cos(uTime * 0.11 + origin.y * 3.0) - cos(origin.y * 3.0),
-    sin(uTime * 0.09 + origin.z * 4.0) - sin(origin.z * 4.0)) * 0.014;
-  p = origin + (p - origin) * (1.0 + breath) + drift + origin * uSeparation * 0.18;
-  p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.003 * (1.0 - uExpansion);
+  vec3 normal = aSurface.xyz;
+  float density = clamp(aSurface.w, 0.0, 1.0);
+  vPulse = 0.94 + sin(uTime * 0.35 + aSeed.x * 8.0) * 0.06;
+  // Geometry stays on the exact loss surface at rest; only dissolution displaces it.
+  p += normal * uSeparation * 0.045;
+  p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
   float cy = cos(uRotation.x), sy = sin(uRotation.x);
   p.xz = mat2(cy, -sy, sy, cy) * p.xz;
   float cx = cos(uRotation.y), sx = sin(uRotation.y);
@@ -60,13 +56,14 @@ void main() {
   gl_Position = vec4(screen, 0.0, 1.0);
   float visualDepth = mix(p.z, depth * 2.0, phase);
   float front = clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0);
-  float formationLight = (0.4 + density * 0.5) * (0.78 + front * 0.22);
+  float illumination = 0.5 + max(0.0, dot(normal, normalize(vec3(-0.4, 0.8, 0.5)))) * 0.45;
+  float formationLight = illumination * (0.75 + front * 0.25);
   vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
   vLight *= mix(smoothstep(-0.1, 0.4, screen.x), 1.0, phase);
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
-  float pointSize = mix(1.9 + aSeed.z * 0.9 + density * 0.6, 1.5 + aSeed.z * 1.1, phase);
-  gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 4.5);
+  float pointSize = mix(4.3 + aSeed.z * 1.0 + density * 0.35, 1.5 + aSeed.z * 1.1, phase);
+  gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
 }`;
 const fragmentSource = `
 precision mediump float;
@@ -109,7 +106,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     program = gl.createProgram();
     if (!program) throw new Error("Program allocation failed");
     shaders.forEach((shader) => gl.attachShader(program!, shader));
-    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aDestination"); gl.bindAttribLocation(program, 2, "aSeed"); gl.bindAttribLocation(program, 3, "aCluster"); gl.linkProgram(program);
+    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aDestination"); gl.bindAttribLocation(program, 2, "aSeed"); gl.bindAttribLocation(program, 3, "aSurface"); gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("Atmosphere shader link failed");
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;

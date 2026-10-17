@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createParticleGeometry, particleVertex, projectFormationPoint, formationPoint, latentSample, latentClusters, particleCluster, particleStride } from "../src/lib/atmosphere-geometry.ts";
+import { createParticleGeometry, particleVertex, projectFormationPoint, formationPoint, surfaceCoordinates, particleStride } from "../src/lib/atmosphere-geometry.ts";
 
 test("quality reductions retain exact particle identities and bounded GPU buffers", () => {
   const high = createParticleGeometry("high");
@@ -15,53 +15,24 @@ test("quality reductions retain exact particle identities and bounded GPU buffer
   }
   assert(high.points.byteLength + high.lines.byteLength < 110_000);
 });
-test("synthetic mixture keeps all four components at every quality and matches their weights", () => {
-  for (const stride of [1, 2, 3]) {
-    const counts = [0, 0, 0, 0];
-    for (let id = 0; id < 1248; id += stride) counts[particleCluster(id)]++;
-    counts.forEach((count, index) => assert(Math.abs(count / (1248 / stride) - latentClusters[index].weight) < 0.015));
-  }
-});
-test("deterministic Gaussian samples have finite bounded tails and distinct non-spherical components", () => {
-  const sums = latentClusters.map(() => [0, 0, 0, 0]);
+test("landscape samples the exact objective and analytic display normals at every quality", async () => {
+  const { loss, lossGradient, surfacePoint, surfaceNormal } = await import("../src/lib/loss-landscape.mjs");
   for (let id = 0; id < 1248; id++) {
-    const sample = latentSample(id);
-    assert.deepEqual(sample, latentSample(id));
-    assert(sample.every(Number.isFinite));
-    assert(sample.reduce((sum, value) => sum + value * value, 0) <= 2.8 ** 2);
-    const group = particleCluster(id), point = formationPoint(id);
-    for (let axis = 0; axis < 3; axis++) sums[group][axis] += point[axis];
-    sums[group][3]++;
+    const [x, z] = surfaceCoordinates(id), normal = surfaceNormal(x, z);
+    assert.deepEqual(formationPoint(id), surfacePoint(x, z));
+    assert(Math.abs(Math.hypot(...normal) - 1) < 1e-12 && normal[1] > 0);
+    const epsilon = 1e-5, [gx, gz] = lossGradient(x, z);
+    assert(Math.abs(gx - (loss(x + epsilon, z) - loss(x - epsilon, z)) / (2 * epsilon)) < 1e-5);
+    assert(Math.abs(gz - (loss(x, z + epsilon) - loss(x, z - epsilon)) / (2 * epsilon)) < 1e-5);
   }
-  latentClusters.forEach((cluster, group) => {
-    assert(cluster.factor[0] > 0 && cluster.factor[2] > 0 && cluster.factor[5] > 0);
-    assert(Math.max(cluster.factor[0], cluster.factor[2], cluster.factor[5]) / Math.min(cluster.factor[0], cluster.factor[2], cluster.factor[5]) > 1.2);
-    for (let axis = 0; axis < 3; axis++) assert(Math.abs(sums[group][axis] / sums[group][3] - cluster.center[axis]) < 0.055);
-  });
 });
-
-test("spatial-hash links match brute-force nearest neighbors and remain sparse at every quality", () => {
-  const distance = (a, b) => a.reduce((sum, v, axis) => sum + (v - b[axis]) ** 2, 0);
+test("surface links connect parameter neighbors and retain every endpoint at lower quality", () => {
   for (const [quality, stride] of [["high", 1], ["medium", 2], ["low", 3]]) {
-    const { connections, lines } = createParticleGeometry(quality);
-    const ids = Array.from({length: 1248 / stride}, (_, i) => i * stride);
-    const positions = new Map(ids.map(id => [id, formationPoint(id)]));
-    assert(connections.length > 60 && connections.length < 320);
-    assert.equal(lines.length, connections.length * particleStride * 2);
-    const keys = connections.map(e => [e.from, e.to].sort((a, b) => a - b).join(":"));
-    assert.equal(new Set(keys).size, keys.length);
+    const { connections } = createParticleGeometry(quality);
+    assert(connections.length > 100 && connections.length < 400);
     for (const edge of connections) {
-      assert(positions.has(edge.from) && positions.has(edge.to) && edge.from !== edge.to);
-      if (!edge.bridge) assert(distance(positions.get(edge.from), positions.get(edge.to)) <= 0.26 ** 2);
-    }
-    for (const id of ids.filter(id => id % (stride * 8) === 0)) {
-      const expected = ids.filter(other => other !== id).map(other => ({id: other, distance: distance(positions.get(id), positions.get(other))})).filter(p => p.distance < 0.26 ** 2).sort((a, b) => a.distance - b.distance).slice(0, 2);
-      for (const nearest of expected) assert(connections.some(e => (e.from === id && e.to === nearest.id) || (e.to === id && e.from === nearest.id)));
-    }
-    // Every intended component pair has a relationship, including when an edge
-    // was already found by the local nearest-neighbor pass.
-    for (const [a, b] of [[0, 1], [1, 2], [1, 3]]) {
-      assert(connections.some(e => [particleCluster(e.from), particleCluster(e.to)].sort().join(":") === `${a}:${b}`));
+      assert.equal(edge.from % stride, 0); assert.equal(edge.to % stride, 0);
+      assert(edge.to - edge.from === 48 || (edge.to - edge.from === stride && Math.floor(edge.to / 48) === Math.floor(edge.from / 48)));
     }
   }
 });
