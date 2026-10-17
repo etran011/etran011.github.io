@@ -156,7 +156,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
   .signal-graphic { animation: signal-arrive 1000ms var(--ease-standard) both; }
 }
 @keyframes hero-word-arrive { from { opacity: 0.65; transform: translateY(12px) rotateX(6deg); } to { opacity: 1; transform: none; } }
-@keyframes hero-arrive { from { opacity: 0.72; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hero-arrive { from { opacity: 0.86; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes signal-arrive { from { opacity: 0; } to { opacity: 1; } }
 
 .hero-actions { margin-top: 2rem; }
@@ -333,7 +333,6 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .technology-button:hover { background: color-mix(in srgb, var(--brand-color, var(--accent)) 5%, transparent); }
  .technology-button:hover .technology-glyph::before { opacity: 0.7; }
 }
-.stack-collection:has(.technology-button:focus-visible) .technology-name { color: var(--foreground); }
 .technology-stack[data-active-group="languages"] [data-collection="languages"] .stack-collection-heading h3,
 .technology-stack[data-active-group="libraries"] [data-collection="libraries"] .stack-collection-heading h3,
 .technology-stack[data-active-group="tools"] [data-collection="tools"] .stack-collection-heading h3 { color: var(--accent); }
@@ -576,7 +575,7 @@ html[data-weighted-scroll] { scroll-behavior: auto !important; }
  .gallery-stage:focus-visible img { animation: none; }
 }
 @keyframes project-frame { from { opacity: 0.88; transform: translateX(calc(var(--frame-direction, 1) * 10px)) scale(1.012); } to { opacity: 1; transform: none; } }
-@keyframes project-caption { from { opacity: 0.75; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes project-caption { from { opacity: 0.88; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media(max-width: 767px) and (prefers-reduced-motion: no-preference) { .gallery-stage img, .project-preview figcaption > span { animation-duration: 320ms; } }
 
 .scroll-story[data-pinned] .project-card:hover { transform: none; }

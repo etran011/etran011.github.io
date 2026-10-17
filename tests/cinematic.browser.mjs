@@ -19,6 +19,7 @@ try {
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
   assert(await page.locator('h1').evaluate(e => Number(getComputedStyle(e).opacity) >= .7));
+  assert(await page.locator('.hero-role').evaluate(e => Number(getComputedStyle(e).opacity) >= .85));
   assert(await page.locator('.hero-scroll-link').isVisible());
   await page.locator('.hero-scroll-link').click();
   await page.waitForFunction(() => document.activeElement.id === 'about');
@@ -47,6 +48,17 @@ try {
   for (const section of ['experience', 'skills', 'education', 'contact']) {
     await page.locator(`#${section}`).scrollIntoViewIfNeeded();
     await page.waitForFunction(id => document.querySelector('.ambient-background').dataset.section === id, section);
+    if (section === 'experience' || section === 'skills') {
+      await page.waitForFunction(id => document.querySelector(`#${id}`).getAnimations({ subtree: true }).some(a => a.playState === 'running'), section);
+      await page.evaluate(id => {
+        window.sceneAnimations = document.querySelector(`#${id}`).getAnimations({ subtree: true }).filter(a => a.playState === 'running');
+        Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+        document.dispatchEvent(new Event('visibilitychange'));
+      }, section);
+      await page.waitForTimeout(100);
+      assert(await page.evaluate(() => window.sceneAnimations.every(a => a.playState === 'paused')), 'Section and icon entrances must pause while hidden');
+      await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+    }
     await page.waitForTimeout(950);
     assert(await page.locator(`#${section} h2`).isVisible());
     assert(await page.evaluate(id => window.reveals.some(r => r.section === id), section));
@@ -75,5 +87,5 @@ try {
   assert.equal(await page.locator('[data-pinned]').count(), 0);
   assert(await page.locator('#contact').evaluate(e => e.getAnimations({ subtree: true }).every(a => a.playState !== 'running')));
   assert.deepEqual(errors, []);
-  console.log('Usable opening, staged section entrances, quiet settling, closing atmosphere and reduced motion passed.');
+  console.log('Opening, directed sections, project transitions/viewer, brand icons/keyboard, hidden-tab pause and reduced motion passed.');
 } finally { await browser.close(); }
