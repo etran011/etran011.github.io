@@ -16,6 +16,53 @@ try {
   await page.mouse.move(1100, 700);
   await page.waitForFunction(() => document.documentElement.dataset.customCursor === 'true');
   await page.waitForTimeout(300);
+  // Temporary semantic controls exercise the shared controller without adding site UI.
+  await page.evaluate(() => {
+    const fixture = document.createElement('div');
+    fixture.id = 'cursor-test-controls';
+    fixture.style.cssText = 'position:fixed;left:100px;top:180px;z-index:10000;display:flex;background:#111';
+    fixture.innerHTML = `<button><span>Nested</span><svg width="20" height="20"><rect width="20" height="20" /></svg></button><button disabled>Disabled</button><a>Decorative</a><a href="#about">Link</a><div role="button" tabindex="0">Role</div><div role="button" aria-disabled="true">Disabled role</div><details><summary>Disclosure</summary></details><fieldset disabled><button>Inherited disabled</button></fieldset><div aria-disabled="true"><button>Disabled group</button></div>`;
+    for (const child of fixture.children) child.style.cssText = 'display:block;padding:8px;width:100px;min-height:60px';
+    document.body.append(fixture);
+  });
+  const ringState = () => page.locator('.cursor-ring').evaluate(e => {
+    const s = getComputedStyle(e);
+    return { width: parseFloat(s.width), height: parseFloat(s.height), fill: s.backgroundColor, border: s.borderTopWidth, text: e.textContent, duration: s.transitionDuration, easing: s.transitionTimingFunction };
+  });
+  const hover = async (locator, active) => {
+    await locator.hover();
+    await page.waitForTimeout(320);
+    assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'), active ? 'link' : 'default');
+    const state = await ringState();
+    assert.equal(state.width, active ? 40 : 24);
+    assert.equal(state.height, state.width);
+    assert.equal(state.fill, 'rgba(0, 0, 0, 0)');
+    assert.equal(state.border, '1px');
+    assert.equal(state.text, '');
+    assert.equal(await page.locator('.cursor-dot').evaluate(e => getComputedStyle(e).width), '4px');
+  };
+  const fixture = page.locator('#cursor-test-controls');
+  await hover(fixture.locator('button').first(), true);
+  assert.match((await ringState()).duration, /0.24s/);
+  assert.match((await ringState()).easing, /ease-out/);
+  await hover(fixture.locator('svg rect'), true);
+  await hover(fixture.locator('button span'), true);
+  await hover(fixture.locator('button').nth(1), false);
+  await hover(fixture.locator('a').first(), false);
+  await hover(fixture.locator('a[href]'), true);
+  await hover(fixture.locator('[role="button"]').first(), true);
+  await hover(fixture.locator('[aria-disabled="true"][role]'), false);
+  await hover(fixture.locator('summary'), true);
+  await hover(fixture.locator('fieldset button'), false);
+  await hover(fixture.locator('div[aria-disabled] button'), false);
+  for (let i = 0; i < 6; i++) {
+    await fixture.locator('button').first().hover();
+    await fixture.locator('a').first().hover();
+  }
+  await hover(fixture.locator('a').first(), false);
+  await page.evaluate(() => document.getElementById('cursor-test-controls').remove());
+  await page.mouse.move(1100, 700);
+  await page.waitForTimeout(320);
   await page.evaluate(() => {
     window.cursorSamples = [];
     window.stopCursorSamples = false;
@@ -57,9 +104,9 @@ try {
     await locator.scrollIntoViewIfNeeded();
     const box = await locator.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 8 });
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(320);
     assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'), 'link');
-    assert(Math.abs(await page.locator('.cursor-ring').evaluate(e => parseFloat(getComputedStyle(e).width)) - 36) < .1, 'All clickable targets share one ring size');
+    assert(Math.abs(await page.locator('.cursor-ring').evaluate(e => parseFloat(getComputedStyle(e).width)) - 40) < .1, 'All clickable targets share one ring size');
     assert.equal(await page.locator('.cursor-ring').evaluate(e => e.childElementCount), 0, 'No cursor label renderer remains');
     assert.equal(await page.locator('.cursor-ring').evaluate(e => getComputedStyle(e).backgroundColor), 'rgba(0, 0, 0, 0)', 'Hover ring stays hollow');
     await page.mouse.down();

@@ -30,3 +30,9 @@ Validation on October 16, 2026 used Chrome browser automation against the produc
 - Home and both case-study pages load directly at 320, 390, 768, and 1440 pixels, with working case-study navigation and no runtime errors. The export includes `.nojekyll` and static case-study HTML. Privacy checks confirm no public résumé download or phone links.
 
 For a manual smoke test, scroll About forward and backward, use its project links without moving the pointer after activation, return from a case study, open and close the screenshot viewer, select ordinary text, then tab through controls. Move the pointer outside the window and return; switch away from and back to the browser. Native pointer behavior should appear only in the documented fallback and editing contexts.
+
+## Minimal cursor hover behavior
+
+The cursor contains only a 4px dot and a hollow 24px ring with the existing 1px accent border. Enabled semantic controls expand the ring to 40px (1.67×) over 240ms ease-out; leaving contracts it with the same transition. No text renderer, contextual label attributes, opaque fills, or per-component cursor states remain. Semantic links, buttons, interactive roles, and native details summaries share the effect. Disabled controls (including disabled fieldsets and ARIA-disabled ancestors), inert controls, and decorative elements do not activate it. Native editing and accessibility fallbacks still take priority.
+
+Viewport translation remains on `.cursor-position`; hover dimensions and the existing 0.85 press scale stay on its nested `.cursor-ring`. Spring settings and pointer lifecycle handlers are unchanged. `tests/cursor.browser.mjs` checks transparent default/hover states, dimensions, transitions, nested SVG/text targets, disabled/decorative targets, rapid changes, real navigation/gallery/technology/contact interactions, click-center regression, and touch/reduced-motion/forced-colors fallbacks against the static export.

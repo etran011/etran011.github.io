@@ -45,8 +45,10 @@ export function CustomCursor() {
         ringX.jump(point.x); ringY.jump(point.y);
       }
       x.set(point.x); y.set(point.y);
-      const control = target.closest("a, button, [role='button']");
-      const mode = control ? "link" : "default";
+      // Resolve the semantic control once, even while crossing its nested icons/text.
+      const control = target.closest("a[href], button, details > summary:first-of-type, [role='button'], [role='link'], [role='tab'], [role='menuitem'], [role='menuitemcheckbox'], [role='menuitemradio'], [role='checkbox'], [role='radio'], [role='switch'], [role='slider'], [role='scrollbar']");
+      const interactive = control && !control.matches(":disabled") && !control.closest("[aria-disabled='true'], [inert]");
+      const mode = interactive ? "link" : "default";
       if (element.dataset.mode !== mode) element.dataset.mode = mode;
       if (!element.dataset.visible) element.dataset.visible = "true";
       if (!document.documentElement.dataset.customCursor) document.documentElement.dataset.customCursor = "true";
