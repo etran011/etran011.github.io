@@ -20,13 +20,13 @@ try {
   await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
   assert(await page.locator('h1').evaluate(e => Number(getComputedStyle(e).opacity) >= .7));
-  assert(await page.locator('.hero-role').evaluate(e => Number(getComputedStyle(e).opacity) >= .85));
+  await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.hero-role')).opacity) >= .85);
   assert(await page.locator('.hero-scroll-link').isVisible());
   await page.locator('.hero-scroll-link').click();
   await page.waitForFunction(() => document.activeElement.id === 'about');
   await page.getByRole('link', { name: 'See what I’m building' }).click();
   await page.waitForFunction(() => document.activeElement.id === 'projects');
-  const project = page.locator('[data-scroll-story="project"]');
+  const project = page.locator('#projects');
   const gallery = project.locator('.screenshot-gallery');
   const headingBefore = await project.locator('#projects-heading').boundingBox();
   const first = await gallery.locator('.gallery-stage img').getAttribute('src');
@@ -39,7 +39,7 @@ try {
   await page.waitForTimeout(750);
   assert.equal(await gallery.locator('.gallery-stage img').evaluate(e => getComputedStyle(e).transform), 'none');
   const headingAfter = await project.locator('#projects-heading').boundingBox();
-  assert(Math.abs(headingAfter.y - headingBefore.y) < 2, 'Image transitions must not move the pinned heading');
+  assert(Math.abs(headingAfter.y - headingBefore.y) < 2, 'Image transitions must not move the heading');
   await gallery.locator('.gallery-stage').click();
   assert(await gallery.getByRole('dialog').isVisible());
   await page.keyboard.press('ArrowRight');
@@ -47,12 +47,12 @@ try {
   assert.equal(await gallery.getByRole('dialog').count(), 0);
   assert(await gallery.locator('.gallery-stage').evaluate(e => e === document.activeElement));
   for (const section of ['experience', 'skills', 'education', 'contact']) {
-    await page.locator(`#${section}`).scrollIntoViewIfNeeded();
+    await page.locator(`#${section}`).evaluate(e=>window.scrollTo({top:e.getBoundingClientRect().top+scrollY-112,behavior:"instant"}));
     await page.waitForFunction(id => document.querySelector('.ambient-background').dataset.section === id, section);
     if (section === 'experience' || section === 'skills') {
-      await page.waitForFunction(id => document.querySelector(`#${id}`).getAnimations({ subtree: true }).some(a => a.playState === 'running'), section);
+      await page.waitForFunction(id => document.querySelector(`#${id}`).getAnimations({ subtree: true }).some(a => a.playState === 'running' && a.constructor.name === 'Animation'), section);
       await page.evaluate(id => {
-        window.sceneAnimations = document.querySelector(`#${id}`).getAnimations({ subtree: true }).filter(a => a.playState === 'running');
+        window.sceneAnimations = document.querySelector(`#${id}`).getAnimations({ subtree: true }).filter(a => a.playState === 'running' && a.constructor.name === 'Animation');
         Object.defineProperty(document, 'hidden', { configurable: true, value: true });
         document.dispatchEvent(new Event('visibilitychange'));
       }, section);
@@ -88,5 +88,5 @@ try {
   assert.equal(await page.locator('[data-pinned]').count(), 0);
   assert(await page.locator('#contact').evaluate(e => e.getAnimations({ subtree: true }).every(a => a.playState !== 'running')));
   assert.deepEqual(errors, []);
-  console.log('Opening, directed sections, project transitions/viewer, brand icons/keyboard, hidden-tab pause and reduced motion passed.');
+  console.log('Opening, island entrances, project transitions/viewer, brand icons/keyboard, hidden-tab pause and reduced motion passed.');
 } finally { await browser.close(); }

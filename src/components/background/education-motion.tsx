@@ -38,9 +38,9 @@ export function EducationMotion({ children }: { children: ReactNode }) {
           ] as const;
           for (const [selector, delay] of stages) {
             for (const target of element.querySelectorAll(selector)) {
-              const frames = [{ opacity: .08, translate: `0 ${compact.matches ? 8 : 18}px` }, { opacity: 1, translate: "0 0" }];
+              const frames = [{ opacity: .92, translate: `0 ${compact.matches ? 6 : 10}px` }, { opacity: 1, translate: "0 0" }];
               const animation = target.animate(frames, {
-                duration: compact.matches ? 500 : 800, delay: delay * (compact.matches ? .65 : 1),
+                duration: compact.matches ? 320 : cinematicMotion.quietEntrance, delay: delay * (compact.matches ? .2 : .3),
                 easing: cinematicMotion.easing, fill: "backwards",
               });
               animations.add(animation);

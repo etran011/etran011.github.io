@@ -1,5 +1,7 @@
 # Gradient descent particle landscape
 
+The continuous-workspace redesign supersedes the historical pinned-scene and particle-dispersal behavior described below. See [Continuous portfolio workspace](continuous-workspace.md) for the current layout, persistent model, and validation.
+
 The hero uses a particle sampling of Himmelblau's loss landscape, a visible optimization trail, one moving optimization point, and three detailed instrument rings. It retains the portfolio's palette, typography, layout, weighted scrolling, pinned scenes, cursor, navigation, and project presentations. The same landscape particles disperse into a smaller ambient field and reconstruct on reverse scroll.
 
 ## Mathematics

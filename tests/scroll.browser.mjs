@@ -13,36 +13,34 @@ try {
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
-  const hero = page.locator('[data-scroll-story="hero"]');
-  assert.equal(Number(await hero.getAttribute('data-story-travel')), 1200);
+  const hero = page.locator('#home');
+  assert.equal(await page.locator('[data-pinned]').count(),0);
+  const expansion=()=>page.locator('.ambient-canvas').evaluate(c=>{const g=c.getContext('webgl'),p=g.getParameter(g.CURRENT_PROGRAM);return g.getUniform(p,g.getUniformLocation(p,'uExpansion'));});
+  await page.waitForFunction(()=>document.querySelector('.ambient-background').dataset.renderer==='webgl');
   await page.mouse.move(900, 500);
   // A dense trackpad-like burst retains its distance without skipping visual stages.
   for (let i = 0; i < 12; i++) { await page.mouse.wheel(0, 10); await page.waitForTimeout(30); }
   await page.waitForTimeout(1000);
   assert(Math.abs(await page.evaluate(() => scrollY) - 120) < 2);
-  const progress = await hero.evaluate(e => Number(e.style.getPropertyValue('--story-progress')));
-  assert(progress > .095 && progress <= .101);
+  const progress = await expansion();
+  assert(progress > .07 && progress < .15);
   // A large wheel gesture starts with bounded visual motion, then catches up.
   await page.mouse.wheel(0, 900);
   await page.waitForTimeout(100);
-  assert(await hero.evaluate(e => Number(e.style.getPropertyValue('--story-progress'))) < .3);
+  assert(await expansion() < .3);
   await page.waitForTimeout(1800);
   assert(Math.abs(await page.evaluate(() => scrollY) - 1020) < 2);
   await page.mouse.wheel(0, -420);
   await page.waitForTimeout(1500);
   assert(Math.abs(await page.evaluate(() => scrollY) - 600) < 2);
-  assert(Math.abs(await hero.evaluate(e => Number(e.style.getPropertyValue('--story-progress'))) - .5) < .002);
+  assert(Math.abs(await expansion() - 600 / ((await hero.boundingBox()).height * 1.2)) < .03);
   // Keyboard interrupts interpolation; anchors retain their destination and focus.
   await page.keyboard.press('Home');
   await page.waitForTimeout(700);
   await page.locator('.hero-scroll-link').click();
   await page.waitForFunction(() => document.activeElement.id === 'about');
   assert(await page.locator('#about').evaluate(e => Math.abs(e.getBoundingClientRect().top - 112) < 3));
-  for (const kind of ['about', 'project']) {
-    const story = page.locator(`[data-scroll-story="${kind}"]`);
-    assert.equal(await story.getAttribute('data-pinned'), 'true');
-    assert(Number(await story.getAttribute('data-story-travel')) >= 1000);
-  }
+  assert.equal(await page.locator('[data-pinned]').count(),0);
   await page.locator('#experience').scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   const ordinaryStart = await page.evaluate(() => scrollY);

@@ -86,7 +86,7 @@ try {
     await assertNoProgress();
     await assertPosition();
   }
-  // Anchors exercise each pinned section using the actual navigation links.
+  // Anchors exercise each content section using the actual navigation links.
   for (const section of ['about', 'projects', 'contact']) {
     await page.locator(`.desktop-nav a[href="/#${section}"]`).click();
     await page.waitForFunction(id => document.activeElement?.id === id, section);

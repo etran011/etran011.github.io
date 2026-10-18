@@ -10,7 +10,8 @@ export const poseKeys = ["yaw", "pitch", "roll", "scale", "centerX", "centerY", 
  * Expansion is applied once in the renderer, to every mathematical layer together.
  */
 export function resolveAtmospherePose(context: AtmosphereContext, target: ScenePose) {
-  Object.assign(target, formationView, { detail: 1 });
+  Object.assign(target, formationView);
+  target.detail = 1;
   const progress = Math.max(0, Math.min(1, context.heroProgress));
   target.yaw += progress * .1;
   target.pitch -= progress * .08;

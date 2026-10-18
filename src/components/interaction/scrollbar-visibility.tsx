@@ -100,7 +100,7 @@ export function ScrollbarVisibility() {
     };
   }, []);
   return <>
-    <div className="auto-scrollbar"><div ref={thumb} className="auto-scrollbar-thumb" role="scrollbar" tabIndex={0} aria-label="Page scroll" aria-controls="main-content" aria-orientation="vertical" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0} /></div>
+    <div className="auto-scrollbar" role="region" aria-label="Page scrolling"><div ref={thumb} className="auto-scrollbar-thumb" role="scrollbar" tabIndex={0} aria-label="Page scroll" aria-controls="main-content" aria-orientation="vertical" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0} /></div>
     <noscript><style>{"html[data-scrollbar-state]{scrollbar-width:auto!important}html[data-scrollbar-state]::-webkit-scrollbar{display:block!important}.auto-scrollbar{display:none!important}"}</style></noscript>
   </>;
 }

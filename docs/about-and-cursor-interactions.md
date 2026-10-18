@@ -1,5 +1,7 @@
 # About storytelling and cursor behavior
 
+The continuous-workspace redesign supersedes the historical pinned-scene and particle-dispersal behavior described below. See [Continuous portfolio workspace](continuous-workspace.md) for the current layout, persistent model, and validation.
+
 ## About narrative
 
 The three chapters in `src/data/background.ts` connect Erik's background, actual projects, and approach to making technical work understandable. OptionLab and PlatePredict are the verified project references. Attribution retains the distinction between the Python backend and reviewed AI-assisted frontend. Private source documents are not published.

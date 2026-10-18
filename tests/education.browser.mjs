@@ -14,7 +14,7 @@ try {
   assert.deepEqual(await page.locator('main > section').evaluateAll(sections => sections.map(s => s.id)), ['home', 'about', 'projects', 'experience', 'skills', 'education', 'contact']);
   await page.locator('#education').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => document.querySelector('[data-education-motion]')?.dataset.active === 'true');
-  const stages = await page.locator('#education').evaluate(s => s.getAnimations({ subtree: true }).filter(a => a.effect?.getTiming().iterations === 1).map(a => a.effect.getTiming().delay));
+  const stages = await page.locator('#education').evaluate(s => s.getAnimations({ subtree: true }).filter(a => a.constructor.name === 'Animation' && a.effect?.getTiming().iterations === 1).map(a => a.effect.getTiming().delay));
   assert(new Set(stages).size >= 5, 'Academic content should reveal in distinct stages');
   await page.waitForTimeout(1800);
   const movement = () => page.locator('#education .academic-lattice').evaluate(e => getComputedStyle(e).transform);
@@ -41,7 +41,7 @@ try {
   assert.equal(await page.locator('#education .academic-signal').evaluate(e => getComputedStyle(e).animationPlayState), 'paused');
   await page.locator('#education').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => document.querySelector('[data-education-motion]').dataset.active === 'true');
-  assert.equal(await page.locator('#education').evaluate(s => s.getAnimations({subtree:true}).filter(a => a.effect?.getTiming().iterations === 1).length), 0, 'Entrance must not replay on reentry');
+  assert.equal(await page.locator('#education').evaluate(s => s.getAnimations({subtree:true}).filter(a => a.constructor.name === 'Animation' && a.effect?.getTiming().iterations === 1).length), 0, 'Entrance must not replay on reentry');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.waitForFunction(() => document.querySelector('[data-education-motion]').dataset.active === 'false');
   assert.equal(await page.locator('#education .academic-lattice').evaluate(e => getComputedStyle(e).animationName), 'none');
