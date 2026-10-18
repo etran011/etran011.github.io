@@ -1,11 +1,11 @@
 /* Open career history: dates, a shared axis, and uninterrupted document flow. */
 .experience-list { --timeline-axis: 13.25rem; position: relative; }
-.experience-list::before { content: ""; position: absolute; top: .7rem; bottom: 1rem; left: var(--timeline-axis); width: 1px; background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.experience-list::before, .experience-list::after { content: ""; position: absolute; top: .7rem; bottom: 1rem; left: var(--timeline-axis); width: 1px; background: color-mix(in srgb, var(--accent) 28%, transparent); }
 .experience-entry { position: relative; display: grid; grid-template-columns: 12rem minmax(0, 1fr); column-gap: 3.5rem; padding-bottom: clamp(2.75rem, 5vw, 4.5rem); }
 .experience-entry:last-child { padding-bottom: 1.5rem; }
 .experience-milestone { position: absolute; left: var(--timeline-axis); top: .25rem; translate: -50% 0; width: 14px; height: 14px; border: 1px solid color-mix(in srgb, var(--accent) 65%, var(--background)); border-radius: 50%; background: var(--background); pointer-events: none; }
 .experience-date { color: var(--muted); font: .6875rem/1.8 var(--font-code); text-align: right; padding-top: .1rem; }
-.experience-entry article { min-width: 0; max-width: 49rem; }
+.experience-entry article { min-width: 0; max-width: 49rem; text-shadow: 0 1px 4px var(--background); }
 .experience-entry h3 { color: var(--foreground); font-size: clamp(1.45rem, 2.5vw, 2.1rem); font-weight: 450; letter-spacing: -.04em; line-height: 1.2; }
 .experience-organization { color: var(--accent); margin-top: .6rem; font-size: 1rem; }
 .experience-location { font: .65rem/1.8 var(--font-code); color: var(--muted); margin-top: .45rem; }
@@ -26,3 +26,20 @@
   .experience-highlights { font-size: .8125rem; }
 }
 @media(forced-colors: active) { .experience-list::before { background: CanvasText; } .experience-milestone { background: Canvas; border-color: CanvasText; } }
+
+/* A one-pixel decorative highlight follows the reading position. */
+.experience-list::after { background: color-mix(in srgb, var(--accent) 70%, transparent); transform: scaleY(var(--timeline-progress, 0)); transform-origin: top; pointer-events: none; }
+.experience-milestone { transition: border-color 220ms ease, box-shadow 220ms ease, scale 220ms ease; }
+.experience-entry h3 { transition: color 220ms ease; }
+.experience-entry[data-timeline-state="completed"] .experience-milestone { border-color: var(--accent); }
+.experience-entry[data-timeline-state="current"] .experience-milestone { border-color: var(--accent-strong); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 8%, transparent); }
+@media(hover: hover) and (pointer: fine) {
+  .experience-entry:hover .experience-milestone { border-color: var(--accent-strong); scale: 1.12; }
+  .experience-entry:hover h3 { color: var(--accent-strong); }
+}
+@media(prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  .experience-entry[data-timeline-state="current"] .experience-milestone::after { content: ""; position: absolute; inset: -4px; border: 1px solid var(--accent); border-radius: 50%; opacity: .15; animation: career-breathe 4.8s ease-in-out infinite paused; }
+  [data-timeline-active="true"] .experience-entry[data-timeline-state="current"] .experience-milestone::after { animation-play-state: running; }
+}
+@keyframes career-breathe { 50% { opacity: .35; scale: 1.12; } }
+@media(prefers-reduced-motion: reduce), (forced-colors: active) { .experience-list::after { display: none; } }

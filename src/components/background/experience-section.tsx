@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/container";
 import { experience } from "@/data/background";
 import "./experience-section.css";
+import { ExperienceTimeline } from "./experience-timeline";
 
 export function ExperienceSection() {
   return (
@@ -10,7 +11,7 @@ export function ExperienceSection() {
           <div><p className="eyebrow">Experience / 03</p><h2 id="experience-heading">Working with people.<br />Solving technical problems.</h2></div>
           <p>From campus support to data analysis, my work connects technical detail with clear communication.</p>
         </div>
-        <ol className="experience-list">
+        <ExperienceTimeline>
           {experience.map((item) => (
             <li key={item.id} className="experience-entry">
               <span className="experience-milestone" aria-hidden="true" />
@@ -25,7 +26,7 @@ export function ExperienceSection() {
               </article>
             </li>
           ))}
-        </ol>
+        </ExperienceTimeline>
       </Container>
     </section>
   );

@@ -4,7 +4,7 @@ The home page uses ordinary document flow from Hero through Contact. The former 
 
 ## Content and layout
 
-`ContentIsland` supplies a shared thin border, quiet transparent dark surface, rounded corners, and responsive padding. About combines a large Markdown-inspired introduction with two verified academic panels and a project panel. All three original narrative chapters remain. Experience uses alternating seven/five-column islands; projects retain large screenshots and manual galleries. Education preserves the William & Mary typography, 2028 graduation, GPA, academic illustration and coursework disclosure within one island. Contact has separate message and social-link islands. Section backgrounds and the footer share the continuous atmosphere.
+`ContentIsland` supplies a shared thin border, quiet transparent dark surface, rounded corners, and responsive padding. About combines a large Markdown-inspired introduction with two verified academic panels and a project panel. All three original narrative chapters remain. Experience now uses an open vertical career timeline (see [Experience career timeline](experience-timeline.md)); projects retain large screenshots and manual galleries. Education preserves the William & Mary typography, 2028 graduation, GPA, academic illustration and coursework disclosure within one island. Contact has separate message and social-link islands. Section backgrounds and the footer share the continuous atmosphere.
 
 Tools retains its original components, categories, official icon assets/colors/sizes, labels, arrangement, selection state, keyboard behavior and hover effects. Only shared section spacing and the background around it have changed.
 

@@ -1,0 +1,13 @@
+# Experience career timeline
+
+Only Experience was redesigned. The four existing roles, employers, periods, locations and contribution bullets remain unchanged. Short role summaries and descriptive tool/area tags are condensed from those same verified responsibilities. No reference-image employers, software versions, invented dates, or extra jobs were added.
+
+An ordered list places dates to the left of a one-pixel shared axis on desktop. Outlined milestones are centered on that axis; role details sit to the right without rectangular cards. Below 768px the dates move above the title in the content column while the rail remains visible. The open composition leaves the existing persistent mathematical background visible. A small text shadow improves legibility without introducing an opaque panel.
+
+`ExperienceTimeline` measures the rail and milestones on resize, then coalesces native scroll notifications into a single animation frame while the list is visible. The highlight reaches the viewport's 55% reading line. Previous milestones retain a quiet completed outline; the latest reached milestone has a restrained highlight and breathing outline. Reverse scrolling recomputes state from document position. No wheel interception, pinning, forced travel, React state updates, or idle JavaScript loop was added.
+
+Content uses once-only, low-distance entrances and lightly staggered contributions. It is always readable before JavaScript and never fades away on exit. Reduced motion and forced colors disable decorative motion, and hidden/offscreen states pause breathing and active entrances. Entry hover emphasizes the milestone and title without a pointer cursor or fake link semantics. The shared cursor and scrollbar are untouched.
+
+Validation includes TypeScript, ESLint, production static export, the existing unit suite, and Chrome checks in `tests/experience.browser.mjs`: exact content, rail/milestone alignment, desktop/mobile date placement, 320–1440px widths, 200% text, no-JavaScript content, native cursor semantics, forward/reverse illumination, one-time entrances, hidden-page pause, reduced motion and forced colors. The shared workspace and accessibility suites check surrounding layouts. Desktop/mobile screenshots are stored locally under `tmp/workspace-experience-*.png` for review.
+
+Known pre-existing limitation: after the Selected Work screenshot loads, that unchanged gallery can exceed a 320px viewport at 200% root text size. Experience itself remains within the viewport at that zoom. The unrelated project layout was intentionally left unchanged.

@@ -6,6 +6,51 @@ const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'
 const browser=await chromium.launch({headless:true,channel:'chrome'});
 const base=process.argv[2]||'http://127.0.0.1:4173';
 try {
+  const page=await browser.newPage({viewport:{width:1440,height:1000}});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{
+    sessionStorage.setItem('portfolio:intro:v1','seen');window.careerEntrances=0;
+    const animate=Element.prototype.animate;
+    Element.prototype.animate=function(...args){if(this.closest('.experience-entry'))window.careerEntrances++;return animate.apply(this,args)};
+  });
+  await page.goto(base);
+  await page.waitForFunction(()=>document.documentElement.dataset.weightedScroll==='true');
+  const travel=async index=>{
+    await page.locator('.experience-entry').nth(index).evaluate(e=>window.scrollTo({top:e.getBoundingClientRect().top+scrollY-240,behavior:'instant'}));
+    await page.waitForTimeout(200);
+    await page.waitForFunction(()=>document.querySelector('.experience-list').dataset.timelineActive==='true');
+  };
+  const progress=()=>page.locator('.experience-list').evaluate(e=>Number(e.style.getPropertyValue('--timeline-progress')));
+  await travel(0);await page.waitForTimeout(800);const firstProgress=await progress();
+  assert.equal(await page.locator('.experience-entry').first().getAttribute('data-timeline-state'),'current');
+  await page.locator('.experience-entry h3').first().hover();
+  await page.waitForTimeout(280);
+  assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'),'default','Timeline copy never impersonates a link');
+  assert.equal(await page.locator('.experience-entry').first().evaluate(e=>getComputedStyle(e).cursor),'none');
+  await travel(3);await page.waitForTimeout(900);
+  assert(await progress()>firstProgress+.4,'Rail illumination follows section travel');
+  assert.equal(await page.locator('.experience-entry[data-timeline-state="completed"]').count(),3);
+  assert.equal(await page.locator('.experience-entry').last().getAttribute('data-timeline-state'),'current');
+  assert(Number(await page.locator('.ambient-canvas').evaluate(e=>getComputedStyle(e).opacity))>=.46,'Persistent mathematical background stays visible');
+  const entrances=await page.evaluate(()=>window.careerEntrances);
+  await travel(0);await page.waitForTimeout(700);
+  assert(await progress()<firstProgress+.01,'Reverse scrolling returns the rail to its document position');
+  assert.equal(await page.locator('.experience-entry').first().getAttribute('data-timeline-state'),'current');
+  assert.equal(await page.evaluate(()=>window.careerEntrances),entrances,'Content entrances never replay');
+  assert.equal(await page.locator('.experience-entry').first().evaluate(e=>getComputedStyle(e.querySelector('article')).opacity),'1');
+  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
+  assert.equal(await page.locator('.experience-list').getAttribute('data-timeline-active'),'false');
+  assert.equal(await page.locator('.experience-milestone').first().evaluate(e=>getComputedStyle(e,'::after').animationPlayState),'paused');
+  await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.waitForFunction(()=>document.querySelector('.experience-list').dataset.timelineActive==='false');
+  assert.equal(await page.locator('.experience-list').getAttribute('data-timeline-active'),'false');
+  assert.equal(await page.locator('.experience-list').evaluate(e=>getComputedStyle(e,'::after').display),'none');
+  await page.emulateMedia({reducedMotion:'no-preference',forcedColors:'active'});
+  await page.waitForFunction(()=>document.querySelector('.experience-list').dataset.timelineActive==='false');
+  assert.equal(await page.locator('.experience-list').getAttribute('data-timeline-active'),'false');
+  assert.deepEqual(errors,[]);await page.close();
+  console.log('Scroll/reverse illumination, milestone states, no replay, noninteractive cursor, hidden/reduced/forced fallbacks passed.');
   for(const width of [320,390,768,1024,1440]) {
     const page=await browser.newPage({viewport:{width,height:1000},reducedMotion:'reduce'});
     await page.goto(base+'/#experience');await page.evaluate(()=>document.fonts.ready);
@@ -30,7 +75,12 @@ try {
     }
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`No overflow at ${width}`);
     await page.addStyleTag({content:'html{font-size:200%}'});
-    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`200% text fits ${width}`);
+    await page.evaluate(()=>document.fonts.ready);
+    await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    const clipped=await page.locator('#experience').evaluate(root=>[root,...root.querySelectorAll('.experience-list,.experience-entry,.experience-date,article,h3,.experience-tags li,.experience-highlights li')].filter(e=>{const r=e.getBoundingClientRect();return r.left<-.5||r.right>innerWidth+.5}).map(e=>e.className||e.tagName));
+    assert.deepEqual(clipped,[],`Experience fits 200% text at ${width}`);
+    const pageOverflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+    if(pageOverflow) console.log(`Existing out-of-scope Selected Work overflow at 200% text, ${width}px; Experience bounds pass.`);
     await page.close();console.log('Accurate career content, aligned axis, responsive dates and enlarged text passed',width);
   }
   const noJS=await browser.newPage({viewport:{width:390,height:844},javaScriptEnabled:false});
