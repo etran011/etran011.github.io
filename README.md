@@ -107,3 +107,5 @@ Contact links use the verified profile email, GitHub, and LinkedIn URLs from `sr
 Accessibility includes a skip link, semantic landmarks, visible focus, reduced-motion support, mobile navigation without JavaScript, and keyboard-operable screenshot viewers. Text can wrap at enlarged sizes, and selected screenshot controls retain an outline in forced-colors mode.
 
 See [Phase 6 validation](docs/phase-6-validation.md) for test coverage and the outstanding GitHub cache removal follow-up.
+
+The current [native scrolling and expanded-atmosphere update](docs/native-scrolling-atmosphere.md) removes Lenis entirely, improves About readability, and expands the shared mathematical background while preserving the hero and continuous island layout. Historical interaction notes above describe earlier revisions.

@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.argv[2] || 'http://127.0.0.1:4173';
 const browser = await chromium.launch({ headless: true, channel: 'chrome' });
-const settled = page => page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'), { }, { timeout: 5000 });
+const settled = page => page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro') && getComputedStyle(document.querySelector('main')).visibility === 'visible' && getComputedStyle(document.querySelector('.portfolio-intro')).display === 'none', { }, { timeout: 5000 });
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();

@@ -28,6 +28,10 @@ try {
   await page.waitForFunction(() => document.activeElement.id === 'projects');
   const project = page.locator('#projects');
   const gallery = project.locator('.screenshot-gallery');
+  // Native anchors arrive immediately; let the independent entrance finish before
+  // measuring gallery-only layout stability.
+  await page.waitForFunction(()=>window.reveals.some(r=>r.section==='projects'&&r.className.includes('section-heading')));
+  await project.locator('.section-heading').evaluate(e=>Promise.all(e.getAnimations().filter(a=>a.constructor.name==='Animation').map(a=>a.finished.catch(()=>{}))));
   const headingBefore = await project.locator('#projects-heading').boundingBox();
   const first = await gallery.locator('.gallery-stage img').getAttribute('src');
   await gallery.getByRole('button', { name: 'Next screenshot' }).click();
