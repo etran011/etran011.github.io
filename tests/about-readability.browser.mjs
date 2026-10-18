@@ -5,11 +5,18 @@ const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'
 const browser=await chromium.launch({headless:true,channel:'chrome'});
 const base=process.argv[2]||'http://127.0.0.1:4173';
 try {
-  for(const width of [320,390,768,1440,1920]) {
+  for(const width of [320,390,768,1024,1280,1440,1920]) {
     const page=await browser.newPage({viewport:{width,height:1000},reducedMotion:'reduce'});
     await page.goto(base+'/#about');await page.evaluate(()=>document.fonts.ready);
     assert.equal(await page.locator('#about .content-island').count(),1,'One unified introduction');
     assert.equal(await page.locator('.about-copy > p').count(),2,'Only two concise paragraphs');
+    assert((await page.locator('.about-copy > p').allTextContents()).join(' ').split(/\s+/).length<90,'Introduction stays concise');
+    assert.equal(await page.locator('#about [data-line],#about code,#about pre').count(),0,'No artificial editor chrome');
+    const heading=await page.locator('.about-heading').boundingBox(),copy=await page.locator('.about-copy').boundingBox();
+    if(width>1100) {
+      assert(Math.abs(heading.y-copy.y)<1,'Editorial heading and prose align');
+      assert(copy.x>=heading.x+heading.width,'Separate desktop columns never overlap');
+    } else assert(copy.y>=heading.y+heading.height+20,'Stacked text has breathing room');
     assert.doesNotMatch(await page.locator('#about').textContent(),/about\.md|Markdown|GPA|2028|OptionLab|PlatePredict/);
     const results=await page.locator('#about .content-island').evaluateAll(islands=>{
       const ctx=document.createElement('canvas').getContext('2d');
@@ -28,7 +35,7 @@ try {
     assert(results.length>5,'Contrast audit covers the actual text');
     for(const result of results) {assert(result.ratio>=4.5,`AA text contrast: ${JSON.stringify(result)}`);assert.equal(result.opacity,1,'Text does not wait for animation');}
     for(const paragraph of await page.locator('.about-copy > p').all()) {
-      assert(await paragraph.evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=16),'Body text stays comfortably sized');
+      assert(await paragraph.evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=17),'Body text stays comfortably sized');
     }
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
     console.log('About text contrast over worst-case backdrop, body size and responsive bounds passed',width);
