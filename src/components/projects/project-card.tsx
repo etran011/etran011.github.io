@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { ScreenshotGallery } from "./screenshot-gallery";
 import type { Project } from "@/types/portfolio";
 
-export function ProjectCard({ project, index, scrollLinked = false }: { project: Project; index: number; scrollLinked?: boolean }) {
+export function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
     <article className={`project-card ${project.featured ? "project-featured" : "project-secondary"}`} aria-labelledby={`project-${project.slug}`}>
       <div className="project-card-copy">
@@ -23,7 +23,7 @@ export function ProjectCard({ project, index, scrollLinked = false }: { project:
         </ul>
         </div>
       </div>
-      <ScreenshotGallery screenshots={project.screenshots} title={project.title} scrollLinked={scrollLinked} />
+      <ScreenshotGallery screenshots={project.screenshots} title={project.title} />
     </article>
   );
 }

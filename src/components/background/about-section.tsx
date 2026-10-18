@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ScrollStory } from "@/components/interaction/scroll-story";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { about } from "@/data/background";
@@ -8,7 +7,7 @@ import { projects } from "@/data/portfolio";
 export function AboutSection() {
   return (
     <section id="about" className="background-section about-section" aria-labelledby="about-heading">
-      <ScrollStory kind="about" steps={about.chapters.length}>
+
         <Container>
           <div className="about-layout">
             <div className="about-intro">
@@ -34,7 +33,7 @@ export function AboutSection() {
             </div>
           </div>
         </Container>
-      </ScrollStory>
+
     </section>
   );
 }

@@ -1,4 +1,3 @@
-import { ScrollStory } from "@/components/interaction/scroll-story";
 import { ArrowDown } from "lucide-react";
 import { HeroHeadline } from "./hero-headline";
 import { Container } from "@/components/ui/container";
@@ -9,7 +8,7 @@ export function Hero() {
   return (
     <section id="home" className="hero" aria-labelledby="hero-heading">
       <script dangerouslySetInnerHTML={{ __html: heroTypingBootstrap }} />
-      <ScrollStory kind="hero" steps={3}><Container className="hero-scene">
+      <Container className="hero-scene">
         <div className="hero-grid hero-identity">
           <div className="hero-copy">
             <h1 id="hero-heading">{profile.name}<span>.</span></h1>
@@ -20,7 +19,7 @@ export function Hero() {
           </div>
         </div>
         <a className="hero-scroll-link text-link" href="#about"><span className="eyebrow">Scroll to discover</span><span className="hero-scroll-track" aria-hidden="true" /><ArrowDown size={16} aria-hidden="true" /><span className="sr-only">About Erik</span></a>
-      </Container></ScrollStory>
+      </Container>
     </section>
   );
 }

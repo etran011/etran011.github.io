@@ -5,9 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } f
 import { ChevronLeft, ChevronRight, Expand, X, ZoomIn, ZoomOut } from "lucide-react";
 import type { Project } from "@/types/portfolio";
 
-export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: { screenshots: Project["screenshots"]; title: string; scrollLinked?: boolean }) {
-  const gallery = useRef<HTMLDivElement>(null);
-  const manual = useRef(false);
+export function ScreenshotGallery({ screenshots, title }: { screenshots: Project["screenshots"]; title: string }) {
   const [selected, setSelected] = useState(0);
   const selection = useRef(0);
   const [direction, setDirection] = useState(1);
@@ -24,30 +22,10 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
     setDirection(travel ?? (index >= selection.current ? 1 : -1));
     selection.current = index; setSelected(index); setZoomed(false);
   }, []);
-  const select = (index: number) => { manual.current = true; show(index); };
-  const move = (direction: number) => { manual.current = true; show((selection.current + direction + screenshots.length) % screenshots.length, direction); };
+  const select = (index: number) => { show(index); };
+  const move = (direction: number) => { show((selection.current + direction + screenshots.length) % screenshots.length, direction); };
 
   useEffect(() => { viewport.current?.scrollTo(0, 0); }, [selected, zoomed]);
-
-  useEffect(() => {
-    if (!scrollLinked) return;
-    const element = gallery.current;
-    const scene = element?.closest<HTMLElement>("[data-scroll-story]");
-    if (!element || !scene) return;
-    const update = (event: Event) => {
-      if (manual.current || scene.dataset.pinned !== "true" || element.contains(document.activeElement)) return;
-      const step = (event as CustomEvent<{ step: number }>).detail.step;
-      show(Math.min(Math.max(0, step), screenshots.length - 1));
-    };
-    scene.addEventListener("story-step", update);
-    const preload = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting) || scene.dataset.pinned !== "true") return;
-      for (const shot of screenshots.slice(1)) { const image = new window.Image(); image.src = shot.src; }
-      preload.disconnect();
-    }, { rootMargin: "500px" });
-    preload.observe(scene);
-    return () => { scene.removeEventListener("story-step", update); preload.disconnect(); };
-  }, [scrollLinked, screenshots, show]);
 
   useEffect(() => {
     if (!expanded) return;
@@ -65,7 +43,7 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
 
   if (!shot) return null;
   return (
-    <div ref={gallery} className="screenshot-gallery" onFocusCapture={() => { manual.current = true; }} onPointerDownCapture={() => { manual.current = true; }} role="region" aria-label={`${title} screenshots`}>
+    <div className="screenshot-gallery" role="region" aria-label={`${title} screenshots`}>
       <figure className="project-preview" style={{ "--frame-direction": direction } as CSSProperties}>
         <button ref={expandButton} className="gallery-stage" aria-label={`Enlarge ${title} screenshot: ${shot.caption}`} onClick={() => { if (swiped.current) { swiped.current = false; return; } setZoomed(false); setExpanded(true); }}
           onPointerDown={(event) => { swiped.current = false; if (event.pointerType === "touch") { gesture.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); } }}
@@ -81,7 +59,6 @@ export function ScreenshotGallery({ screenshots, title, scrollLinked = false }: 
           <span className="expand-label"><Expand size={15} aria-hidden="true" /> Enlarge</span>
         </button>
         <figcaption aria-live="polite"><span key={shot.src}>{shot.caption}</span></figcaption>
-        {scrollLinked && <p className="gallery-story-hint">Scroll through the preview, or choose a view below.</p>}
         <div className="gallery-controls">
           <div className="gallery-selectors">
             {screenshots.map((image, index) => <button key={image.src} aria-pressed={selected === index} onClick={() => select(index)}>{image.caption.split(" · ")[0]}</button>)}
