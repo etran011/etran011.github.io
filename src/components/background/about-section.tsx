@@ -1,39 +1,51 @@
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { about } from "@/data/background";
+import { ContentIsland } from "@/components/ui/content-island";
+import { about, education } from "@/data/background";
 import { projects } from "@/data/portfolio";
 
 export function AboutSection() {
+  const [background, building, approach] = about.chapters;
   return (
     <section id="about" className="background-section about-section" aria-labelledby="about-heading">
-
-        <Container>
-          <div className="about-layout">
-            <div className="about-intro">
-              <p className="eyebrow">About me / 01</p>
-              <h2 id="about-heading"><span>Curiosity,</span><span>put into</span><span>practice.</span></h2>
-              <ol className="about-chapters" aria-hidden="true">
-                {about.chapters.map((chapter, index) => <li key={chapter.id}><span className="about-journey-number">{String(index + 1).padStart(2, "0")}</span><div><strong>{chapter.word}</strong><small>{chapter.label}</small></div></li>)}
-              </ol>
-              <a className="text-link about-story-next" href="#projects">See what I’m building <ArrowDown size={16} aria-hidden="true" /></a>
+      <Container>
+        <header className="workspace-heading about-heading">
+          <p className="workspace-path"><span>portfolio</span><span aria-hidden="true">/</span>about.md <span className="workspace-index">{"// 01"}</span></p>
+          <h2 id="about-heading">Curiosity,<br /><span>put into practice.</span></h2>
+        </header>
+        <div className="about-islands">
+          <ContentIsland as="article" className="about-editor" aria-labelledby="about-background-heading">
+            <div className="editor-tab"><span className="editor-status" aria-hidden="true" />about.md<span className="editor-format">Markdown</span></div>
+            <div className="editor-content">
+              <div className="editor-block" data-line="01">
+                <p className="eyebrow">{background.label}</p>
+                <h3 id="about-background-heading">{background.title}</h3>
+                <p>{background.body}</p>
+              </div>
+              <div className="editor-block" data-line="05">
+                <p className="eyebrow">{approach.label}</p>
+                <h3 id="about-approach-heading">{approach.title}</h3>
+                <p>{approach.body}</p>
+              </div>
+              <p className="editor-note" data-line="09">Check the model. Explain the result.</p>
             </div>
-            <div className="about-copy">
-              {about.chapters.map((chapter, index) => (
-                <article className="about-chapter" key={chapter.id} data-about-chapter={index} aria-labelledby={`about-${chapter.id}-heading`}>
-                  <span className="about-chapter-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                  <p className="eyebrow">{chapter.label}</p>
-                  <h3 id={`about-${chapter.id}-heading`}>{chapter.title}</h3>
-                  <p className="about-chapter-body">{chapter.body}</p>
-                  {chapter.id === "background" && <a className="about-evidence text-link" href="#education">William &amp; Mary · Class of 2028 <ArrowUpRight size={14} aria-hidden="true" /></a>}
-                  {chapter.id === "building" && <ul className="about-project-links" aria-label="Projects mentioned">{projects.map((project) => <li key={project.slug}><Link className="text-link" href={`/projects/${project.slug}/`}>{project.title} <ArrowUpRight size={14} aria-hidden="true" /></Link></li>)}</ul>}
-                  {chapter.id === "approach" && <p className="about-evidence">Check the model. Explain the result.</p>}
-                </article>
-              ))}
+          </ContentIsland>
+          <div className="about-support">
+            <div className="about-facts">
+              <ContentIsland className="about-fact"><p className="eyebrow">William &amp; Mary</p><p className="about-fact-value">2028<span>Class of</span></p><a className="text-link" href="#education">B.S. Data Science <ArrowUpRight size={14} aria-hidden="true" /></a></ContentIsland>
+              <ContentIsland className="about-fact"><p className="eyebrow">Cumulative GPA</p><p className="about-fact-value">{education.gpa.split(" / ")[0]}<span>/ 4.00</span></p><p className="about-fact-caption">Learning through practice.</p></ContentIsland>
             </div>
+            <ContentIsland as="article" className="about-building" aria-labelledby="about-building-heading">
+              <p className="eyebrow">{building.label}</p>
+              <h3 id="about-building-heading">{building.title}</h3>
+              <p>{building.body}</p>
+              <ul className="about-project-links" aria-label="Projects mentioned">{projects.map(project => <li key={project.slug}><Link className="text-link" href={`/projects/${project.slug}/`}>{project.title}<ArrowUpRight size={14} aria-hidden="true" /></Link></li>)}</ul>
+            </ContentIsland>
+            <a className="text-link about-story-next" href="#projects">See what I’m building <ArrowDown size={16} aria-hidden="true" /></a>
           </div>
-        </Container>
-
+        </div>
+      </Container>
     </section>
   );
 }

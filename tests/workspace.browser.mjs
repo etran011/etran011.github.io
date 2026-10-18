@@ -28,6 +28,14 @@ try {
   await page.locator('#skills').scrollIntoViewIfNeeded();
   await page.getByRole('button',{name:'Python',exact:true}).click();
   assert.equal(await page.getByRole('button',{name:'Python',exact:true}).getAttribute('aria-pressed'),'true');
+  for (const width of [320,390,768,1024,1440]) {
+    await page.setViewportSize({width,height:1000});
+    await page.locator('#about').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(100);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), `No horizontal overflow at ${width}px`);
+    assert.equal(await page.locator('.about-islands .content-island').count(),4);
+    assert(await page.locator('#about-background-heading').isVisible());
+  }
   assert.deepEqual(errors,[]);
   console.log('Natural section flow, no pinning, stable gallery selection, modal and Tools interactions passed.');
 } finally {await browser.close();}
