@@ -1,4 +1,4 @@
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, Mail } from "lucide-react";
 import { HeroHeadline } from "./hero-headline";
 import { Container } from "@/components/ui/container";
 import { heroTypingBootstrap } from "@/lib/hero-typing";
@@ -15,6 +15,7 @@ export function Hero() {
             <p className="hero-role">{profile.institution} <span aria-hidden="true">·</span> {profile.discipline} <span aria-hidden="true">·</span> Class of {profile.graduationYear}</p>
             <div className="hero-narrative">
               <HeroHeadline />
+              <a className="hero-email" href={`mailto:${profile.email}`}><Mail size={16} strokeWidth={1.5} aria-hidden="true" /><span>{profile.email}</span></a>
             </div>
           </div>
         </div>
