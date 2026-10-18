@@ -13,7 +13,7 @@ export function AmbientBackground() {
   const root = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const pathname = usePathname();
-  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", progress: 0, heroProgress: 0, scroll: 0, aboutStep: 0, skillGroup: null });
+  const input = useRef<AtmosphereContext>({ scene: pathname === "/" ? "hero" : "quiet", heroProgress: 0 });
   useDataParticles(canvas, root, input);
   const shift = useSpring(0, { stiffness: 55, damping: 28, mass: 0.8 });
 
@@ -24,38 +24,26 @@ export function AmbientBackground() {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)");
     const forced = matchMedia("(forced-colors: active)");
     const coarse = matchMedia("(any-pointer: coarse)");
-    let frame = 0, y = scrollY, enabled = false, documentHeight = 1;
+    let frame = 0, y = scrollY, enabled = false;
     let sections: { id: string; top: number }[] = [];
-    let stack: HTMLElement | null = null;
     let hero: HTMLElement | null = null;
     const update = () => {
       const index = sections.findLastIndex((section) => section.top <= y + innerHeight * 0.4);
       const current = sections[index];
       const scene: AtmosphereScene = current?.id === "home" ? "hero" : current?.id === "about" || current?.id === "projects" || current?.id === "skills" ? current.id : "quiet";
       input.current.scene = scene;
-      input.current.scroll = Math.max(0, y / 1000);
       // Continuous document travel, independent of content scenes or pinning.
       input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, hero.offsetHeight * 1.2))) : 1;
       element.style.setProperty("--atmosphere-progress", input.current.heroProgress.toFixed(4));
-      input.current.progress = current ? Math.max(0, Math.min(1, (y - current.top) / Math.max(1, (sections[index + 1]?.top ?? documentHeight) - current.top))) : 0;
       const section = current?.id ?? "home";
       if (element.dataset.section !== section) element.dataset.section = section;
       if (element.dataset.scene !== scene) element.dataset.scene = scene;
       if (enabled) shift.set(-Math.min(80, Math.max(0, y * 0.012)));
     };
-    const skillSelection = () => {
-      const group = stack?.dataset.activeGroup;
-      input.current.skillGroup = group && ["languages", "libraries", "tools"].includes(group) ? group : null;
-    };
-    const selection = new MutationObserver(skillSelection);
     const measure = () => {
       frame = 0;
       sections = Array.from(document.querySelectorAll<HTMLElement>("main > section[id]"), (section) => ({ id: section.id, top: section.getBoundingClientRect().top + scrollY }));
-      documentHeight = document.documentElement.scrollHeight;
       hero = document.getElementById("home");
-      const nextStack = document.querySelector<HTMLElement>(".technology-stack");
-      if (stack !== nextStack) { selection.disconnect(); stack = nextStack; if (stack) selection.observe(stack, { attributes: true, attributeFilter: ["data-active-group"] }); }
-      skillSelection();
       y = scrollY; update();
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
@@ -72,7 +60,7 @@ export function AmbientBackground() {
     window.addEventListener("resize", schedule);
     configure();
     return () => {
-      stop(); observer.disconnect(); selection.disconnect(); cancelAnimationFrame(frame);
+      stop(); observer.disconnect(); cancelAnimationFrame(frame);
       for (const query of [desktop, reduce, forced, coarse]) query.removeEventListener("change", configure);
       window.removeEventListener("resize", schedule);
     };

@@ -7,16 +7,16 @@ test('three detailed instrument rings share one bounded static buffer', () => {
   assert.deepEqual(data, createRingGeometry());
   assert(data.byteLength < 400000);
   const rings = new Set(), speeds = new Set(), details = new Set();
-  for (let i = 0; i < data.length; i += 13) {
-    assert(Array.from(data.slice(i, i + 13)).every(Number.isFinite));
-    rings.add(data[i + 7]); speeds.add(data[i + 8]); details.add(data[i + 12]);
-    assert(data[i + 6] >= 0 && data[i + 6] < 1);
+  for (let i = 0; i < data.length; i += 10) {
+    assert(Array.from(data.slice(i, i + 10)).every(Number.isFinite));
+    rings.add(data[i + 4]); speeds.add(data[i + 5]); details.add(data[i + 9]);
+    assert(data[i + 3] >= 0 && data[i + 3] < 1);
     assert(Math.hypot(data[i], data[i + 1] + .12, data[i + 2]) > 1.5);
   }
   assert.equal(createRingGeometry(false).length * 3, data.length, 'Static strokes and live ribbons share the same arc/tick layout');
   assert.equal(rings.size, 3); assert.equal(speeds.size, 3);
   assert.deepEqual([...details].sort(), [0,1,2,3]);
-  assert.equal(data.length % 78, 0, 'Every ribbon segment contains two triangles');
+  assert.equal(data.length % 60, 0, 'Every ribbon segment contains two triangles');
 });
 
 import { resolveRingChoreography } from '../src/lib/particle-transition.ts';
@@ -37,7 +37,7 @@ import { formationCamera, formationView, sculptureRadius, fitSculptureScale, pos
 test('ribbon envelope fits desktop and tall-window frames with safe margins', () => {
   const geometry = createRingGeometry();
   let radius = 0;
-  for (let i = 0; i < geometry.length; i += 13) radius = Math.max(radius, Math.hypot(...geometry.slice(i, i + 3)) * .85);
+  for (let i = 0; i < geometry.length; i += 10) radius = Math.max(radius, Math.hypot(...geometry.slice(i, i + 3)) * .85);
   const projectedEnvelope = radius / Math.sqrt(1 - (radius / formationCamera) ** 2);
   assert(projectedEnvelope <= sculptureRadius);
   for (const aspect of [1.7778, 1.6, 1.44, 1.3333, 1.024, .8533]) {

@@ -2,8 +2,8 @@ import { formationView } from "./atmosphere-view.mjs";
 import type { AtmospherePose } from "./atmosphere-renderer";
 
 export type AtmosphereScene = "hero" | "about" | "projects" | "skills" | "quiet";
-export interface AtmosphereContext { scene: AtmosphereScene; progress: number; heroProgress: number; scroll: number; aboutStep: number; skillGroup: string | null; }
-type ScenePose = Omit<AtmospherePose, "lightX" | "lightY" | "pointerStrength" | "scroll">;
+export interface AtmosphereContext { scene: AtmosphereScene; heroProgress: number; }
+type ScenePose = Omit<AtmospherePose, "lightX" | "lightY" | "pointerStrength">;
 export const poseKeys = ["yaw", "pitch", "roll", "scale", "centerX", "centerY", "detail"] as const;
 
 /** One continuous camera, rather than jumping between per-section scene profiles.

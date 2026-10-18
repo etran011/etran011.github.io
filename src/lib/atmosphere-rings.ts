@@ -7,7 +7,7 @@ export function createRingGeometry(ribbon = true) {
     const radius = 2.02 + ring * 0.15 + radiusOffset;
     const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius * (0.84 + ring * 0.045);
     const tilt = [0.08, 0.72, -0.52][ring];
-    return [x, z * Math.sin(tilt) - 0.12, z * Math.cos(tilt), 0, 0, 0,
+    return [x, z * Math.sin(tilt) - 0.12, z * Math.cos(tilt),
       angle / (Math.PI * 2), ring, [0.065, -0.045, 0.03][ring], 0, 1, 0, detail];
   };
   const segment = (a: number, b: number, ring: number, tick = false, offset = 0, detail = 0, major = false) => {
@@ -17,7 +17,7 @@ export function createRingGeometry(ribbon = true) {
     // Real narrow ribbons avoid platform-dependent WebGL line-width limits.
     const side = (angle: number, radius: number, sign: number) => {
       const point = vertex(angle + (tick ? sign * 0.002 : 0), ring, offset + radius + (tick ? 0 : sign * width), detail);
-      point[6] = angle / (Math.PI * 2); // Width must not cross the arc's identity seam.
+      point[3] = angle / (Math.PI * 2); // Width must not cross the arc's identity seam.
       return point;
     };
     const a0 = side(a, 0, -1), a1 = side(a, 0, 1), b0 = side(b, end, -1), b1 = side(b, end, 1);

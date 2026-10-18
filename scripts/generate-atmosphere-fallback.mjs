@@ -15,7 +15,7 @@ const ringPaths = new Map();
 const rings = createRingGeometry(false);
 for (let i = 0; i < rings.length; i += particleStride * 2) {
   const a = project(rings.slice(i, i + 3).map(value => value * 0.85)), b = project(rings.slice(i + particleStride, i + particleStride + 3).map(value => value * 0.85));
-  const detail = rings[i + 12];
+  const detail = rings[i + 9];
   ringPaths.set(detail, (ringPaths.get(detail) ?? "") + `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`);
 }
 let dots = "";
@@ -27,9 +27,9 @@ for (let i = 0; i < lines.length; i += particleStride * 2) {
 }
 for (let i = 0; i < points.length; i += particleStride) {
   const [x, y] = project(points.slice(i, i + 3));
-  const layer = Math.max(0, -points[i + 12]);
-  const density = Math.max(0, points[i + 12]);
-  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(layer ? 1.6 / layer : 2.8 + density * 0.45).toFixed(2)}" opacity="${(layer ? .4 / layer : 0.5 + density * 0.3 + points[i + 7] * 0.12).toFixed(2)}"/>`;
+  const layer = Math.max(0, -points[i + 9]);
+  const density = Math.max(0, points[i + 9]);
+  dots += `<circle vector-effect="non-scaling-stroke" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(layer ? 1.6 / layer : 2.8 + density * 0.45).toFixed(2)}" opacity="${(layer ? .4 / layer : 0.5 + density * 0.3 + points[i + 4] * 0.12).toFixed(2)}"/>`;
 }
 const trail = createTrajectoryGeometry().data;
 let trajectoryPath = "";

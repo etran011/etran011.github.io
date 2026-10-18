@@ -38,25 +38,24 @@ test("surface links connect parameter neighbors and retain every endpoint at low
   }
 });
 
-test("destinations cover all viewport quadrants with finite depth and no random regeneration", () => {
-  const quadrants = [0, 0, 0, 0];
-  for (let id = 0; id < particleCount; id++) {
-    const vertex = particleVertex(id);
-    assert.deepEqual(vertex, particleVertex(id));
+test("compact vertices retain deterministic surface positions without scatter destinations", () => {
+  assert.equal(particleStride,10);
+  for (let id=0; id<particleCount; id++) {
+    const vertex=particleVertex(id);
+    assert.deepEqual(vertex,particleVertex(id));
+    assert.equal(vertex.length,particleStride);
     assert(vertex.every(Number.isFinite));
-    assert(Math.abs(vertex[3]) <= 1.05 && Math.abs(vertex[4]) <= 1.05);
-    assert(vertex[5] >= 0 && vertex[5] < 1);
-    quadrants[(vertex[3] > 0 ? 1 : 0) + (vertex[4] > 0 ? 2 : 0)]++;
-    const projected = projectFormationPoint(formationPoint(id));
+    assert.deepEqual(vertex.slice(0,3),formationPoint(id));
+    assert(vertex[3]>=0 && vertex[3]<1);
+    const projected=projectFormationPoint(formationPoint(id));
     assert(projected.every(Number.isFinite));
-    assert(Math.abs(projected[0]) < 2 && Math.abs(projected[1]) < 2);
+    assert(Math.abs(projected[0])<2 && Math.abs(projected[1])<2);
   }
-  assert(quadrants.every(count => Math.abs(count - particleCount / 4) < 40));
 });
 
 test("section changes preserve one continuous mathematical camera", async () => {
   const { resolveAtmospherePose } = await import("../src/lib/atmosphere-scene.ts");
-  const context = { scene: "hero", progress: 0, heroProgress: 0, scroll: 0, aboutStep: 0, skillGroup: null };
+  const context = { scene: "hero", heroProgress: 0 };
   const start = {}; resolveAtmospherePose(context, start);
   for (const progress of [0, .25, .5, 1]) {
     context.heroProgress = progress;
@@ -78,7 +77,7 @@ test('secondary and micro layers stay anchored to mathematical surface normals',
     const offset=vertex.slice(0,3).map((v,i)=>v-anchor[i]), distance=Math.hypot(...offset);
     assert(distance>.05&&distance<=.201);
     assert(Math.hypot(...offset.map((v,i)=>v-normal[i]*distance))<1e-10);
-    tiers.add(vertex[12]);
+    tiers.add(vertex[9]);
   }
   assert.deepEqual([...tiers],[-1,-2]);
 });

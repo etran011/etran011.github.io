@@ -6,7 +6,7 @@ export const surfaceColumns = 72;
 export const surfaceRows = 42;
 export const surfaceCount = surfaceColumns * surfaceRows;
 export const particleCount = surfaceCount + 576;
-export const particleStride = 13;
+export const particleStride = 10;
 
 const fraction = (value: number) => value - Math.floor(value);
 export function surfaceCoordinates(id: number) {
@@ -30,15 +30,12 @@ export const atmosphereQuality = {
   low: { stride: 6, pixelRatio: 1 },
 } as const;
 export type AtmosphereQuality = keyof typeof atmosphereQuality;
-/** Stable identities keep every retained particle in place when quality decreases.
- * Interleaved vertex: formation.xyz, viewport destination.xyz, identity/depth/size, surface normal/relative loss.
- * The destination uses a low-discrepancy distribution, not frame-by-frame randomness.
+/** Stable surface identities survive quality changes. Interleaved vertex:
+ * formation.xyz, identity/light/size seed, surface normal/relative loss.
  */
 export function particleVertex(id: number) {
   const coordinates = surfaceCoordinates(id);
-  return [...formationPoint(id), (fraction((id + 1) * 0.754877666) * 2 - 1) * 1.05,
-    (fraction((id + 1) * 0.569840291) * 2 - 1) * 1.05,
-    fraction((id + 1) * 0.438579), id / particleCount,
+  return [...formationPoint(id), id / particleCount,
     fraction((id + 1) * 0.618033989), fraction((id + 1) * 0.414213562),
     ...surfaceNormal(...coordinates), id >= surfaceCount ? (id < surfaceCount + 384 ? -1 : -2) : Math.log1p(loss(...coordinates) / 16) / 4];
 }
@@ -60,7 +57,7 @@ export function createParticleGeometry(quality: AtmosphereQuality = "high") {
   const append = (coordinate: number[], identity: number, kind: number) => {
     const vertex = particleVertex(identity % surfaceCount), position = surfacePoint(...coordinate), normal = surfaceNormal(...coordinate);
     position[1] += .008;
-    vertex.splice(0, 3, ...position); vertex.splice(9, 4, ...normal, kind);
+    vertex.splice(0, 3, ...position); vertex.splice(6, 4, ...normal, kind);
     lines.push(...vertex);
   };
   [...detail.contours, ...detail.vectors].forEach((edge, index) => {
@@ -75,7 +72,7 @@ export function createTrajectoryGeometry() {
   const trajectory = descentPath(), data: number[] = [];
   trajectory.path.forEach(({ x, z }, index) => {
     const position = surfacePoint(x, z); position[1] += 0.012;
-    data.push(...position, 0, 0, 0, trajectory.progress[index], 0.5, 0.5, ...surfaceNormal(x, z), 0);
+    data.push(...position, trajectory.progress[index], 0.5, 0.5, ...surfaceNormal(x, z), 0);
   });
   return { data: new Float32Array(data), trajectory };
 }

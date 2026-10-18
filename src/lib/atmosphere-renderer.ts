@@ -5,8 +5,8 @@ import { resolveParticleChoreography, resolveRingChoreography } from "./particle
 import { formationCamera, formationView, fitSculptureScale, positionSculptureCenter } from "./atmosphere-view.mjs";
 import { atmosphereQuality, createParticleGeometry, createTrajectoryGeometry, particleStride, type AtmosphereQuality } from "./atmosphere-geometry";
 
-export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; scroll: number; }
-export const restingPose: AtmospherePose = { ...formationView, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0, scroll: 0 };
+export interface AtmospherePose { yaw: number; pitch: number; roll: number; scale: number; centerX: number; centerY: number; detail: number; lightX: number; lightY: number; pointerStrength: number; }
+export const restingPose: AtmospherePose = { ...formationView, detail: 1, lightX: 0, lightY: 0, pointerStrength: 0 };
 
 const vertexSource = `
 attribute vec3 aPosition;
@@ -177,7 +177,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     program = gl.createProgram();
     if (!program) throw new Error("Program allocation failed");
     shaders.forEach((shader) => gl.attachShader(program!, shader));
-    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 2, "aSeed"); gl.bindAttribLocation(program, 3, "aSurface"); gl.linkProgram(program);
+    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aSeed"); gl.bindAttribLocation(program, 2, "aSurface"); gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("Atmosphere shader link failed");
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
@@ -200,7 +200,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     const emission = { x: 0, y: 0, z: 0, progress: 0, alpha: 0 };
     let emissionIndex = -1;
     if (gl.getError() !== gl.NO_ERROR) throw new Error("Geometry upload failed");
-    for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
+    for (let i = 0; i < 3; i++) gl.enableVertexAttribArray(i); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
@@ -208,7 +208,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     const ringChoreography = { opacity: 1 };
     const choreography = { scale: 1, links: 1, shrink: 0 };
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number, count = geometry.count) => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, count);
+      gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 3; i++) gl.vertexAttribPointer(i, i === 2 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, count);
     };
     return {
       resize(w: number, h: number) {

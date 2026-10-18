@@ -25,7 +25,7 @@ try {
     proto.drawArrays = function (...args) {
       if (!window.onlyRings || kind === 3) return draw.apply(this, args);
     };
-    const held = new Set(['uTime', 'uRotation', 'uMarker', 'uHead', 'uTrajectoryAlpha', 'uEnergy', 'uProjection', 'uLight', 'uScroll']);
+    const held = new Set(['uTime', 'uRotation', 'uMarker', 'uHead', 'uTrajectoryAlpha', 'uEnergy', 'uProjection', 'uLight']);
     for (const method of ['uniform1f', 'uniform2f', 'uniform3f', 'uniform4f']) {
       const original = proto[method];
       proto[method] = function (location, ...values) {

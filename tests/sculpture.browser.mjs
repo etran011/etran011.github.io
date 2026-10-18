@@ -25,7 +25,7 @@ try {
   const read = () => page.locator('.ambient-canvas').evaluate(c => {
     const gl = c.getContext('webgl'), program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { projection: Array.from(uniform('uProjection')), time: uniform('uTime'), rotation: Array.from(uniform('uRotation')), rings: Array.from(uniform('uRings')), expansion: uniform('uExpansion'), error: gl.getError() };
+    return { projection: Array.from(uniform('uProjection')), time: uniform('uTime'), rotation: Array.from(uniform('uRotation')), ringOpacity: uniform('uRingOpacity'), expansion: uniform('uExpansion'), error: gl.getError() };
   });
   const before = await read(), heading = await page.locator('h1').boundingBox();
   const first = await page.screenshot();
@@ -37,7 +37,7 @@ try {
   assert(Math.abs(after.rotation[0] - before.rotation[0]) > .045, 'Idle orbit must be noticeable within a few seconds');
   assert(!first.equals(await page.screenshot()), 'The idle sculpture must keep moving without input');
   assert.deepEqual(await page.locator('h1').boundingBox(), heading, 'Sculpture motion must not move typography');
-  assert(after.rings[2] > .99 && after.expansion < .001);
+  assert(after.ringOpacity > .99 && after.expansion < .001);
   assert(await page.evaluate(() => window.orbitalDraws > 0));
   await page.screenshot({ path: 'tmp/sculpture-hero.png' });
   const settleExpansion = goal => page.waitForFunction(goal => {
@@ -46,15 +46,15 @@ try {
     return goal === 1 ? value > .98 : value < .01;
   }, goal);
   await page.keyboard.press('End'); await settleExpansion(1);
-  assert((await read()).rings[2] === 0 && (await read()).expansion > .98);
+  assert((await read()).ringOpacity >= .649 && (await read()).expansion > .98);
   const ambient = await page.screenshot(), idleY = await page.evaluate(() => scrollY);
   await page.waitForTimeout(1700);
   assert.equal(await page.evaluate(() => scrollY), idleY);
-  assert(!ambient.equals(await page.screenshot()), 'Dispersed particles must keep drifting while idle');
+  assert(!ambient.equals(await page.screenshot()), 'Expanded mathematical structure keeps moving while idle');
   const ambientTime = (await read()).time;
   await page.keyboard.press('Home'); await settleExpansion(0);
   const restored = await read();
-  assert(restored.rings[2] > .99 && restored.expansion < .01);
+  assert(restored.ringOpacity > .99 && restored.expansion < .01);
   assert(restored.time > ambientTime, 'Reconstruction must preserve the active clock');
   await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, value: true }); document.dispatchEvent(new Event('visibilitychange')); });
   const paused = (await read()).time;
@@ -67,5 +67,5 @@ try {
   }, paused);
   assert.equal((await read()).error, 0);
   assert.deepEqual(errors, []);
-  console.log('Visible idle orbit/ribbons, stationary typography, ongoing ambient drift, reversible reconstruction and preserved/paused active clock passed.');
+  console.log('Visible idle orbit/ribbons, stationary typography, persistent background motion, reversible reconstruction and preserved/paused active clock passed.');
 } finally { await browser.close(); }

@@ -60,7 +60,6 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
         pose.centerX += pointer.x * 0.025; pose.centerY += pointer.y * 0.018;
         pose.lightX = pointer.x; pose.lightY = pointer.y;
         pose.pointerStrength = pointer.strength;
-        pose.scroll += (input.current.scroll - pose.scroll) * follow;
       }
       try {
         if (root.dataset.quality !== budget.quality) {
