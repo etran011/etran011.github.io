@@ -10,18 +10,15 @@ export const restingPose: AtmospherePose = { ...formationView, detail: 1, lightX
 
 const vertexSource = `
 attribute vec3 aPosition;
-attribute vec3 aDestination;
 attribute vec3 aSeed;
 attribute vec4 aSurface;
 uniform float uTime;
 uniform mediump float uKind;
-uniform highp vec3 uRings;
+uniform highp float uRingOpacity;
 uniform vec3 uMarker;
 uniform vec4 uEnergy;
 uniform highp float uTrajectoryAlpha;
 uniform highp float uHead;
-uniform float uSeparation;
-uniform float uRelease;
 uniform float uShrink;
 uniform mediump float uExpansion;
 uniform vec3 uRotation;
@@ -29,7 +26,6 @@ uniform vec4 uProjection;
 uniform float uRatio;
 uniform vec2 uLight;
 uniform float uPointerStrength;
-uniform float uScroll;
 varying float vLight;
 varying float vPulse;
 varying float vPath;
@@ -41,29 +37,25 @@ void main() {
   vec3 normal = uKind > 1.5 && uKind < 2.5 ? markerNormal(p.xz) : aSurface.xyz;
   float layer = max(0.0, -aSurface.w);
   float breath = idleBreath(uTime);
-  float formation = 1.0 - smoothstep(0.0, 1.0, uRelease);
+  float formation = 1.0 - uExpansion * 0.45;
   float energy = 0.0;
   if (uKind < 2.5 && formation > 0.001) energy = energyWave(length(p.xz - uEnergy.xz), uEnergy.w) * formation;
   vPulse = 0.83 + sin(uTime * 0.95 + aPosition.x * 3.0 - aPosition.z * 2.0) * 0.17;
   // A coherent common display offset keeps the trail and marker attached to the surface.
   // Optimization still evaluates the original objective and analytic gradient.
-  if (uKind < 2.5 && uRelease < 0.999) {
+  if (uKind < 2.5) {
     p += normal * (displayWave(p.xz, uTime) * formation + energy * 0.045);
   }
   if (uKind < 0.5 && layer > 0.5 && formation > 0.001) {
     p += normal * sin(uTime * (0.45 + layer * 0.17) + aSeed.x * 19.0) * (0.012 + layer * 0.009) * formation;
     p += vec3(-normal.z, 0.0, normal.x) * sin(uTime * 0.2 + aSeed.y * 8.0) * 0.018 * layer * formation;
   }
-  // Larger displacements belong exclusively to dissolution.
-  if (uKind < 0.5) p += normal * uSeparation * 0.045;
-  if (uKind < 0.5) p.y += sin(uTime * 0.21 + aSeed.x * 30.0) * 0.025 * uExpansion * (1.0 - uExpansion);
   if (uKind > 2.5) {
-    // Staggered arrival and a moving arc highlight; ring dimensions stay fixed.
+    // Rings retain their calibrated shape and continuous angular velocity.
     energy = energyWave(1.45 + aSeed.y * 0.22, max(0.0, uEnergy.w - aSeed.y * 0.18)) * formation;
     // Scroll adds a bounded rotation offset, avoiding time * progress discontinuities.
-    float angle = uTime * aSeed.z + sign(aSeed.z) * uRings.x * 0.24;
-    p *= 0.85 * (1.0 + uRings.x * 0.48);
-    p += vec3(sin(aSeed.x * 75.0), cos(aSeed.x * 62.0), sin(aSeed.x * 43.0)) * uRings.y * 0.065;
+    float angle = uTime * aSeed.z;
+    p *= 0.85;
     if (aSeed.y < 0.5) p.xz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xz;
     else if (aSeed.y < 1.5) p.yz = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.yz;
     else p.xy = mat2(cos(angle), -sin(angle), sin(angle), cos(angle)) * p.xy;
@@ -80,31 +72,18 @@ void main() {
   float perspective = ${formationCamera.toFixed(1)} / (${formationCamera.toFixed(1)} + p.z);
   vec2 projected = p.xy * uProjection.x * perspective;
   projected.x /= uProjection.y;
-  // Slightly staggered departures flow along curved paths, with exact endpoints.
-  float phase = smoothstep(0.0, 1.0, clamp((uRelease - aSeed.x * 0.06) / 0.94, 0.0, 1.0));
-  if (uKind > 0.5) phase = 0.0;
-  vec2 destination = aDestination.xy;
-  // Depth is independent of formation rotation once the data fills the viewport.
-  float depth = aDestination.z - 0.5 + sin(uTime * 0.11 + aSeed.x * 9.0) * 0.085;
-  destination += uLight * depth * 0.018 * uPointerStrength;
-  destination.y += sin(uScroll * 0.25 + aSeed.y * 6.28) * depth * 0.055;
-  // Time-driven, smoothly varying velocities continue while scroll and cursor idle.
-  destination += vec2(sin(uTime * (0.18 + aSeed.z * 0.065) + aSeed.x * 18.0),
-    cos(uTime * (0.15 + aSeed.y * 0.055) + aSeed.y * 8.0)) * 0.095 * (0.75 + aDestination.z * 0.25);
-  destination += vec2(cos(uTime * 0.105 + aSeed.z * 14.0), sin(uTime * 0.12 + aSeed.x * 11.0)) * 0.018;
-  vec2 flow = vec2(sin(aSeed.x * 6.28), cos(aSeed.y * 6.28)) * sin(phase * 3.141593) * 0.13;
-  vec2 screen = mix(projected + uProjection.zw, destination, phase) + flow;
+  vec2 screen = projected + uProjection.zw;
   vec2 offset = (screen - uLight) * vec2(uProjection.y, 1.0);
   float distanceToPointer = length(offset);
   float influence = exp(-dot(offset, offset) * 32.0) * uPointerStrength;
   screen += offset / max(distanceToPointer, 0.02) * vec2(1.0 / uProjection.y, 1.0) * influence * 0.035;
   gl_Position = vec4(screen, 0.0, 1.0);
-  float visualDepth = mix(p.z, depth * 2.0, phase);
+  float visualDepth = p.z;
   float front = clamp((1.8 - visualDepth) / 3.6, 0.0, 1.0);
   float illumination = 0.65 + max(0.0, dot(normal, normalize(vec3(-0.4 + sin(uTime * 0.21) * 0.12, 0.8, 0.5 + cos(uTime * 0.17) * 0.1)))) * 0.35;
   float rim = pow(1.0 - max(0.0, normal.y), 2.0);
   float formationLight = (illumination * 0.82 + rim * 0.18) * (0.48 + front * 0.52);
-  vLight = mix(formationLight, mix(0.16, 0.72, front), phase);
+  vLight = formationLight;
   vLight *= 1.0 + influence * 0.22;
   vLight *= 0.65 + aSeed.y * 0.5;
   // Illuminate the sampled surface without moving it away from the objective.
@@ -117,18 +96,18 @@ void main() {
   }
   vLight += energy * 0.62;
   if (uKind < 0.5) {
-    vLight *= mix(1.0, layer < 1.5 ? 0.65 : 0.36, step(0.5, layer)) * (1.0 - phase * 0.45);
+    vLight *= mix(1.0, layer < 1.5 ? 0.65 : 0.36, step(0.5, layer)) * (1.0 - uExpansion * 0.25);
     if (aSurface.w > 1.5) vLight *= aSurface.w < 2.5 ? 0.62 + energy * 0.45 : 0.9;
   }
   vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
   // Protect typography after every lighting contribution, including propagating energy.
-  vLight *= mix(smoothstep(0.02, 0.42, screen.x), 1.0, phase);
+  vLight *= mix(smoothstep(0.02, 0.42, screen.x), smoothstep(-1.0, -0.45, screen.x), uExpansion);
   float formationSize = layer < 0.5 ? 4.8 + aSeed.z * 0.8 : layer < 1.5 ? 2.6 + aSeed.z * 0.5 : 1.4 + aSeed.z * 0.3;
-  float pointSize = mix(formationSize, 1.15 + aSeed.z * 0.65, uShrink);
+  float pointSize = mix(formationSize, (layer < 0.5 ? 1.8 : layer < 1.5 ? 1.1 : 0.8) + aSeed.z * 0.3, uShrink);
   pointSize *= 1.0 + (breath - 0.5) * 0.16 * formation + energy * 0.24;
   if (uKind > 0.5) vLight = 1.0;
-  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * smoothstep(0.02, 0.42, screen.x) * (1.0 + energy * 0.2) * (aSurface.w < 0.5 ? 1.0 : aSurface.w < 1.5 ? 0.6 : aSurface.w < 2.5 ? 0.8 : 1.3);
-  gl_PointSize = clamp(pointSize * mix(perspective, 1.0 - depth * 0.3, phase) * uRatio, 1.0, 10.0 * uRatio);
+  if (uKind > 2.5) vLight = (0.5 + front * 0.5) * mix(smoothstep(0.02, 0.42, screen.x), smoothstep(-1.0, -0.45, screen.x), uExpansion) * (1.0 + energy * 0.2) * (aSurface.w < 0.5 ? 1.0 : aSurface.w < 1.5 ? 0.6 : aSurface.w < 2.5 ? 0.8 : 1.3);
+  gl_PointSize = clamp(pointSize * perspective * uRatio, 1.0, 10.0 * uRatio);
   if (uKind > 1.5 && uKind < 2.5) gl_PointSize = (22.0 + breath * 4.0) * uRatio;
 }`;
 const fragmentSource = `
@@ -137,7 +116,7 @@ uniform highp float uTime;
 uniform vec3 uColor;
 uniform float uPoint;
 uniform mediump float uKind;
-uniform highp vec3 uRings;
+uniform highp float uRingOpacity;
 uniform highp float uTrajectoryAlpha;
 uniform highp float uHead;
 uniform float uLinks;
@@ -165,16 +144,14 @@ void main() {
     }
   }
   if (uKind > 2.5) {
-    float segment = fract(vPath * 36.0);
-    float intact = smoothstep(uRings.y * 0.88, uRings.y * 0.88 + 0.1, segment);
-    alpha = (0.28 + vPulse * 0.32) * uRings.z * mix(1.0, intact, uRings.y);
+    alpha = (0.28 + vPulse * 0.32) * uRingOpacity;
     alpha *= vLight;
     color = mix(uColor, vec3(0.71, 0.804, 1.0), vPulse * 0.25);
   }
   gl_FragColor = vec4(color, alpha);
 }`;
 
-/** Shared program and static buffers; expanded fields need only the points pass. */
+/** One persistent program and four static buffers for the complete mathematical scene. */
 export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuality: AtmosphereQuality, color: readonly number[]) {
   const gl = canvas.getContext("webgl", { alpha: true, antialias: false, depth: false, stencil: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: "low-power" });
   if (!gl) throw new Error("WebGL unavailable");
@@ -200,12 +177,12 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     program = gl.createProgram();
     if (!program) throw new Error("Program allocation failed");
     shaders.forEach((shader) => gl.attachShader(program!, shader));
-    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 1, "aDestination"); gl.bindAttribLocation(program, 2, "aSeed"); gl.bindAttribLocation(program, 3, "aSurface"); gl.linkProgram(program);
+    gl.bindAttribLocation(program, 0, "aPosition"); gl.bindAttribLocation(program, 2, "aSeed"); gl.bindAttribLocation(program, 3, "aSurface"); gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error("Atmosphere shader link failed");
     // Shader objects can be released once linked; the program retains its executable.
     shaders.forEach((shader) => gl.deleteShader(shader)); shaders.length = 0;
     gl.useProgram(program);
-    const uniforms = Object.fromEntries(["uTime", "uEnergy", "uRings", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uRelease", "uShrink", "uSeparation", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength", "uScroll"].map((name) => [name, gl.getUniformLocation(program!, name)]));
+    const uniforms = Object.fromEntries(["uTime", "uEnergy", "uRingOpacity", "uKind", "uMarker", "uTrajectoryAlpha", "uHead", "uExpansion", "uShrink", "uLinks", "uRotation", "uProjection", "uRatio", "uColor", "uPoint", "uDetail", "uLight", "uPointerStrength"].map((name) => [name, gl.getUniformLocation(program!, name)]));
     const allocate = (data: Float32Array) => {
       const buffer = gl.createBuffer();
       if (!buffer) throw new Error("Buffer allocation failed");
@@ -228,8 +205,8 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
     gl.clearColor(0, 0, 0, 0);
     gl.uniform3f(uniforms.uColor, color[0], color[1], color[2]);
     let width = 1, height = 1, ratio = 1;
-    const ringChoreography = { expansion: 0, fragments: 0, opacity: 1 };
-    const choreography = { separation: 0, release: 0, links: 1, shrink: 0 };
+    const ringChoreography = { opacity: 1 };
+    const choreography = { scale: 1, links: 1, shrink: 0 };
     const draw = (geometry: { buffer: WebGLBuffer; count: number }, mode: number, count = geometry.count) => {
       gl.bindBuffer(gl.ARRAY_BUFFER, geometry.buffer); for (let i = 0; i < 4; i++) gl.vertexAttribPointer(i, i === 3 ? 4 : 3, gl.FLOAT, false, particleStride * 4, i * 12); gl.drawArrays(mode, 0, count);
     };
@@ -253,16 +230,16 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.clear(gl.COLOR_BUFFER_BIT);
         resolveParticleChoreography(expansion, choreography);
         resolveRingChoreography(expansion, ringChoreography);
-        gl.uniform3f(uniforms.uRings, ringChoreography.expansion, ringChoreography.fragments, ringChoreography.opacity);
+        gl.uniform1f(uniforms.uRingOpacity, ringChoreography.opacity);
         gl.uniform1f(uniforms.uTime, time); gl.uniform1f(uniforms.uExpansion, expansion);
-        gl.uniform1f(uniforms.uSeparation, choreography.separation); gl.uniform1f(uniforms.uRelease, choreography.release); gl.uniform1f(uniforms.uLinks, choreography.links);
+        gl.uniform1f(uniforms.uLinks, choreography.links);
         gl.uniform1f(uniforms.uShrink, choreography.shrink);
         resolveIdleRotation(time, pose, idleRotation);
         gl.uniform3f(uniforms.uRotation, idleRotation.yaw, idleRotation.pitch, idleRotation.roll);
-        gl.uniform4f(uniforms.uProjection, fitSculptureScale(pose, width / height), width / height, positionSculptureCenter(pose, width / height), pose.centerY);
+        gl.uniform4f(uniforms.uProjection, fitSculptureScale(pose, width / height) * choreography.scale, width / height, positionSculptureCenter(pose, width / height), pose.centerY);
         gl.uniform1f(uniforms.uRatio, ratio); gl.uniform1f(uniforms.uDetail, pose.detail);
         gl.uniform2f(uniforms.uLight, pose.lightX, pose.lightY);
-        gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength); gl.uniform1f(uniforms.uScroll, pose.scroll);
+        gl.uniform1f(uniforms.uPointerStrength, pose.pointerStrength);
         const cycle = Math.floor(time / energyCycle);
         if (cycle !== emissionIndex) {
           descentPlayback(cycle * energyCycle, trajectoryModel.trajectory, emission);
@@ -275,7 +252,7 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
         gl.uniform3f(uniforms.uMarker, playback.x, playback.y, playback.z);
         if (ringChoreography.opacity > 0.001) { gl.uniform1f(uniforms.uKind, 3); draw(rings, gl.TRIANGLES); }
         gl.uniform1f(uniforms.uKind, 0);
-        // Expanded sections have no visible relationships; omit their entire draw.
+        // Mesh, trajectory and rings remain present at every document position.
         if (choreography.links > 0.001) { gl.uniform1f(uniforms.uPoint, 0); draw(lines, gl.LINES); }
         if (pose.detail > 0.01) { gl.uniform1f(uniforms.uPoint, 1); draw(points, gl.POINTS); }
         if (choreography.links > 0.001) {

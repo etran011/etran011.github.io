@@ -54,20 +54,20 @@ test("destinations cover all viewport quadrants with finite depth and no random 
   assert(quadrants.every(count => Math.abs(count - particleCount / 4) < 40));
 });
 
-test("scene poses keep the model restrained and respond to real narrative states", async () => {
+test("section changes preserve one continuous mathematical camera", async () => {
   const { resolveAtmospherePose } = await import("../src/lib/atmosphere-scene.ts");
-  const target = {};
   const context = { scene: "hero", progress: 0, heroProgress: 0, scroll: 0, aboutStep: 0, skillGroup: null };
-  for (const scene of ["hero", "about", "projects", "skills", "quiet"]) {
-    context.scene = scene; resolveAtmospherePose(context, target);
-    assert(Object.values(target).every(Number.isFinite));
-    assert(target.scale <= 0.65);
-    assert(target.centerX >= (scene === "hero" ? 0.2 : 0.4));
+  const start = {}; resolveAtmospherePose(context, start);
+  for (const progress of [0, .25, .5, 1]) {
+    context.heroProgress = progress;
+    const reference = {}; resolveAtmospherePose(context, reference);
+    for (const scene of ["hero", "about", "projects", "skills", "quiet"]) {
+      context.scene = scene;
+      const target = {}; resolveAtmospherePose(context, target);
+      assert.deepEqual(target, reference, 'Crossing a section boundary must not switch camera profiles');
+      assert(target.detail === 1 && target.scale === start.scale);
+    }
   }
-  context.scene = "about"; resolveAtmospherePose(context, target); const background = target.yaw;
-  context.aboutStep = 2; resolveAtmospherePose(context, target); assert(target.yaw > background);
-  context.scene = "skills"; context.skillGroup = "tools"; resolveAtmospherePose(context, target); assert.equal(target.detail, 1.3);
-  context.scene = "projects"; resolveAtmospherePose(context, target); assert(target.detail < 0.2);
 });
 
 test('secondary and micro layers stay anchored to mathematical surface normals',async()=>{

@@ -23,26 +23,19 @@ test("mid-expansion reversals stay bounded; background delays and invalid target
   assert.equal(advanceExpansion(1, 2, 0.05), 1);
 });
 
-test("surface loosens, links fade and samples shrink progressively with exact reverse reconstruction", () => {
+test("proportional expansion preserves links and reversibly shrinks samples", () => {
   const state = {};
   resolveParticleChoreography(0, state);
-  assert.deepEqual(state, { separation: 0, release: 0, links: 1, shrink: 0 });
-  resolveParticleChoreography(0.12, state);
-  assert(state.separation > 0.2 && state.release === 0 && state.links < 1);
-  resolveParticleChoreography(0.36, state);
-  assert.equal(state.separation, 1);
-  assert.equal(state.links, 0);
-  assert(state.release > 0 && state.release < 0.2);
-  let previousRelease = 0, previousLinks = 1, previousShrink = 0;
+  assert.deepEqual(state, { scale: 1, links: 1, shrink: 0 });
+  let previous = { ...state };
   const forward = [];
   for (let i = 0; i <= 100; i++) {
     resolveParticleChoreography(i / 100, state);
-    assert(state.release >= previousRelease && state.links <= previousLinks && state.shrink >= previousShrink);
-    assert(Object.values(state).every(value => value >= 0 && value <= 1));
-    previousRelease = state.release; previousLinks = state.links; previousShrink = state.shrink;
-    forward.push({ ...state });
+    assert(state.scale >= previous.scale && state.links <= previous.links && state.shrink >= previous.shrink);
+    assert(state.links >= .55 && state.scale <= 1.32);
+    previous = { ...state }; forward.push({ ...state });
   }
-  assert.deepEqual(state, { separation: 0, release: 1, links: 0, shrink: 1 });
+  assert.deepEqual(state, { scale: 1.32, links: .55, shrink: 1 });
   for (let i = 100; i >= 0; i--) {
     resolveParticleChoreography(i / 100, state);
     assert.deepEqual(state, forward[i]);

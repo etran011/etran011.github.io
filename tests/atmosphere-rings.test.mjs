@@ -20,21 +20,17 @@ test('three detailed instrument rings share one bounded static buffer', () => {
 });
 
 import { resolveRingChoreography } from '../src/lib/particle-transition.ts';
-test('rings expand, fragment and fade continuously with exact reverse reconstruction', () => {
+test('intact rings never fade out and reverse exactly with the landscape', () => {
   const sample = p => { const state = {}; resolveRingChoreography(p, state); return state; };
-  assert.deepEqual(sample(0), { expansion: 0, fragments: 0, opacity: 1 });
-  assert.deepEqual(sample(1), { expansion: 1, fragments: 1, opacity: 0 });
-  let previous = sample(0);
+  assert.deepEqual(sample(0), { opacity: 1 });
+  assert.deepEqual(sample(1), { opacity: .65 });
   const forward = [];
   for (let i = 0; i <= 100; i++) {
     const current = sample(i / 100); forward.push(current);
-    assert(current.expansion >= previous.expansion && current.fragments >= previous.fragments && current.opacity <= previous.opacity);
-    assert(Math.abs(current.opacity - previous.opacity) < .03);
-    previous = current;
+    assert(current.opacity >= .65 && current.opacity <= 1);
+    if (i) assert(Math.abs(current.opacity - forward[i-1].opacity) < .01);
   }
   for (let i = 100; i >= 0; i--) assert.deepEqual(sample(i / 100), forward[i]);
-  assert.equal(sample(.1).fragments, 0, 'Initial scroll preserves coherent coordinate arcs');
-  assert(sample(.5).opacity > 0, 'Fragments remain after surface links disappear');
 });
 
 import { formationCamera, formationView, sculptureRadius, fitSculptureScale, positionSculptureCenter } from '../src/lib/atmosphere-view.mjs';

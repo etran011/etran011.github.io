@@ -11,7 +11,7 @@ async function inspect(page) {
     const gl = canvas.getContext('webgl');
     const program = gl.getParameter(gl.CURRENT_PROGRAM);
     const uniform = name => gl.getUniform(program, gl.getUniformLocation(program, name));
-    return { rings: Array.from(uniform('uRings')), marker: Array.from(uniform('uMarker')), head: uniform('uHead'), time: uniform('uTime'), expansion: uniform('uExpansion'), release: uniform('uRelease'), separation: uniform('uSeparation'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
+    return { ringOpacity: uniform('uRingOpacity'), projection: Array.from(uniform('uProjection')), marker: Array.from(uniform('uMarker')), head: uniform('uHead'), time: uniform('uTime'), expansion: uniform('uExpansion'), links: uniform('uLinks'), shrink: uniform('uShrink'), strength: uniform('uPointerStrength'), error: gl.getError() };
   });
 }
 async function ready(page) {
@@ -60,61 +60,48 @@ async function ready(page) {
     assert((await inspect(page)).expansion < 0.01);
     await page.mouse.wheel(0, 60);
     await page.waitForTimeout(750);
-    const loosening = await inspect(page);
-    assert(loosening.expansion > .02 && loosening.expansion < .051, 'Small input should advance only the first part of the longer sequence');
-    assert(loosening.separation > 0 && loosening.release < 0.001 && loosening.links > .98);
-    await page.mouse.wheel(0, 140);
-    await page.waitForTimeout(650);
-    const partial = (await inspect(page)).expansion;
-    assert(partial > 0.02 && partial < 0.65);
-    const heroTravel = Number(await page.locator('[data-scroll-story="hero"]').getAttribute('data-story-travel'));
-    await page.mouse.wheel(0, heroTravel - 200);
-    await page.waitForTimeout(3300);
-    assert((await inspect(page)).expansion > 0.95);
-    assert((await inspect(page)).links === 0 && (await inspect(page)).release > 0.98);
-    assert((await inspect(page)).shrink > 0.99);
-    assert((await inspect(page)).rings[2] === 0, 'Dissolved rings must be invisible');
-    const releasedLineDraws = await page.evaluate(() => window.particleLineDraws);
-    const releasedTrajectoryDraws = await page.evaluate(() => window.trajectoryDraws);
-    await page.waitForTimeout(200);
-    assert.equal(await page.evaluate(() => window.particleLineDraws), releasedLineDraws, 'Invisible connections must not issue GPU draws');
-    assert.equal(await page.evaluate(() => window.trajectoryDraws), releasedTrajectoryDraws);
+    const early = await inspect(page);
+    assert(early.expansion > .02 && early.expansion < .15, 'Small scroll starts proportional expansion');
+    assert(early.links > .9 && early.ringOpacity > .9);
+    const originalScale = descentAfter.projection[0];
+    const buffersBefore = await page.evaluate(() => window.buffersCreated);
+    for (const id of ['about','projects','experience','skills','education','contact']) {
+      await page.locator('#'+id).evaluate(e => window.scrollTo({top:e.getBoundingClientRect().top+scrollY-100,behavior:'instant'}));
+      await page.waitForTimeout(2400);
+      const state = await inspect(page);
+      assert(state.expansion > .6 && state.links >= .549 && state.ringOpacity >= .649, `${id} retains complete mesh and rings`);
+      assert(state.projection[0] > originalScale * 1.1, `${id} expands the sculpture`);
+      assert(state.shrink > .6, `${id} uses smaller particles`);
+      assert(Number(await page.locator('.ambient-canvas').evaluate(e=>getComputedStyle(e).opacity)) >= .46, `${id} never hides the model`);
+      assert.equal(await page.locator('.ambient-canvas').count(),1);
+      assert.equal(state.error,0);
+    }
+    assert.equal(await page.evaluate(() => window.buffersCreated),buffersBefore,'Scrolling never rebuilds geometry');
+    const lineDraws = await page.evaluate(() => window.particleLineDraws);
+    const trajectoryDraws = await page.evaluate(() => window.trajectoryDraws);
+    const backgroundBefore = await inspect(page);
+    await page.waitForTimeout(1400);
+    assert(await page.evaluate(n=>window.particleLineDraws>n,lineDraws),'Background retains mathematical connections');
+    assert(await page.evaluate(n=>window.trajectoryDraws>n,trajectoryDraws),'Optimization keeps running behind Contact');
+    assert((await inspect(page)).time-backgroundBefore.time>1,'Idle clock continues without scrolling');
     await page.keyboard.press('Home');
     await page.waitForTimeout(100);
-    assert((await inspect(page)).expansion > 0.6, 'A reverse jump must not teleport particles');
+    assert((await inspect(page)).expansion > .6,'Reverse jump remains paced');
     await page.waitForTimeout(2900);
-    assert((await inspect(page)).expansion < 0.02);
-    assert((await inspect(page)).links > 0.98 && (await inspect(page)).release < 0.001);
-    assert((await inspect(page)).shrink < 0.001);
-    assert((await inspect(page)).rings[2] > .99 && (await inspect(page)).rings[1] < .001, 'Reverse scroll must reform intact rings');
-    assert(await page.evaluate(n => window.particleLineDraws > n, releasedLineDraws));
+    assert((await inspect(page)).expansion < .02);
+    assert((await inspect(page)).links > .98 && (await inspect(page)).shrink < .001);
+    assert((await inspect(page)).ringOpacity > .99,'Reverse restores full ring emphasis');
     await page.mouse.move(1250, 350);
-    await page.waitForTimeout(900);
+    await page.waitForTimeout(1200);
     assert((await inspect(page)).strength > 0.99);
     assert.equal(await page.locator('html').getAttribute('data-custom-cursor'), 'true');
     await page.evaluate(() => document.dispatchEvent(new Event('pointerleave')));
     await page.waitForTimeout(1200);
     assert((await inspect(page)).strength < 0.01);
     await page.locator('.hero-scroll-link').click();
-    await page.waitForTimeout(2500);
-    assert((await inspect(page)).expansion > 0.98);
-    const idleY = await page.evaluate(() => scrollY), idleBefore = await inspect(page);
-    const imageBefore = await page.screenshot();
-    await page.waitForTimeout(1400);
-    const imageAfter = await page.screenshot(), idleAfter = await inspect(page);
-    assert(Math.abs(await page.evaluate(() => scrollY) - idleY) < 1);
-    assert(idleAfter.time - idleBefore.time > 1, 'Ambient animation must advance without scroll input');
-    assert(!imageBefore.equals(imageAfter), 'The rendered idle background must keep moving');
-
-    assert.equal(await page.locator('[data-scroll-story="about"]').getAttribute('data-pinned'), 'true');
-    await page.getByRole('link', { name: 'See what I’m building' }).click();
-    await page.waitForTimeout(1200);
-    assert.equal(await page.locator('.ambient-background').getAttribute('data-scene'), 'projects');
-    await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.ambient-canvas')).opacity) <= .12);
-    assert(Number(await page.locator('.ambient-canvas').evaluate(e => getComputedStyle(e).opacity)) <= 0.12);
-    assert.equal(await page.locator('[data-scroll-story="project"]').getAttribute('data-pinned'), 'true');
-    assert.equal(await page.locator('.ambient-canvas').count(), 1);
-    assert.equal((await inspect(page)).error, 0);
+    await page.waitForTimeout(2200);
+    assert.equal(await page.locator('[data-pinned]').count(),0);
+    assert.equal((await inspect(page)).error,0);
 
     await page.evaluate(() => {
       Object.defineProperty(document, 'hidden', { configurable: true, value: true });
@@ -187,7 +174,7 @@ async function ready(page) {
     await unavailable.goto(base, { waitUntil: 'load' });
     await unavailable.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'static');
     assert(await unavailable.locator('.ambient-formation img').evaluate(e => e.complete && e.naturalWidth > 0));
-    console.log('Particle expansion/reversal, pointer/cursor, pinned sections, visibility pause, context recovery and static fallbacks passed.');
+    console.log('Particle expansion/reversal, pointer/cursor, persistent surface/rings, visibility pause, context recovery and static fallbacks passed.');
   } finally {
     await browser.close();
   }

@@ -1,4 +1,4 @@
-/** Bounded catch-up remains reversible even when an offscreen story settles at once. */
+/** Bounded catch-up remains reversible even after a large document scroll jump. */
 export function advanceExpansion(current: number, target: number, seconds: number) {
   const goal = Math.max(0, Math.min(1, target));
   const delta = Math.max(0, Math.min(0.05, seconds));
@@ -7,25 +7,23 @@ export function advanceExpansion(current: number, target: number, seconds: numbe
   return Math.max(0, Math.min(1, current + Math.sign(distance) * movement));
 }
 
-export interface ParticleChoreography { separation: number; release: number; links: number; shrink: number; }
-const smoothstep = (start: number, end: number, value: number) => {
-  const t = Math.max(0, Math.min(1, (value - start) / (end - start)));
+export interface ParticleChoreography { scale: number; links: number; shrink: number; }
+const smoothstep = (value: number) => {
+  const t = Math.max(0, Math.min(1, value));
   return t * t * (3 - 2 * t);
 };
-/** One reversible timeline: the surface loosens before its samples disperse.
- * Write into a reused object so the frame loop does not allocate state.
+/** A single proportional projection keeps the surface, trail and rings together.
+ * Smaller samples and quieter links reveal an intact atmospheric landscape.
  */
 export function resolveParticleChoreography(progress: number, target: ParticleChoreography) {
-  target.separation = smoothstep(0.02, 0.3, progress) * (1 - smoothstep(0.55, 1, progress));
-  target.release = smoothstep(0.18, 0.98, progress);
-  target.shrink = smoothstep(0.03, 0.95, target.release);
-  target.links = 1 - smoothstep(0.06, 0.36, progress);
+  const expansion = smoothstep(progress);
+  target.scale = 1 + expansion * 0.32;
+  target.shrink = expansion;
+  target.links = 1 - expansion * 0.45;
 }
 
-export interface RingChoreography { expansion: number; fragments: number; opacity: number; }
-/** The same paced hero value drives both directions; no one-way completion flags. */
+export interface RingChoreography { opacity: number; }
+/** Ring geometry always stays intact and shares the landscape's projection scale. */
 export function resolveRingChoreography(progress: number, target: RingChoreography) {
-  target.expansion = smoothstep(0.02, 0.72, progress);
-  target.fragments = smoothstep(0.12, 0.7, progress);
-  target.opacity = 1 - smoothstep(0.08, 0.78, progress);
+  target.opacity = 1 - smoothstep(progress) * 0.35;
 }

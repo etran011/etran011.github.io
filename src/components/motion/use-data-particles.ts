@@ -37,7 +37,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       if (document.hidden) { pause(); return; }
       if (previousFrame) budget.observe(now - previousFrame);
       previousFrame = now;
-      const cadence = input.current.scene === "quiet" || input.current.scene === "projects" ? 30 : budget.frameRate;
+      const cadence = budget.frameRate;
       if (cadence === 30 && previous && now - previous < 1000 / 30 - 1) { frame = requestAnimationFrame(tick); return; }
       const delta = previous ? Math.min(50, now - previous) / 1000 : 1 / 60;
       expansion = advanceExpansion(expansion, input.current.heroProgress, delta);

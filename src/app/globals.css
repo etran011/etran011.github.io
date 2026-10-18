@@ -615,27 +615,17 @@ body { isolation: isolate; }
 .ambient-background[data-renderer="webgl"] .ambient-canvas { opacity: var(--model-intensity, 0.8); }
 .ambient-background[data-renderer="webgl"][data-scene] .ambient-formation { opacity: 0; }
 .ambient-background:not([data-renderer="webgl"]) .ambient-formation, .ambient-background:not([data-renderer="webgl"]) .ambient-canvas { transition: none; }
-.ambient-background[data-scene="hero"] { --model-intensity: 0.95; }
-.ambient-background[data-scene="hero"] .ambient-canvas { mask-image: linear-gradient(90deg, black 85%, #000d); }
-.ambient-background[data-scene="about"] { --model-intensity: 0.42; }
-.ambient-background[data-scene="projects"] { --model-intensity: 0.12; }
-.ambient-background[data-scene="skills"] { --model-intensity: 0.5; }
-.ambient-background[data-scene="quiet"] { --model-intensity: 0.28; }
-.ambient-background[data-scene="about"] .ambient-halo { opacity: 0.25; transform: translateY(8vh); }
-.ambient-background[data-scene="about"] .ambient-formation { opacity: 0.22; }
-.ambient-background[data-scene="projects"] .ambient-formation { opacity: 0.12; }
-.ambient-background[data-scene="skills"] .ambient-grid { opacity: 0.1; }
-.ambient-background[data-scene="skills"] .ambient-formation { opacity: 0.28; }
-.ambient-background[data-scene="quiet"] .ambient-halo { opacity: 0.18; }
-.ambient-background[data-scene="quiet"] .ambient-formation { opacity: 0.1; }
-@media(max-width: 1023px) { .ambient-grid { display: none; } .ambient-halo { opacity: 0.25; } .ambient-background .ambient-formation { width: 100%; right: 0; height: 45svh; opacity: 0.48; } }
+/* A continuous document parameter, never per-section disappearance. */
+.ambient-background { --atmosphere-progress: 0; --model-intensity: calc(.95 - var(--atmosphere-progress) * .48); }
+.ambient-halo { opacity: calc(.7 - var(--atmosphere-progress) * .4); }
+.ambient-grid { opacity: .035; mask-image: none; }
+.ambient-formation { opacity: calc(.82 - var(--atmosphere-progress) * .45); transform: scale(calc(1 + var(--atmosphere-progress) * .2)); transform-origin: 65% 50%; }
+@media(min-width: 1024px) { .ambient-formation { mask-image: linear-gradient(90deg, transparent calc(50% - var(--atmosphere-progress) * 25%), black calc(72% - var(--atmosphere-progress) * 20%)); } }
+@media(max-width: 1023px) { .ambient-grid { opacity: .025; background-size: 56px 56px; } .ambient-halo { opacity: .25; } .ambient-background .ambient-formation { width: 100%; right: 0; height: 55svh; opacity: .32; } }
 @media(prefers-reduced-motion: reduce) { .ambient-scroll-layer, .ambient-halo { transform: none !important; } }
 @media(forced-colors: active) { .ambient-background { display: none; } }
 
 /* Quiet professional chapters lead into a gently illuminated closing scene. */
-.ambient-background[data-section="experience"] .ambient-halo { opacity: 0.12; }
-.ambient-background[data-section="education"] .ambient-halo { opacity: 0.14; }
-.ambient-background[data-section="contact"] .ambient-halo { opacity: 0.3; transform: translateY(5vh) scale(1.06); }
 
 .technology-glyph::before { content: ""; position: absolute; inset: -0.75rem; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--brand-color, var(--accent)) 22%, transparent), transparent 70%); opacity: 0; transition: opacity var(--duration-normal) var(--ease-standard); pointer-events: none; }
 [data-brand-surface="light"] .technology-icon { background: #f5f5f7; border-radius: 0.35rem; padding: 0.25rem; }

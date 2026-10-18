@@ -36,6 +36,7 @@ export function AmbientBackground() {
       input.current.scroll = Math.max(0, y / 1000);
       // Continuous document travel, independent of content scenes or pinning.
       input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, hero.offsetHeight * 1.2))) : 1;
+      element.style.setProperty("--atmosphere-progress", input.current.heroProgress.toFixed(4));
       input.current.progress = current ? Math.max(0, Math.min(1, (y - current.top) / Math.max(1, (sections[index + 1]?.top ?? documentHeight) - current.top))) : 0;
       const section = current?.id ?? "home";
       if (element.dataset.section !== section) element.dataset.section = section;
