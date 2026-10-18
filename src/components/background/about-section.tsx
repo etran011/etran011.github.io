@@ -42,8 +42,8 @@ export function AboutSection() {
               <p>{building.body}</p>
               <ul className="about-project-links" aria-label="Projects mentioned">{projects.map(project => <li key={project.slug}><Link className="text-link" href={`/projects/${project.slug}/`}>{project.title}<ArrowUpRight size={14} aria-hidden="true" /></Link></li>)}</ul>
             </ContentIsland>
-            <a className="text-link about-story-next" href="#projects">See what I’m building <ArrowDown size={16} aria-hidden="true" /></a>
           </div>
+          <a className="text-link about-story-next" href="#projects">See what I’m building <ArrowDown size={16} aria-hidden="true" /></a>
         </div>
       </Container>
     </section>
