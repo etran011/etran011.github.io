@@ -8,6 +8,9 @@ try {
   for(const width of [320,390,768,1440,1920]) {
     const page=await browser.newPage({viewport:{width,height:1000},reducedMotion:'reduce'});
     await page.goto(base+'/#about');await page.evaluate(()=>document.fonts.ready);
+    assert.equal(await page.locator('#about .content-island').count(),1,'One unified introduction');
+    assert.equal(await page.locator('.about-copy > p').count(),2,'Only two concise paragraphs');
+    assert.doesNotMatch(await page.locator('#about').textContent(),/about\.md|Markdown|GPA|2028|OptionLab|PlatePredict/);
     const results=await page.locator('#about .content-island').evaluateAll(islands=>{
       const ctx=document.createElement('canvas').getContext('2d');
       const rgba=color=>{ctx.clearRect(0,0,1,1);ctx.fillStyle=color;ctx.fillRect(0,0,1,1);return [...ctx.getImageData(0,0,1,1).data].map((n,i)=>i===3?n/255:n)};
@@ -22,8 +25,9 @@ try {
         });
       });
     });
+    assert(results.length>5,'Contrast audit covers the actual text');
     for(const result of results) {assert(result.ratio>=4.5,`AA text contrast: ${JSON.stringify(result)}`);assert.equal(result.opacity,1,'Text does not wait for animation');}
-    for(const paragraph of await page.locator('.editor-block > p:last-child,.about-building > p:not(.eyebrow)').all()) {
+    for(const paragraph of await page.locator('.about-copy > p').all()) {
       assert(await paragraph.evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=16),'Body text stays comfortably sized');
     }
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

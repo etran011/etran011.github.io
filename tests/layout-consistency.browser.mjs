@@ -17,14 +17,7 @@ try {
       const links=await p.locator('.contact-resource').evaluateAll(nodes=>nodes.map(e=>e.getBoundingClientRect().height));
       close(links[0],links[1],'Social link rows');
     }else assert(Math.abs(contact[0].height-contact[1].height)>20,'Stacked mobile cards retain their natural heights');
-    const about=await p.locator('.about-editor,.about-building').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return{top:r.top,bottom:r.bottom,height:r.height}}));
-    const facts=await p.locator('.about-fact').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return{top:r.top,height:r.height}}));
-    if(Math.abs(facts[0].top-facts[1].top)<1) close(facts[0].height,facts[1].height,'Matching academic fact cards');
-    if(width>900) {
-      close(about[0].bottom,about[1].bottom,'About editor and supporting stack bottom edges');
-      close(about[0].top,facts[0].top,'About editor and facts top edges');
-      assert(about[0].height>facts[0].height*1.5,'Large editorial island retains intentional size');
-    }
+    assert.equal(await p.locator('#about .content-island').count(),1,'About has one unified composition');
     const glyphs=await p.locator('.technology-glyph').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return {width:r.width,height:r.height}}));
     assert.equal(glyphs.length,19,'All Tools icons remain present');
     for(const glyph of glyphs) {
@@ -41,7 +34,7 @@ try {
     const email=await p.locator('.contact-email').boundingBox();
     assert(email.x>=0&&email.x+email.width<=width+1,'Enlarged email and icons remain within viewport');
     for(const icon of await p.locator('.contact-email svg').all()) {const b=await icon.boundingBox();assert(b.x>=0&&b.x+b.width<=width+1);}
-    console.log('Aligned Contact/About groups, natural mobile heights and enlarged email passed',width);
+    console.log('Aligned Contact and unified About, natural mobile heights and enlarged email passed',width);
     await p.close();
   }
   // Direct anchors previously exposed intrinsic gallery overflow after images/fonts settled.

@@ -20,8 +20,8 @@ try{
   for(const options of [{javaScriptEnabled:false},{forcedColors:'active'},{hasTouch:true,isMobile:true}]){
     const page=await browser.newPage({viewport:{width:390,height:844},...options});
     await page.goto(base+'/#about');
-    assert(await page.locator('#about-background-heading').isVisible());
-    assert(await page.locator('#about-building-heading').isVisible());
+    assert(await page.locator('#about-heading').isVisible());
+    assert.equal(await page.locator('.about-copy > p:visible').count(),2);
     assert.equal(await page.locator('.technology-button').count(),19);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
     if(!options.forcedColors) assert(Number(await page.locator('.ambient-formation').evaluate(e=>getComputedStyle(e).opacity))>0);

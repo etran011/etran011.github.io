@@ -40,8 +40,8 @@ try {
     assert.equal(await page.locator('.stack-collection').count(),3);
     assert.equal(await page.locator('.technology-button').count(),19);
     assert.equal(await page.locator('.experience-entry').count(),4);
-    assert.equal(await page.locator('.about-islands .content-island').count(),4);
-    assert(await page.locator('#about-background-heading').isVisible());
+    assert.equal(await page.locator('#about .content-island').count(),1);
+    assert(await page.locator('#about-heading').isVisible());
   }
   assert.deepEqual(errors,[]);
   console.log('Natural section flow, no pinning, stable gallery selection, modal and Tools interactions passed.');

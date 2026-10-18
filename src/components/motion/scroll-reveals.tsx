@@ -35,7 +35,7 @@ export function ScrollReveals({ children }: { children: ReactNode }) {
         if (document.hidden) animation.pause();
       }
     }, { threshold: 0.08, rootMargin: "0px 0px -32px 0px" });
-    element.querySelectorAll(".section-heading, .workspace-heading, .content-island, .case-content section").forEach((target) => { if (!target.closest("#skills, #education")) observer.observe(target); });
+    element.querySelectorAll(".section-heading, .content-island, .case-content section").forEach((target) => { if (!target.closest("#skills, #education")) observer.observe(target); });
     const cancelAll = () => { if (preference.matches || forced.matches) { animations.forEach((animation) => animation.cancel()); animations.clear(); } };
     const revealFocused = (event: FocusEvent) => {
       animations.forEach((animation, target) => { if (target.contains(event.target as Node)) { animation.cancel(); animations.delete(target); } });

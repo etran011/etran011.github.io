@@ -99,23 +99,14 @@ export const skillCategories = [
   { id: "tools", name: "Tools & environments", items: ["Git", "Linux", "AWS EC2", "Tableau", "Excel", "Stata"] },
 ] as const satisfies readonly SkillCategory[];
 
-export interface AboutChapter { id: string; word: string; label: string; title: string; body: string; }
-export interface About { chapters: readonly AboutChapter[]; }
+export interface About { heading: string; emphasis: string; paragraphs: readonly string[]; }
 
-// First-person copy grounded in the supplied résumé and audited project materials.
+// Concise first-person introduction grounded in the supplied résumé and interests.
 export const about = {
-  chapters: [
-    {
-      id: "background", word: "Learn", label: "Who I am", title: "A foundation in data.",
-      body: "I’m Erik, a Data Science student at William & Mary, graduating in 2028. Coursework gives me the foundations; projects give me a way to test what I’m learning.",
-    },
-    {
-      id: "building", word: "Build", label: "What I build", title: "From model to interface.",
-      body: "I like working from the calculation to the interface. I built OptionLab’s Python pricing backend and reviewed its AI-assisted frontend. In PlatePredict, I prepared nutritional data and compared regression models.",
-    },
-    {
-      id: "approach", word: "Explain", label: "How I approach problems", title: "Make the result understandable.",
-      body: "In campus IT support, explaining a solution clearly matters as much as finding it. I bring that same care to software: check the result, make assumptions visible, and give people something they can use.",
-    },
+  heading: "Curiosity,",
+  emphasis: "put into practice.",
+  paragraphs: [
+    "I’m Erik, a Data Science student at William & Mary. I enjoy programming, statistics, and the process of turning a question into working software.",
+    "I’m especially interested in AI, machine learning, software engineering, and financial technology. I like projects where I can try an idea, see where it falls short, and make it work better.",
   ],
 } as const satisfies About;
