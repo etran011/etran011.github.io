@@ -17,7 +17,7 @@ const smoothstep = (value: number) => {
  */
 export function resolveParticleChoreography(progress: number, target: ParticleChoreography) {
   const expansion = smoothstep(progress);
-  target.scale = 1 + expansion * 0.32;
+  target.scale = 1 + expansion * 1.65;
   target.shrink = expansion;
   target.links = 1 - expansion * 0.45;
 }

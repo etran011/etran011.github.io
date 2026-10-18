@@ -28,6 +28,8 @@ async function ready(page) {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(() => {
+      // Fix density so adaptive quality changes cannot masquerade as scroll rebuilds.
+      Object.defineProperty(navigator, "hardwareConcurrency", { configurable: true, value: 4 });
       window.particleFrames = 0;
       window.trajectoryDraws = 0;
       window.buffersCreated = 0; window.buffersDeleted = 0;
@@ -70,7 +72,7 @@ async function ready(page) {
       await page.waitForTimeout(2400);
       const state = await inspect(page);
       assert(state.expansion > .6 && state.links >= .549 && state.ringOpacity >= .649, `${id} retains complete mesh and rings`);
-      assert(state.projection[0] > originalScale * 1.1, `${id} expands the sculpture`);
+      assert(state.projection[0] > originalScale * 2.2, `${id} expands the sculpture`);
       assert(state.shrink > .6, `${id} uses smaller particles`);
       assert(Number(await page.locator('.ambient-canvas').evaluate(e=>getComputedStyle(e).opacity)) >= .46, `${id} never hides the model`);
       assert.equal(await page.locator('.ambient-canvas').count(),1);

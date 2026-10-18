@@ -32,10 +32,10 @@ test("proportional expansion preserves links and reversibly shrinks samples", ()
   for (let i = 0; i <= 100; i++) {
     resolveParticleChoreography(i / 100, state);
     assert(state.scale >= previous.scale && state.links <= previous.links && state.shrink >= previous.shrink);
-    assert(state.links >= .55 && state.scale <= 1.32);
+    assert(state.links >= .55 && state.scale <= 2.65);
     previous = { ...state }; forward.push({ ...state });
   }
-  assert.deepEqual(state, { scale: 1.32, links: .55, shrink: 1 });
+  assert.deepEqual(state, { scale: 2.65, links: .55, shrink: 1 });
   for (let i = 100; i >= 0; i--) {
     resolveParticleChoreography(i / 100, state);
     assert.deepEqual(state, forward[i]);
