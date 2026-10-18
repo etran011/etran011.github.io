@@ -10,7 +10,7 @@ try {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(base, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro') && document.documentElement.dataset.weightedScroll === 'true');
+  await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro') && document.querySelector('.ambient-background').dataset.rendererReady === 'true');
   assert.deepEqual(await page.locator('main > section').evaluateAll(sections => sections.map(s => s.id)), ['home', 'about', 'projects', 'experience', 'skills', 'education', 'contact']);
   await page.locator('#education').scrollIntoViewIfNeeded();
   await page.waitForFunction(() => document.querySelector('[data-education-motion]')?.dataset.active === 'true');

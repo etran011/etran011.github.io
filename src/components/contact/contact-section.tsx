@@ -5,7 +5,7 @@ import { profile } from "@/data/portfolio";
 
 export function ContactSection() {
   return (
-    <section id="contact" className="contact-section" aria-labelledby="contact-heading">
+    <section id="contact" tabIndex={-1} className="contact-section" aria-labelledby="contact-heading">
       <Container>
         <div className="contact-layout">
           <ContentIsland className="contact-intro">

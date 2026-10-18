@@ -1,6 +1,5 @@
 import { HoverEffects } from "@/components/interaction/hover-effects";
 import { AmbientBackground } from "@/components/motion/ambient-background";
-import { SmoothScroll } from "@/components/interaction/smooth-scroll";
 import { ScrollbarVisibility } from "@/components/interaction/scrollbar-visibility";
 import { PortfolioIntro } from "@/components/intro/portfolio-intro";
 import { introBootstrap } from "@/lib/intro-bootstrap";
@@ -12,7 +11,6 @@ import { Navigation } from "@/components/navigation";
 import type { Metadata } from "next";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
-import "lenis/dist/lenis.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,5 +26,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-scroll-behavior="smooth" data-scrollbar-state="idle" suppressHydrationWarning><head><script id="portfolio-intro-bootstrap" dangerouslySetInnerHTML={{ __html: introBootstrap }} /></head><body><PortfolioIntro /><AmbientBackground /><HoverEffects /><SmoothScroll /><CustomCursor /><Navigation /><ScrollbarVisibility /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
+  return <html lang="en" data-scrollbar-state="idle" suppressHydrationWarning><head><script id="portfolio-intro-bootstrap" dangerouslySetInnerHTML={{ __html: introBootstrap }} /></head><body><PortfolioIntro /><AmbientBackground /><HoverEffects /><CustomCursor /><Navigation /><ScrollbarVisibility /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }

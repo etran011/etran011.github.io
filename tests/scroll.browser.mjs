@@ -10,31 +10,45 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
+  await page.addInitScript(()=>{
+    sessionStorage.setItem('portfolio:intro:v1','seen');
+    window.wheelCanceled=[];
+    window.addEventListener('wheel',event=>queueMicrotask(()=>window.wheelCanceled.push(event.defaultPrevented)),{passive:true});
+  });
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
-  await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
+  await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.rendererReady === 'true');
   const hero = page.locator('#home');
+  assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).scrollBehavior),'auto');
+  assert.equal(await page.locator('html[class*=lenis], [data-weighted-scroll]').count(),0);
+
   assert.equal(await page.locator('[data-pinned]').count(),0);
   const expansion=()=>page.locator('.ambient-canvas').evaluate(c=>{const g=c.getContext('webgl'),p=g.getParameter(g.CURRENT_PROGRAM);return g.getUniform(p,g.getUniformLocation(p,'uExpansion'));});
   await page.waitForFunction(()=>document.querySelector('.ambient-background').dataset.renderer==='webgl');
   await page.mouse.move(900, 500);
   // A dense trackpad-like burst retains its distance without skipping visual stages.
   for (let i = 0; i < 12; i++) { await page.mouse.wheel(0, 10); await page.waitForTimeout(30); }
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(150);
   assert(Math.abs(await page.evaluate(() => scrollY) - 120) < 2);
   const progress = await expansion();
   assert(progress > .07 && progress < .15);
-  // A large wheel gesture starts with bounded visual motion, then catches up.
+  // Native document travel finishes immediately; only decorative expansion eases.
   await page.mouse.wheel(0, 900);
   await page.waitForTimeout(100);
-  assert(await expansion() < .3);
+  assert(Math.abs(await page.evaluate(()=>scrollY)-1020)<2,'Large wheel input has no artificial resistance');
+  assert(await expansion() < .4);
   await page.waitForTimeout(1800);
   assert(Math.abs(await page.evaluate(() => scrollY) - 1020) < 2);
   await page.mouse.wheel(0, -420);
   await page.waitForTimeout(1500);
   assert(Math.abs(await page.evaluate(() => scrollY) - 600) < 2);
   assert(Math.abs(await expansion() - 600 / ((await hero.boundingBox()).height * 1.2)) < .03);
-  // Keyboard interrupts interpolation; anchors retain their destination and focus.
+  // Keyboard keys and anchor focus are browser-owned, with no scroll engine.
+  const beforeKeys=await page.evaluate(()=>scrollY);
+  await page.keyboard.press('PageDown');await page.waitForTimeout(450);
+  assert(await page.evaluate(()=>scrollY)>beforeKeys);
+  await page.keyboard.press('PageUp');await page.waitForTimeout(450);
+  assert(Math.abs(await page.evaluate(()=>scrollY)-beforeKeys)<3);
   await page.keyboard.press('Home');
   await page.waitForTimeout(700);
   await page.locator('.hero-scroll-link').click();
@@ -53,6 +67,7 @@ try {
   await page.keyboard.press('End');
   await page.waitForTimeout(500);
   assert(await page.locator('#contact').evaluate(e => e.getBoundingClientRect().top < innerHeight));
+  assert((await page.evaluate(()=>window.wheelCanceled)).every(value=>value===false),'Wheel events are never canceled');
   assert.deepEqual(errors, []);
-  console.log('Fine wheel bursts, large input, reverse pacing, native distance, keyboard, anchor focus and normal content passed.');
+  console.log('Uncanceled native wheel input, immediate full distance, keyboard, anchor focus, reverse travel and visual expansion passed.');
 } finally { await browser.close(); }

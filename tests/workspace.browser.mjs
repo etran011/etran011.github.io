@@ -9,7 +9,7 @@ try {
   const errors=[]; page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>sessionStorage.setItem('portfolio:intro:v1','seen'));
   await page.goto(base);
-  await page.waitForFunction(()=>document.documentElement.dataset.weightedScroll==='true');
+  await page.waitForFunction(()=>document.querySelector('.ambient-background').dataset.rendererReady === 'true');
   assert.equal(await page.locator('[data-pinned]').count(),0,'Content has no pinned scenes');
   const first = await page.locator('#about').boundingBox();
   assert(first.y < 1100,'About follows the hero without artificial travel');

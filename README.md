@@ -91,7 +91,7 @@ Navigation highlights the current section (Projects on case-study routes), displ
 
 See [Phase 5 validation](docs/phase-5-validation.md) for checks performed.
 
-The cinematic interaction update adds a contextual desktop cursor, weighted wheel scrolling, and three short scroll stories for the hero, About, and OptionLab. Mobile, reduced-motion, and accessibility fallbacks retain natural navigation and readable content. See [interaction behavior and validation](docs/cinematic-interactions.md) for implementation details and browser coverage.
+The cinematic interaction update adds a contextual desktop cursor, native browser scrolling, and three short scroll stories for the hero, About, and OptionLab. Mobile, reduced-motion, and accessibility fallbacks retain natural navigation and readable content. See [interaction behavior and validation](docs/cinematic-interactions.md) for implementation details and browser coverage.
 
 The subsequent refinement makes the hero a minimal full-screen scene, reveals navigation on scroll, bounds visual story pacing, raises and animates the skill stack, and adds a shared atmospheric background. See [refinement behavior and validation](docs/animation-refinement-validation.md). Run `npm test` for the permanent timeline regression tests.
 

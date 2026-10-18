@@ -1,6 +1,6 @@
 # Cinematic interactions
 
-The continuous-workspace redesign supersedes the historical pinned-scene and particle-dispersal behavior described below. See [Continuous portfolio workspace](continuous-workspace.md) for the current layout, persistent model, and validation.
+Native scrolling now supersedes the former Lenis wheel smoothing: there is no scroll manager or input damping. Anchor targets are focusable through native browser navigation. The continuous-workspace redesign supersedes the historical pinned-scene and particle-dispersal behavior described below. See [Continuous portfolio workspace](continuous-workspace.md) for the current layout, persistent model, and validation.
 
 The interaction update preserves the existing colors, fonts, content, routes, and static hosting configuration. About remains immediately after the hero. OptionLab uses the supplied screenshots; Application Atlas has no verified content or supplied screenshots and has not been invented.
 

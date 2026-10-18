@@ -8,7 +8,7 @@ import { projects } from "@/data/portfolio";
 export function AboutSection() {
   const [background, building, approach] = about.chapters;
   return (
-    <section id="about" className="background-section about-section" aria-labelledby="about-heading">
+    <section id="about" tabIndex={-1} className="background-section about-section" aria-labelledby="about-heading">
       <Container>
         <header className="workspace-heading about-heading">
           <p className="workspace-path"><span>portfolio</span><span aria-hidden="true">/</span>about.md <span className="workspace-index">{"// 01"}</span></p>

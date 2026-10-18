@@ -54,7 +54,7 @@ export function ScrollbarVisibility() {
     const down = (event: PointerEvent) => {
       if (!enabled || event.button !== 0) return;
       event.preventDefault();
-      // Focus interrupts pending Lenis interpolation through the existing focus handler.
+      // Keep the accessible thumb focused during its native-position drag.
       handle.focus({ preventScroll: true });
       drag = { pointer: event.pointerId, y: event.clientY, scroll: scrollY };
       handle.dataset.dragging = "true";

@@ -6,7 +6,7 @@ import { profile } from "@/data/portfolio";
 
 export function Hero() {
   return (
-    <section id="home" className="hero" aria-labelledby="hero-heading">
+    <section id="home" tabIndex={-1} className="hero" aria-labelledby="hero-heading">
       <script dangerouslySetInnerHTML={{ __html: heroTypingBootstrap }} />
       <Container className="hero-scene">
         <div className="hero-grid hero-identity">

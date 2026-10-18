@@ -11,7 +11,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(base);
   await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
-  await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
+  await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.rendererReady === 'true');
   const assertNoProgress = async () => assert.equal(await page.locator('.scroll-progress, .nav-progress').count(), 0);
   await assertNoProgress();
   assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement, '::-webkit-scrollbar').width), '10px');
@@ -73,9 +73,8 @@ try {
   await assertPosition();
   await assertNoProgress();
   await page.mouse.move(900, 400);
-  await page.waitForTimeout(1250);
-  assert((await alpha()) > 0 && (await alpha()) < 1, 'Idle thumb fades rather than disappears abruptly');
-  await page.waitForTimeout(450);
+  await page.waitForFunction(()=>{const opacity=Number(getComputedStyle(document.querySelector('.auto-scrollbar')).opacity);return opacity>0&&opacity<1},{},{timeout:4000});
+  await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('.auto-scrollbar')).opacity)===0);
   assert.equal(await alpha(), 0, 'Idle thumb disappears completely');
   for (const delta of [-1600, 2200, -350]) {
     await page.mouse.wheel(0, delta);

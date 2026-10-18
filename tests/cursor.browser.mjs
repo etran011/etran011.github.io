@@ -10,7 +10,7 @@ try {
   page.on('pageerror', e => errors.push(e.message));
   await page.addInitScript(() => sessionStorage.setItem('portfolio:intro:v1', 'seen'));
   await page.goto(base);
-  await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
+  await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.rendererReady === 'true');
   await page.bringToFront();
   await page.mouse.click(1100, 700);
   await page.mouse.move(1100, 700);

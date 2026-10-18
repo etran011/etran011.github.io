@@ -22,7 +22,7 @@ function AcademicStudy() {
 
 export function EducationSection() {
   return (
-    <section id="education" className="background-section education-section" aria-labelledby="education-heading">
+    <section id="education" tabIndex={-1} className="background-section education-section" aria-labelledby="education-heading">
       <Container><ContentIsland className="education-island"><EducationMotion>
         <header className="education-kicker"><p className="eyebrow">Education / 05</p><p className="education-location">{education.location}</p></header>
         <div className="education-composition">

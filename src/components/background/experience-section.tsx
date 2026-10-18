@@ -5,7 +5,7 @@ import { ExperienceTimeline } from "./experience-timeline";
 
 export function ExperienceSection() {
   return (
-    <section id="experience" className="background-section experience-section" aria-labelledby="experience-heading">
+    <section id="experience" tabIndex={-1} className="background-section experience-section" aria-labelledby="experience-heading">
       <Container>
         <div className="section-heading">
           <div><p className="eyebrow">Experience / 03</p><h2 id="experience-heading">Working with people.<br />Solving technical problems.</h2></div>

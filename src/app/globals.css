@@ -193,7 +193,6 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 
 .hero-motion { min-width: 0; }
 @media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
   .hero-grid { perspective: 900px; }
   .hero-copy > :not(.hero-narrative) { animation: hero-arrive var(--duration-reveal) var(--ease-standard) both; }
   .hero-copy > h1 { animation-delay: 100ms; }
@@ -537,7 +536,6 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 }
 @media(forced-colors: active) { .custom-cursor { display: none; } html[data-custom-cursor], html[data-custom-cursor] * { cursor: auto !important; } }
 
-html[data-weighted-scroll] { scroll-behavior: auto !important; }
 
 /* Project previews stay visible in natural document flow. */
 .hero-narrative { position: relative; }

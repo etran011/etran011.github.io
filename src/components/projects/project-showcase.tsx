@@ -12,7 +12,7 @@ export function ProjectShowcase() {
   );
   const introduction = <>{heading}{leading && <ProjectCard project={leading} index={0} />}</>;
   return (
-    <section id="projects" className="project-section" aria-labelledby="projects-heading">
+    <section id="projects" tabIndex={-1} className="project-section" aria-labelledby="projects-heading">
       <Container>
         <div className="project-list">
           <div>{introduction}</div>

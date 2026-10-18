@@ -14,7 +14,7 @@ try {
     Element.prototype.animate=function(...args){if(this.closest('.experience-entry'))window.careerEntrances++;return animate.apply(this,args)};
   });
   await page.goto(base);
-  await page.waitForFunction(()=>document.documentElement.dataset.weightedScroll==='true');
+  await page.waitForFunction(()=>document.querySelector('.ambient-background').dataset.rendererReady === 'true');
   const travel=async index=>{
     await page.locator('.experience-entry').nth(index).evaluate(e=>window.scrollTo({top:e.getBoundingClientRect().top+scrollY-240,behavior:'instant'}));
     await page.waitForTimeout(200);

@@ -18,7 +18,7 @@ async function ready(page) {
   await page.goto(base, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => !document.documentElement.hasAttribute('data-intro'));
   await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'webgl');
-  await page.waitForFunction(() => document.documentElement.dataset.weightedScroll === 'true');
+  await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.rendererReady === 'true');
 }
 
 (async () => {
