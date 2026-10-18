@@ -25,6 +25,16 @@ try {
       close(about[0].top,facts[0].top,'About editor and facts top edges');
       assert(about[0].height>facts[0].height*1.5,'Large editorial island retains intentional size');
     }
+    const glyphs=await p.locator('.technology-glyph').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return {width:r.width,height:r.height}}));
+    assert.equal(glyphs.length,19,'All Tools icons remain present');
+    for(const glyph of glyphs) {
+      close(glyph.width,glyphs[0].width,'Consistent icon frame width');
+      close(glyph.height,glyphs[0].height,'Consistent icon frame height');
+    }
+    for(const group of await p.locator('.stack-technologies').all()) {
+      const buttons=await group.locator('.technology-button').evaluateAll(nodes=>nodes.map(e=>{const r=e.getBoundingClientRect();return {top:r.top,height:r.height}}));
+      for(const button of buttons) for(const peer of buttons.filter(b=>Math.abs(b.top-button.top)<1)) close(button.height,peer.height,'Matching Tools row heights');
+    }
     assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
     await p.addStyleTag({content:'html{font-size:200%}'});
     await p.evaluate(()=>document.fonts.ready);
