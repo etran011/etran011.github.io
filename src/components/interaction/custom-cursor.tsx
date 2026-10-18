@@ -9,7 +9,6 @@ export function CustomCursor() {
   const pathname = usePathname();
   const root = useRef<HTMLDivElement>(null);
   const dot = useRef<HTMLSpanElement>(null);
-  const label = useRef<HTMLSpanElement>(null);
   const refresh = useRef<() => void>(() => {});
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
@@ -47,10 +46,8 @@ export function CustomCursor() {
       }
       x.set(point.x); y.set(point.y);
       const control = target.closest("a, button, [role='button']");
-      const text = control?.matches(".hero-project, .case-link") ? "Explore" : control?.matches(".gallery-stage") ? "View" : control?.getAttribute("data-cursor") ?? "";
-      const mode = text ? "context" : control ? "link" : "default";
+      const mode = control ? "link" : "default";
       if (element.dataset.mode !== mode) element.dataset.mode = mode;
-      if (label.current && label.current.textContent !== text) label.current.textContent = text;
       if (!element.dataset.visible) element.dataset.visible = "true";
       if (!document.documentElement.dataset.customCursor) document.documentElement.dataset.customCursor = "true";
     };
@@ -98,5 +95,5 @@ export function CustomCursor() {
   useEffect(() => { refresh.current(); }, [pathname]);
 
   // Keep viewport translation outside the ring's local hover/press transforms.
-  return <div ref={root} className="custom-cursor" aria-hidden="true"><span ref={dot} className="cursor-dot" /><motion.span className="cursor-position" style={{ x: ringX, y: ringY }}><span className="cursor-ring"><span ref={label} /></span></motion.span></div>;
+  return <div ref={root} className="custom-cursor" aria-hidden="true"><span ref={dot} className="cursor-dot" /><motion.span className="cursor-position" style={{ x: ringX, y: ringY }}><span className="cursor-ring" /></motion.span></div>;
 }

@@ -58,9 +58,10 @@ try {
     const box = await locator.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 8 });
     await page.waitForTimeout(250);
-    const contextual = await locator.evaluate(e => e.matches('.case-link, .hero-project, .gallery-stage') || Boolean(e.getAttribute('data-cursor')));
-    assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'), contextual ? 'context' : 'link');
-    assert(Math.abs(await page.locator('.cursor-ring').evaluate(e => parseFloat(getComputedStyle(e).width)) - (contextual ? 54 : 36)) < .1, 'Existing hover dimensions remain unchanged');
+    assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'), 'link');
+    assert(Math.abs(await page.locator('.cursor-ring').evaluate(e => parseFloat(getComputedStyle(e).width)) - 36) < .1, 'All clickable targets share one ring size');
+    assert.equal(await page.locator('.cursor-ring').evaluate(e => e.childElementCount), 0, 'No cursor label renderer remains');
+    assert.equal(await page.locator('.cursor-ring').evaluate(e => getComputedStyle(e).backgroundColor), 'rgba(0, 0, 0, 0)', 'Hover ring stays hollow');
     await page.mouse.down();
     await page.waitForTimeout(170);
     await page.mouse.up();

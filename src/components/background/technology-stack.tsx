@@ -47,5 +47,5 @@ export function TechnologySelection({ technologies, collections }: { technologie
 
 export function TechnologyButton({ technology, children }: { technology: StackTechnology; children: ReactNode }) {
   const { selected, select } = useContext(StackContext);
-  return <button className="technology-button" type="button" aria-pressed={selected?.name === technology.name} aria-controls="stack-selection" data-cursor="Select" onClick={(event) => select(selected?.name === technology.name ? null : technology, event.currentTarget)}>{children}</button>;
+  return <button className="technology-button" type="button" aria-pressed={selected?.name === technology.name} aria-controls="stack-selection" onClick={(event) => select(selected?.name === technology.name ? null : technology, event.currentTarget)}>{children}</button>;
 }

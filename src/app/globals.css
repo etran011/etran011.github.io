@@ -531,10 +531,8 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .cursor-dot, .cursor-position { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1000; }
 .cursor-dot { translate: -50% -50%; border-radius: 50%; width: 4px; height: 4px; background: var(--accent-strong); transform: translate3d(var(--cursor-x, -100px), var(--cursor-y, -100px), 0); }
 .cursor-position { width: 0; height: 0; }
-.cursor-ring { position: absolute; top: 0; left: 0; translate: -50% -50%; pointer-events: none; border-radius: 50%; display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--accent); color: var(--foreground); transition: width 180ms ease, height 180ms ease, background 180ms ease, scale 120ms ease; }
-.cursor-ring > span { font-size: 10px; letter-spacing: 0.02em; }
-.custom-cursor[data-mode="link"] .cursor-ring { width: 36px; height: 36px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
-.custom-cursor[data-mode="context"] .cursor-ring { width: 54px; height: 54px; background: var(--surface); }
+.cursor-ring { position: absolute; top: 0; left: 0; translate: -50% -50%; pointer-events: none; border-radius: 50%; width: 24px; height: 24px; border: 1px solid var(--accent); background: transparent; transition: width 180ms ease, height 180ms ease, scale 120ms ease; }
+.custom-cursor[data-mode="link"] .cursor-ring { width: 36px; height: 36px; }
 .custom-cursor[data-pressed] .cursor-ring { scale: 0.85; }
 @media(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
  html[data-custom-cursor], html[data-custom-cursor] * { cursor: none !important; }
