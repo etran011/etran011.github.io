@@ -79,8 +79,7 @@ try {
     await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     const clipped=await page.locator('#experience').evaluate(root=>[root,...root.querySelectorAll('.experience-list,.experience-entry,.experience-date,article,h3,.experience-tags li,.experience-highlights li')].filter(e=>{const r=e.getBoundingClientRect();return r.left<-.5||r.right>innerWidth+.5}).map(e=>e.className||e.tagName));
     assert.deepEqual(clipped,[],`Experience fits 200% text at ${width}`);
-    const pageOverflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
-    if(pageOverflow) console.log(`Existing out-of-scope Selected Work overflow at 200% text, ${width}px; Experience bounds pass.`);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Entire page fits 200% text at ${width}`);
     await page.close();console.log('Accurate career content, aligned axis, responsive dates and enlarged text passed',width);
   }
   const noJS=await browser.newPage({viewport:{width:390,height:844},javaScriptEnabled:false});

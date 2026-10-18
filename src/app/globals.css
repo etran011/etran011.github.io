@@ -215,8 +215,8 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .section-heading .eyebrow { color: var(--accent); margin-bottom: 1rem; }
 .section-heading h2 { font-size: clamp(2rem, 4vw, 3.25rem); letter-spacing: -0.045em; line-height: 1.15; }
 .section-heading > p { max-width: 21rem; color: var(--muted); font-size: 0.9rem; }
-.project-list { display: grid; gap: 2rem; }
-.project-card { padding: 0; min-width: 0; }
+.project-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+.project-card.content-island { padding: 0; min-width: 0; }
 .project-card-copy { padding: clamp(1.5rem, 4vw, 3rem); }
 .project-category { color: var(--muted); margin-bottom: 1.75rem; }
 .project-category > span { color: var(--accent); }
@@ -232,7 +232,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .project-preview img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 0.5rem; background: #f7f7f4; }
 .project-preview figcaption { margin-top: 0.85rem; color: var(--muted); font-size: 0.7rem; }
 
-.project-card-copy { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+.project-card-copy { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
 .project-period { color: var(--muted); font-family: var(--font-code); font-size: 0.65rem; margin-top: 1.5rem; }
 .project-featured { background: linear-gradient(135deg, #182131, var(--surface) 65%); }
 .project-featured .project-preview { padding: 0 clamp(1rem, 4vw, 3rem) 2rem; }
@@ -240,7 +240,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .project-secondary .project-details { border-left: 1px solid var(--border); padding-left: clamp(1.5rem, 4vw, 3rem); }
 .project-details .project-highlights { margin-top: 0; }
 @media(max-width: 767px) {
- .project-card-copy { grid-template-columns: 1fr; }
+ .project-card-copy { grid-template-columns: minmax(0, 1fr); }
  .project-secondary .project-details { border-left: 0; border-top: 1px solid var(--border); padding: 1.5rem 0 0; }
  .project-featured .project-preview { padding-bottom: 1.25rem; }
 }
@@ -249,10 +249,12 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .gallery-stage img { width: 100%; height: 100%; object-fit: contain; }
 .expand-label { position: absolute; bottom: 0.75rem; right: 0.75rem; display: inline-flex; gap: 0.4rem; align-items: center; padding: 0.4rem 0.6rem; background: #0b0d12e8; color: var(--foreground); font-size: 0.7rem; border-radius: 0.3rem; }
 .gallery-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+.gallery-controls > * { min-width: 0; max-width: 100%; }
 .gallery-selectors { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.gallery-selectors button { min-height: 44px; padding: 0.5rem 0.7rem; border: 1px solid transparent; border-radius: 0.3rem; font-size: 0.7rem; color: var(--muted); cursor: pointer; }
+.gallery-selectors button { min-width: 0; max-width: 100%; min-height: 44px; padding: 0.5rem 0.7rem; border: 1px solid transparent; border-radius: 0.3rem; font-size: 0.7rem; color: var(--muted); cursor: pointer; }
 .gallery-selectors button[aria-pressed="true"] { border-color: var(--border); color: var(--accent); background: var(--background); }
-.gallery-arrows { display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-code); font-size: 0.65rem; white-space: nowrap; }
+.gallery-arrows { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; width: max-content; max-width: 100%; align-items: center; gap: 0.5rem; font-family: var(--font-code); font-size: 0.65rem; }
+.gallery-arrows > span { text-align: center; }
 .gallery-arrows button, .gallery-dialog-header button { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--border); border-radius: 0.3rem; cursor: pointer; }
 .gallery-dialog { position: fixed; inset: 0; margin: auto; max-width: 95vw; width: 90rem; max-height: 94svh; padding: 0; background: var(--background); color: var(--foreground); border: 1px solid var(--border); border-radius: 0.75rem; }
 .gallery-dialog::backdrop { background: #03060de8; backdrop-filter: blur(8px); }
