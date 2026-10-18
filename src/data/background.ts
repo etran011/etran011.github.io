@@ -5,6 +5,8 @@ export interface Experience {
   organization: string;
   location: string;
   period: string;
+  summary: string;
+  tags: readonly string[];
   highlights: readonly string[];
 }
 
@@ -15,6 +17,8 @@ export const experience = [
     organization: "William & Mary Technology Support Center",
     location: "Williamsburg, VA",
     period: "August 2026 – Present",
+    summary: "Campus technology support, connecting technical troubleshooting with clear, patient communication.",
+    tags: ["Microsoft Office", "Campus systems", "Technical support"],
     highlights: [
       "Troubleshoot Microsoft Office, campus systems, account access, and software issues, resolving 80% on first contact.",
       "Document support tickets and escalate unresolved issues to higher-level IT staff.",
@@ -27,6 +31,8 @@ export const experience = [
     organization: "Handshake AI",
     location: "Remote",
     period: "July 2026 – Present",
+    summary: "Reviewing AI-generated responses for accuracy, quality, and instruction following.",
+    tags: ["AI evaluation", "Response review", "Technical feedback"],
     highlights: [
       "Evaluate AI-generated responses weekly for inaccuracies, quality issues, and instruction failures.",
       "Write constructive feedback with specific corrections to improve responses.",
@@ -39,6 +45,8 @@ export const experience = [
     organization: "Tuan Construction",
     location: "Washington, DC",
     period: "June 2026 – August 2026",
+    summary: "Turning construction and operational data into clear reporting and dashboards.",
+    tags: ["Excel", "Tableau", "Data analysis"],
     highlights: [
       "Cleaned and organized construction, labor, and project data in Excel, reducing reporting preparation time by 20%.",
       "Built Tableau dashboards to track project trends, labor costs, job locations, and operational performance.",
@@ -51,6 +59,8 @@ export const experience = [
     organization: "Cybersecurity Competitions · National Cyber League",
     location: "Remote",
     period: "August 2024 – May 2026",
+    summary: "Coordinating an eight-person team through timed cybersecurity challenges.",
+    tags: ["OSINT", "Cryptography", "Network analysis"],
     highlights: [
       "Directed an eight-person team, coordinating efforts to solve security challenges under competition deadlines.",
       "Competed in challenges spanning OSINT, cryptography, network traffic, log analysis, and web security.",

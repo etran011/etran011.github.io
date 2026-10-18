@@ -1,0 +1,28 @@
+/* Open career history: dates, a shared axis, and uninterrupted document flow. */
+.experience-list { --timeline-axis: 13.25rem; position: relative; }
+.experience-list::before { content: ""; position: absolute; top: .7rem; bottom: 1rem; left: var(--timeline-axis); width: 1px; background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.experience-entry { position: relative; display: grid; grid-template-columns: 12rem minmax(0, 1fr); column-gap: 3.5rem; padding-bottom: clamp(2.75rem, 5vw, 4.5rem); }
+.experience-entry:last-child { padding-bottom: 1.5rem; }
+.experience-milestone { position: absolute; left: var(--timeline-axis); top: .25rem; translate: -50% 0; width: 14px; height: 14px; border: 1px solid color-mix(in srgb, var(--accent) 65%, var(--background)); border-radius: 50%; background: var(--background); pointer-events: none; }
+.experience-date { color: var(--muted); font: .6875rem/1.8 var(--font-code); text-align: right; padding-top: .1rem; }
+.experience-entry article { min-width: 0; max-width: 49rem; }
+.experience-entry h3 { color: var(--foreground); font-size: clamp(1.45rem, 2.5vw, 2.1rem); font-weight: 450; letter-spacing: -.04em; line-height: 1.2; }
+.experience-organization { color: var(--accent); margin-top: .6rem; font-size: 1rem; }
+.experience-location { font: .65rem/1.8 var(--font-code); color: var(--muted); margin-top: .45rem; }
+.experience-summary { margin-top: 1.3rem; max-width: 46rem; font-size: .95rem; line-height: 1.85; color: var(--muted); }
+.experience-highlights { display: grid; gap: .65rem; margin-top: 1.25rem; color: var(--muted); font-size: .875rem; line-height: 1.85; }
+.experience-highlights li { position: relative; padding-left: 1.4rem; }
+.experience-highlights li::before { content: "+"; position: absolute; left: 0; color: var(--accent); font-family: var(--font-code); }
+.experience-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.experience-tags li { padding: .25rem .65rem; border: 1px solid var(--border); border-radius: .35rem; font: .65rem/1.8 var(--font-code); color: var(--muted); background: color-mix(in srgb, var(--background) 75%, transparent); }
+@media(max-width: 1023px) and (min-width: 768px) { .experience-list { --timeline-axis: 10rem; } .experience-entry { grid-template-columns: 9rem minmax(0, 1fr); column-gap: 2.75rem; } }
+@media(max-width: 767px) {
+  .experience-list { --timeline-axis: .45rem; }
+  .experience-entry { grid-template-columns: minmax(0, 1fr); padding-left: 2rem; padding-bottom: 3rem; }
+  .experience-date { text-align: left; margin-bottom: .8rem; }
+  .experience-entry h3 { font-size: clamp(1.4rem, 5.5vw, 1.8rem); }
+  .experience-organization { font-size: .875rem; }
+  .experience-summary { font-size: .875rem; margin-top: 1rem; }
+  .experience-highlights { font-size: .8125rem; }
+}
+@media(forced-colors: active) { .experience-list::before { background: CanvasText; } .experience-milestone { background: Canvas; border-color: CanvasText; } }
