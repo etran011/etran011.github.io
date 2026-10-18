@@ -13,17 +13,17 @@ const smoothstep = (value: number) => {
   return t * t * (3 - 2 * t);
 };
 /** A single proportional projection keeps the surface, trail and rings together.
- * Smaller samples and quieter links reveal an intact atmospheric landscape.
+ * Smaller samples and retained links reveal an intact atmospheric landscape.
  */
 export function resolveParticleChoreography(progress: number, target: ParticleChoreography) {
   const expansion = smoothstep(progress);
   target.scale = 1 + expansion * 1.65;
   target.shrink = expansion;
-  target.links = 1 - expansion * 0.45;
+  target.links = 1 - expansion * 0.18;
 }
 
 export interface RingChoreography { opacity: number; }
 /** Ring geometry always stays intact and shares the landscape's projection scale. */
 export function resolveRingChoreography(progress: number, target: RingChoreography) {
-  target.opacity = 1 - smoothstep(progress) * 0.35;
+  target.opacity = 1 + smoothstep(progress) * 0.12;
 }

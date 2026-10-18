@@ -71,10 +71,10 @@ async function ready(page) {
       await page.locator('#'+id).evaluate(e => window.scrollTo({top:e.getBoundingClientRect().top+scrollY-100,behavior:'instant'}));
       await page.waitForTimeout(2400);
       const state = await inspect(page);
-      assert(state.expansion > .6 && state.links >= .549 && state.ringOpacity >= .649, `${id} retains complete mesh and rings`);
+      assert(state.expansion > .6 && state.links >= .819 && state.ringOpacity >= 1, `${id} retains complete mesh and rings`);
       assert(state.projection[0] > originalScale * 2.2, `${id} expands the sculpture`);
       assert(state.shrink > .6, `${id} uses smaller particles`);
-      assert(Number(await page.locator('.ambient-canvas').evaluate(e=>getComputedStyle(e).opacity)) >= .46, `${id} never hides the model`);
+      assert(Number(await page.locator('.ambient-canvas').evaluate(e=>getComputedStyle(e).opacity)) >= .74, `${id} never hides the model`);
       assert.equal(await page.locator('.ambient-canvas').count(),1);
       assert.equal(state.error,0);
     }

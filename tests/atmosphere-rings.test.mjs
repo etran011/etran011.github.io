@@ -23,11 +23,11 @@ import { resolveRingChoreography } from '../src/lib/particle-transition.ts';
 test('intact rings never fade out and reverse exactly with the landscape', () => {
   const sample = p => { const state = {}; resolveRingChoreography(p, state); return state; };
   assert.deepEqual(sample(0), { opacity: 1 });
-  assert.deepEqual(sample(1), { opacity: .65 });
+  assert.deepEqual(sample(1), { opacity: 1.12 });
   const forward = [];
   for (let i = 0; i <= 100; i++) {
     const current = sample(i / 100); forward.push(current);
-    assert(current.opacity >= .65 && current.opacity <= 1);
+    assert(current.opacity >= 1 && current.opacity <= 1.12);
     if (i) assert(Math.abs(current.opacity - forward[i-1].opacity) < .01);
   }
   for (let i = 100; i >= 0; i--) assert.deepEqual(sample(i / 100), forward[i]);

@@ -96,7 +96,7 @@ void main() {
   }
   vLight += energy * 0.62;
   if (uKind < 0.5) {
-    vLight *= mix(1.0, layer < 1.5 ? 0.65 : 0.36, step(0.5, layer)) * (1.0 - uExpansion * 0.25);
+    vLight *= mix(1.0, layer < 1.5 ? 0.65 : 0.36, step(0.5, layer)) * (1.0 - uExpansion * 0.08);
     if (aSurface.w > 1.5) vLight *= aSurface.w < 2.5 ? 0.62 + energy * 0.45 : 0.9;
   }
   vLight *= 1.0 + (breath - 0.5) * 0.5 * formation;
