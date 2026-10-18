@@ -5,7 +5,7 @@ import type { Project } from "@/types/portfolio";
 
 export function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
-    <article className={`project-card ${project.featured ? "project-featured" : "project-secondary"}`} aria-labelledby={`project-${project.slug}`}>
+    <article className={`content-island project-card ${project.featured ? "project-featured" : "project-secondary"}`} aria-labelledby={`project-${project.slug}`}>
       <div className="project-card-copy">
         <div className="project-intro">
         <p className="eyebrow project-category"><span>{String(index + 1).padStart(2, "0")}</span> / {project.category}</p>

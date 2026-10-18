@@ -33,6 +33,13 @@ try {
     await page.locator('#about').scrollIntoViewIfNeeded();
     await page.waitForTimeout(100);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), `No horizontal overflow at ${width}px`);
+    for (const id of ['projects','experience','education','skills','contact']) {
+      await page.locator('#'+id).scrollIntoViewIfNeeded();
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth), `${id} fits ${width}px`);
+    }
+    assert.equal(await page.locator('.stack-collection').count(),3);
+    assert.equal(await page.locator('.technology-button').count(),19);
+    assert.equal(await page.locator('.experience-entry.content-island').count(),4);
     assert.equal(await page.locator('.about-islands .content-island').count(),4);
     assert(await page.locator('#about-background-heading').isVisible());
   }

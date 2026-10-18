@@ -1,6 +1,7 @@
 import { Container } from "@/components/ui/container";
 import { education } from "@/data/background";
 import "./education-section.css";
+import { ContentIsland } from "@/components/ui/content-island";
 import { EducationMotion } from "./education-motion";
 
 /** Academic coordinate study: decorative geometry, never a claim about measured progress. */
@@ -22,7 +23,7 @@ function AcademicStudy() {
 export function EducationSection() {
   return (
     <section id="education" className="background-section education-section" aria-labelledby="education-heading">
-      <Container><EducationMotion>
+      <Container><ContentIsland className="education-island"><EducationMotion>
         <header className="education-kicker"><p className="eyebrow">Education / 05</p><p className="education-location">{education.location}</p></header>
         <div className="education-composition">
           <div className="education-identity">
@@ -39,7 +40,7 @@ export function EducationSection() {
           </div>
         </div>
         <details className="education-coursework"><summary><span>Academic foundations</span><span className="education-coursework-hint">Explore coursework <span aria-hidden="true">+</span></span></summary><ul>{education.coursework.map((course, i) => <li key={course}><span aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>{course}</li>)}</ul></details>
-      </EducationMotion></Container>
+      </EducationMotion></ContentIsland></Container>
     </section>
   );
 }

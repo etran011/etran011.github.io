@@ -11,7 +11,7 @@ export function ExperienceSection() {
         </div>
         <ol className="experience-list">
           {experience.map((item) => (
-            <li key={item.id} className="experience-entry">
+            <li key={item.id} className="experience-entry content-island">
               <div className="experience-date"><p>{item.period}</p><span>{item.location}</span></div>
               <article aria-labelledby={`${item.id}-heading`}>
                 <h3 id={`${item.id}-heading`}>{item.role}</h3>

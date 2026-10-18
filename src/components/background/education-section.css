@@ -1,8 +1,8 @@
-.education-section { position: relative; overflow: clip; background: color-mix(in srgb, var(--surface) 30%, transparent); }
+.education-section { position: relative; overflow: clip; background: transparent; }
 .education-kicker { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .education-kicker .eyebrow { color: var(--accent); }
 .education-location { color: var(--muted); font-family: var(--font-code); font-size: .6875rem; }
-.education-composition { display: grid; grid-template-columns: 1.15fr 1fr; align-items: center; gap: clamp(2rem, 5vw, 5rem); margin-top: clamp(2.5rem, 5vw, 4rem); }
+.education-composition { display: grid; grid-template-columns: 1.15fr 1fr; align-items: center; gap: clamp(2rem, 5vw, 5rem); margin-top: clamp(1.5rem, 3vw, 2.5rem); }
 .education-identity h2 { font-size: clamp(3.6rem, 8.2vw, 7.25rem); font-weight: 450; line-height: .98; letter-spacing: -.065em; }
 .education-identity h2 > span { display: block; }
 .education-identity h2 em { font-weight: 300; font-style: normal; color: var(--muted); }
@@ -11,7 +11,7 @@
 .education-degree { font-size: clamp(1.1rem, 1.7vw, 1.4rem); line-height: 1.5; letter-spacing: -.02em; }
 .education-degree span { color: var(--accent); }
 .education-description { color: var(--muted); font-size: .875rem; line-height: 1.8; margin-top: 1.1rem; }
-.education-academic { position: relative; display: grid; align-content: center; min-height: 28rem; padding: 3rem 1.75rem; isolation: isolate; }
+.education-academic { position: relative; display: grid; align-content: center; min-height: 24rem; padding: 3rem 1.75rem; isolation: isolate; }
 .academic-study { position: absolute; width: 112%; max-width: none; left: -6%; top: 50%; transform: translateY(-50%); z-index: -1; color: var(--accent); pointer-events: none; }
 .academic-grid { stroke: var(--border); stroke-width: .6; opacity: .45; }
 .academic-boundary { stroke: currentColor; stroke-width: .65; opacity: .2; stroke-dasharray: 2 7; }
@@ -26,7 +26,7 @@
 .education-gpa dd { margin-top: .4rem; font-size: 2rem; font-weight: 400; letter-spacing: -.04em; line-height: 1.25; }
 .education-gpa dd span { font-family: var(--font-code); color: var(--muted); font-size: .75rem; letter-spacing: 0; }
 .education-field { color: var(--muted); font-size: .55rem; letter-spacing: .08em; margin-top: 2.75rem; }
-.education-coursework { margin-top: clamp(2.5rem, 5vw, 4rem); border-block: 1px solid var(--border); }
+.education-coursework { margin-top: clamp(1.5rem, 3vw, 2.5rem); border-block: 1px solid var(--border); }
 .education-coursework summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-block: 1.5rem; list-style: none; cursor: pointer; font-size: .875rem; }
 .education-coursework summary::-webkit-details-marker { display: none; }
 .education-coursework-hint { font-family: var(--font-code); font-size: .625rem; color: var(--muted); }
