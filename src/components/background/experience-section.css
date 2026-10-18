@@ -1,6 +1,6 @@
 /* Open career history: dates, a shared axis, and uninterrupted document flow. */
 .experience-list { --timeline-axis: 13.25rem; position: relative; }
-.experience-list::before, .experience-list::after { content: ""; position: absolute; top: .7rem; bottom: 1rem; left: var(--timeline-axis); width: 1px; background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.experience-list::before, .experience-list::after { content: ""; position: absolute; top: calc(.25rem + 7px); bottom: 1rem; left: var(--timeline-axis); width: 1px; background: color-mix(in srgb, var(--accent) 28%, transparent); }
 .experience-entry { position: relative; display: grid; grid-template-columns: 12rem minmax(0, 1fr); column-gap: 3.5rem; padding-bottom: clamp(2.75rem, 5vw, 4.5rem); }
 .experience-entry:last-child { padding-bottom: 1.5rem; }
 .experience-milestone { position: absolute; left: var(--timeline-axis); top: .25rem; translate: -50% 0; width: 14px; height: 14px; border: 1px solid color-mix(in srgb, var(--accent) 65%, var(--background)); border-radius: 50%; background: var(--background); pointer-events: none; }

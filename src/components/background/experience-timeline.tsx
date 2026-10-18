@@ -72,7 +72,8 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
       }
     }, { threshold: .08, rootMargin: "0px 0px -24px 0px" });
     entries.forEach(entry => entrances.observe(entry));
-    const observer = new ResizeObserver(measure); observer.observe(element);
+    // Earlier sections can reflow without changing the list’s own height.
+    const observer = new ResizeObserver(measure); observer.observe(element); observer.observe(document.body);
     const focus = () => { animations.forEach(animation => animation.cancel()); animations.clear(); };
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", measure);

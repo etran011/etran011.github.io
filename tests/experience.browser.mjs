@@ -38,6 +38,15 @@ try {
   assert.equal(await page.locator('.experience-entry').first().getAttribute('data-timeline-state'),'current');
   assert.equal(await page.evaluate(()=>window.careerEntrances),entrances,'Content entrances never replay');
   assert.equal(await page.locator('.experience-entry').first().evaluate(e=>getComputedStyle(e.querySelector('article')).opacity),'1');
+  // A preceding layout change must refresh document-space rail measurements.
+  const shifted=await page.addStyleTag({content:'html,body{overflow-anchor:none}.project-section{padding-top:180px!important}'});
+  await page.waitForTimeout(200);
+  const expected=await page.locator('.experience-list').evaluate(e=>{
+    const rect=e.getBoundingClientRect(),rail=getComputedStyle(e,'::before');
+    return Math.max(0,Math.min(1,(innerHeight*.55-rect.top-parseFloat(rail.top))/(rect.height-parseFloat(rail.top)-parseFloat(rail.bottom))));
+  });
+  assert(Math.abs(await progress()-expected)<.001,'Rail follows reflow of preceding sections');
+  await shifted.evaluate(e=>e.remove());await page.waitForTimeout(200);
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
   assert.equal(await page.locator('.experience-list').getAttribute('data-timeline-active'),'false');
   assert.equal(await page.locator('.experience-milestone').first().evaluate(e=>getComputedStyle(e,'::after').animationPlayState),'paused');
@@ -54,6 +63,11 @@ try {
   for(const width of [320,390,768,1024,1440]) {
     const page=await browser.newPage({viewport:{width,height:1000},reducedMotion:'reduce'});
     await page.goto(base+'/#experience');await page.evaluate(()=>document.fonts.ready);
+    const railStart=()=>page.locator('.experience-list').evaluate(e=>{
+      const marker=e.querySelector('.experience-milestone').getBoundingClientRect();
+      return Math.abs(marker.top+marker.height/2-e.getBoundingClientRect().top-parseFloat(getComputedStyle(e,'::before').top));
+    });
+    assert(await railStart()<.6,'Rail starts at milestone center');
     const entries=page.locator('.experience-entry');
     assert.equal(await entries.count(),experience.length);
     assert.equal(await page.locator('#experience .content-island').count(),0);
@@ -77,6 +91,7 @@ try {
     await page.addStyleTag({content:'html{font-size:200%}'});
     await page.evaluate(()=>document.fonts.ready);
     await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+    assert(await railStart()<.6,'Enlarged-text rail starts at milestone center');
     const clipped=await page.locator('#experience').evaluate(root=>[root,...root.querySelectorAll('.experience-list,.experience-entry,.experience-date,article,h3,.experience-tags li,.experience-highlights li')].filter(e=>{const r=e.getBoundingClientRect();return r.left<-.5||r.right>innerWidth+.5}).map(e=>e.className||e.tagName));
     assert.deepEqual(clipped,[],`Experience fits 200% text at ${width}`);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Entire page fits 200% text at ${width}`);
