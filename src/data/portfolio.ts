@@ -61,6 +61,8 @@ export const projects = [
       outcome: "The notebook demonstrates a complete modeling workflow from exploratory analysis to prediction plots. It also highlights the need to keep each model’s predictions isolated and to separate validation results from final test evaluation. The résumé reports a FastAPI deployment on AWS EC2; no live deployment is linked here.",
     },
     technologies: ["Python", "scikit-learn", "pandas", "NumPy", "Matplotlib", "Seaborn"],
-    screenshots: [],
+    screenshots: [
+      { src: "/images/projects/platepredict/landing-page.webp", width: 2047, height: 1160, alt: "PlatePredict landing page with the headline Nutrition in. Calories in perspective, nutrition inputs, calorie estimates, and model comparison features.", caption: "Landing page · Nutrition inputs, calorie estimates, and regression model comparisons" },
+    ],
   },
 ] as const satisfies readonly Project[];
