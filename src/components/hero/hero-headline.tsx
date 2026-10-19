@@ -58,7 +58,6 @@ export function HeroHeadline() {
       if (disposed || disabled) return;
       if (preference.matches) { staticText(); return; }
       if (started) { if (active()) schedule(); else pause(); return; }
-      if (!root.dataset.heroTyping) { staticText(); return; }
       if (!active() || preparing) return;
       preparing = true;
       void Promise.race([document.fonts.ready, new Promise(resolve => { fontTimer = setTimeout(resolve, 500); })]).then(() => {
@@ -75,17 +74,31 @@ export function HeroHeadline() {
       });
     };
     const observer = new MutationObserver(sync);
-    observer.observe(root, {attributes:true,attributeFilter:["data-intro", "data-hero-typing"]});
+    observer.observe(root, {attributes:true,attributeFilter:["data-intro"]});
     const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, {threshold:.1});
     intersection.observe(element);
     preference.addEventListener("change", sync);
     document.addEventListener("visibilitychange", sync);
-    if (preference.matches || !root.dataset.heroTyping) staticText();
+    // The document bootstrap prevents a first-load flash; it is not a mount signal.
+    // Client navigation and restored routes must start without that temporary flag.
+    if (preference.matches) staticText();
     return () => {
       disposed = true; clearTimeout(timer); clearTimeout(fontTimer);
       observer.disconnect(); intersection.disconnect();
       preference.removeEventListener("change", sync);
       document.removeEventListener("visibilitychange", sync);
+      // React may retain route DOM while stopping effects. Leave a clean static
+      // fallback so the next effect owns exactly one cycle and one caret.
+      for (const layer of layers) delete layer.dataset.active;
+      for (const phrase of characters) for (const character of phrase) {
+        delete character.dataset.typed;
+        delete character.dataset.caret;
+      }
+      delete element.dataset.typing;
+      delete element.dataset.phase;
+      delete element.dataset.phrase;
+      delete element.dataset.paused;
+      if (copy) delete copy.dataset.headline;
     };
   }, []);
 
