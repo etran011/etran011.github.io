@@ -107,6 +107,6 @@ export const about = {
   emphasis: "put into practice.",
   paragraphs: [
     "I’m Erik, a Data Science student at William & Mary. I enjoy programming, statistics, and the process of turning a question into working software.",
-    "I’m especially interested in AI, machine learning, software engineering, and financial technology. I like projects where I can try an idea, see where it falls short, and make it work better.",
+    "I’m interested in AI, machine learning, software engineering, financial technology, and consulting. I enjoy combining technical skills with analytical problem-solving to understand real-world business challenges and build useful solutions.",
   ],
 } as const satisfies About;
