@@ -9,11 +9,11 @@ export function characterDelay(character: string, index: number) {
   if (character === " ") return 20 + index * 7 % 11;
   return 35 + (index * 13 % 31) + (/[,.!?]/.test(character) ? 100 : 0);
 }
-/** Runs ahead of the headline markup; no JavaScript leaves the complete SSR text visible. */
+/** Document-only prepaint setup in the persistent root layout; route effects own playback. */
 export const heroTypingBootstrap = `(() => {
   const root = document.documentElement;
   try {
-    if ((location.hash && location.hash !== '#home') || root.dataset.heroTyping ||
+    if (location.pathname !== '/' || (location.hash && location.hash !== '#home') || root.dataset.heroTyping ||
         matchMedia('(prefers-reduced-motion: reduce), (forced-colors: active)').matches ||
         performance.getEntriesByType('navigation')[0]?.type === 'back_forward') return;
     root.dataset.heroTyping = 'waiting';

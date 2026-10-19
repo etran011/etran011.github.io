@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import vm from 'node:vm';
 import { characterDelay, heroTypingBootstrap, heroHeadlinePhrases, createHeroTypingCycle, backspaceDelay } from '../src/lib/hero-typing.ts';
-const run = ({ hash = '', reduced = false, navigation = 'navigate' } = {}) => {
+const run = ({ pathname = '/', hash = '', reduced = false, navigation = 'navigate' } = {}) => {
   const dataset = {}, timers = [];
   vm.runInNewContext(heroTypingBootstrap, {
-    document: {documentElement:{dataset}}, location:{hash}, matchMedia:()=>({matches:reduced}),
+    document: {documentElement:{dataset}}, location:{pathname,hash}, matchMedia:()=>({matches:reduced}),
     performance:{getEntriesByType:()=>[{type:navigation}]}, setTimeout:(callback,delay)=>timers.push({callback,delay}),
   });
   return {dataset,timers};
@@ -15,7 +15,7 @@ test('typing bootstrap prepares home visits and releases hidden text without hyd
   assert.equal(state.timers[0].delay,8000); state.timers[0].callback(); assert.equal(state.dataset.heroTyping,undefined);
 });
 test('reduced motion, deep links and history restores get immediate full text',()=>{
-  for(const options of [{reduced:true},{hash:'#projects'},{navigation:'back_forward'}]) assert.equal(run(options).dataset.heroTyping,undefined);
+  for(const options of [{pathname:'/projects/optionlab/'},{pathname:'/projects/platepredict/'},{reduced:true},{hash:'#projects'},{navigation:'back_forward'}]) assert.equal(run(options).dataset.heroTyping,undefined);
   assert.equal(run({hash:'#home'}).dataset.heroTyping,'waiting');
 });
 test('typing is slower than backspacing, with natural timing and punctuation pauses',()=>{

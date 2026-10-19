@@ -5,6 +5,11 @@ import {heroHeadlinePhrases} from '../src/lib/hero-typing.ts';
 const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({headless:true,channel:'chrome'});
 const base=process.argv[2]||'http://127.0.0.1:4174';
+const errors=[];
+const assertHealthy=async page=>{
+  assert.deepEqual(errors,[],'No runtime errors, console errors or React warnings');
+  assert.equal(await page.locator('[data-nextjs-dialog]:visible').count(),0,'No development error overlay');
+};
 const state=page=>page.locator('.hero-headline').evaluate(e=>({phrase:e.dataset.phrase,phase:e.dataset.phase,count:e.querySelectorAll('.hero-phrase[data-active] [data-typed]').length}));
 const resume=async page=>{
   await page.locator('.hero-headline').waitFor({state:'visible'});
@@ -14,6 +19,7 @@ const resume=async page=>{
     return e?.dataset.typing==='cycling'&&!e.hasAttribute('data-paused')&&e.querySelectorAll('[data-caret]').length===1;
   },{}, {timeout:8000});
   assert.equal(await page.evaluate(()=>document.documentElement.hasAttribute('data-intro')),false,'No missing loader event blocks return');
+  await assertHealthy(page);
 };
 const loop=async page=>{
   for(const index of [0,1,0]) {
@@ -30,8 +36,13 @@ const loop=async page=>{
   }
 };
 try {
-  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
-  page.on('pageerror',error=>errors.push(error.message));
+  const page=await browser.newPage({viewport:{width:1440,height:1000}});
+  page.on('pageerror',error=>errors.push(error.stack||error.message));
+  // React's client-rendered script warning reaches the Next overlay via console.error,
+  // without an uncaught exception; pageerror alone misses this regression.
+  page.on('console',message=>{
+    if(['error','warning'].includes(message.type())) errors.push(`${message.type()}: ${message.text()}`);
+  });
   await page.goto(base);await resume(page);
   await page.evaluate(()=>{window.navigationDocument='same-document'});
   for(const slug of ['optionlab','platepredict','optionlab','platepredict']) {
@@ -62,7 +73,7 @@ try {
   await page.reload();await resume(page);
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.typing==='static');
-  assert.deepEqual(errors,[]);
+  await assertHealthy(page);
   console.log('Back/Forward, direct project entry, rapid returns, refresh, visibility pause/resume, reduced motion and console checks passed');
   await page.close();
 }finally{await browser.close()}
