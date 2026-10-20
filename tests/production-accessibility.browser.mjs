@@ -16,6 +16,12 @@ try {
   if(path.includes('/projects/')) {
    await p.locator('.gallery-stage').click();assert.deepEqual(await audit(),[],'Open screenshot dialog');
    await p.keyboard.press('Escape');assert(await p.locator('.gallery-stage').evaluate(e=>e===document.activeElement));
+   for(let index=0;index<3;index++){
+    const img=p.locator('.gallery-stage img');
+    await img.evaluate(i=>i.decode());
+    assert(await img.evaluate(i=>i.naturalWidth>0),'Gallery image loads from the static export');
+    await p.getByRole('button',{name:'Next screenshot',exact:true}).click();
+   }
   }
   await p.addStyleTag({content:'html{font-size:200%}'});
   assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'200% text does not overflow');

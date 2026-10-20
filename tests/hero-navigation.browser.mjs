@@ -23,13 +23,22 @@ const resume=async page=>{
 };
 const loop=async page=>{
   for(const index of [0,1,0]) {
-    await page.waitForFunction(index=>{
+    const held=await page.waitForFunction(index=>{
       const e=document.querySelector('.hero-headline');
-      return e?.dataset.phrase===String(index)&&e.dataset.phase==='hold';
+      if(e?.dataset.phrase!==String(index)||e.dataset.phase!=='hold')return false;
+      const caret=e.querySelector('.hero-character[data-caret]');
+      return {
+        count:e.querySelectorAll('.hero-phrase[data-active] [data-typed]').length,
+        carets:e.querySelectorAll('.hero-character[data-caret]').length,
+        animation:caret?getComputedStyle(caret,'::after').animationName:null,
+      };
     },index,{timeout:15000});
-    assert.equal((await state(page)).count,heroHeadlinePhrases[index].lines.join(' ').length);
-    assert.equal(await page.locator('.hero-character[data-caret]').count(),1,'One caret after every effect restart');
-    assert.equal(await page.locator('.hero-character[data-caret]').evaluate(e=>getComputedStyle(e,'::after').animationName),'hero-caret-blink');
+    // Sample one animation frame atomically: separate protocol calls may arrive
+    // after the hold has ended and backspacing has already removed characters.
+    const snapshot=await held.jsonValue();await held.dispose();
+    assert.equal(snapshot.count,heroHeadlinePhrases[index].lines.join(' ').length);
+    assert.equal(snapshot.carets,1,'One caret after every effect restart');
+    assert.equal(snapshot.animation,'hero-caret-blink');
     await page.waitForFunction(()=>document.querySelector('.hero-headline').dataset.phase==='backspace');
     const before=await state(page);await page.waitForTimeout(120);
     assert((await state(page)).count<before.count,'Backspacing continues after navigation');

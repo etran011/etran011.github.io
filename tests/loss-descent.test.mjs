@@ -2,6 +2,22 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { loss, lossGradient, gradientDescent, descentPath, descentPlayback, landscapeDomain } from '../src/lib/loss-landscape.mjs';
 
+test('analytical gradient agrees with independent finite differences across the landscape', () => {
+  const h = 1e-5;
+  for (const x of [-4, -2, 0, 1, 3, 4]) {
+    for (const z of [-4, -2, 0, 1, 3, 4]) {
+      const numerical = [
+        (loss(x + h, z) - loss(x - h, z)) / (2 * h),
+        (loss(x, z + h) - loss(x, z - h)) / (2 * h),
+      ];
+      lossGradient(x, z).forEach((value, axis) => {
+        assert(Math.abs(value - numerical[axis]) < 1e-6 * Math.max(1, Math.abs(value)),
+          `Gradient mismatch at (${x}, ${z}), axis ${axis}`);
+      });
+    }
+  }
+});
+
 test('descent follows the exact negative gradient and sufficient decrease into the selected basin', () => {
   const steps = gradientDescent();
   assert(steps.length > 20 && steps.length < 1024);
