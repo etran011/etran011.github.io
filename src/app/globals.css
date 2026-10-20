@@ -144,9 +144,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 /* Keyboard focus reveals navigation immediately, including at the landing scene. */
 .site-header[data-home]:focus-within { opacity: 1 !important; transform: none !important; pointer-events: auto !important; transition: none; }
 .nav-bar { display: flex; align-items: center; justify-content: space-between; min-height: 4.5rem; padding: 0 1.25rem; }
-.brand { display: flex; gap: 0.8rem; align-items: center; font-size: 0.875rem; font-weight: 500; }
-.brand-mark { white-space: nowrap; flex-shrink: 0; font-size: 1.5rem; font-weight: 650; letter-spacing: -0.08em; }
-.brand-mark span { color: var(--accent); }
+.nav-name { font-size: 0.875rem; font-weight: 500; }
 .desktop-nav { display: flex; gap: 1.35rem; }
 .nav-link { display: inline-flex; gap: 0.4rem; align-items: center; min-height: 44px; color: var(--muted); font-size: 0.8rem; }
 .nav-link:hover { color: var(--foreground); }
@@ -484,10 +482,10 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
   .nav-link[aria-current], .mobile-nav a[aria-current], .gallery-selectors button[aria-pressed="true"] { outline: 1px solid Highlight; outline-offset: -1px; }
 }
 
-.hero-copy, .brand { min-width: 0; }
+.hero-copy, .nav-name { min-width: 0; }
 .technology-list li { max-width: 100%; }
 .gallery-selectors button[aria-pressed="true"] { border-color: var(--accent); }
-@media(max-width: 599px) { .nav-bar { padding-inline: 0.75rem; } .brand { gap: 0.5rem; } }
+@media(max-width: 599px) { .nav-bar { padding-inline: 0.75rem; } }
 
 @media(max-width: 1023px) {
  .hero-grid { grid-template-columns: 1fr; }

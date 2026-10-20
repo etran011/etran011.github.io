@@ -1,7 +1,6 @@
 "use client";
 
 import { profile } from "@/data/portfolio";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
@@ -75,10 +74,7 @@ export function Navigation() {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header ref={header} className="site-header" data-home={pathname === "/" ? "true" : undefined} data-menu-open={open ? "true" : undefined}>
         <div className="nav-bar">
-          <Link className="brand" href="/#home" onClick={() => setOpen(false)}>
-            <span className="brand-mark" aria-hidden="true">et<span>.</span></span>
-            <span>Erik Tran<span className="sr-only"> — home</span></span>
-          </Link>
+          <span className="nav-name">Erik Tran</span>
           <nav aria-label="Main navigation" className="desktop-nav">
             {links.map((link) => <a key={link.label} className="nav-link" href={link.href} aria-current={activeHref === link.href ? "location" : undefined}>{link.label}{!link.href.startsWith("/") && <ArrowUpRight size={13} aria-hidden="true" />}</a>)}
           </nav>
