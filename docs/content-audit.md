@@ -44,4 +44,4 @@ Source: https://github.com/etran011/platepredict at `5f1f23760264d3f8eeacd8e0a23
 - Current code corrects the historical forest and split-labeling mistakes; the portfolio no longer describes them as unresolved.
 - Model export contains 54 terms plus intercept. The browser parity fixture covers 145 test records and 31 boundary cases. Review threshold is 56 kcal, an empirical heuristic, not independently validated detection.
 - Limitations retained: repeated profiles across random splits, unknown unseen-restaurant performance, unverified upstream dataset provenance/license, and no health-score or percentage-accuracy claim.
-- New user screenshots are pending; existing landing image remains unchanged until supplied.
+- Three supplied screenshots (2940 × 1668 each) show the updated landing page, the blank nutrition-entry form and model explanation, and pre-cleaning exploratory charts. Original PNGs are preserved; lossless WebP copies are used in the existing card/detail gallery. The form image does not show a completed estimate; the charts are not model evaluation results. The previous landing asset is retained but no longer displayed.

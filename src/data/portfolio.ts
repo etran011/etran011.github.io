@@ -66,7 +66,9 @@ export const projects = [
     },
     technologies: ["Python", "scikit-learn", "pandas", "React", "TypeScript", "Vite"],
     screenshots: [
-      { src: "/images/projects/platepredict/landing-page.webp", width: 2047, height: 1160, alt: "PlatePredict landing page with the headline Nutrition in. Calories in perspective, nutrition inputs, calorie estimates, and model comparison features.", caption: "Landing page · Nutrition inputs, calorie estimates, and regression model comparisons" },
+      { src: "/images/projects/platepredict/calorie-review-landing.webp", width: 2940, height: 1668, alt: "PlatePredict landing page introducing calorie estimation, reported-value comparison, and the evidence behind the model.", caption: "Landing page · Calorie completion and consistency review" },
+      { src: "/images/projects/platepredict/nutrition-entry.webp", width: 2940, height: 1668, alt: "PlatePredict nutrition-entry form with historical menu presets, nutrient fields, and an explanation of the polynomial model and review threshold.", caption: "Nutrition entry · Input fields, historical presets, and model limitations" },
+      { src: "/images/projects/platepredict/nutrition-exploration.webp", width: 2940, height: 1668, alt: "PlatePredict exploratory charts showing a calorie histogram and total fat versus recorded calories before model cleaning.", caption: "Original exploration · Calorie distribution and nutrient relationships before cleaning" },
     ],
   },
 ] as const satisfies readonly Project[];
