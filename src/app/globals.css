@@ -192,9 +192,8 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
 .hero-motion { min-width: 0; }
 @media (prefers-reduced-motion: no-preference) {
   .hero-grid { perspective: 900px; }
-  .hero-copy > :not(.hero-narrative) { animation: hero-arrive var(--duration-reveal) var(--ease-standard) both; }
+  .hero-copy > :not(.hero-narrative):not(.hero-role) { animation: hero-arrive var(--duration-reveal) var(--ease-standard) both; }
   .hero-copy > h1 { animation-delay: 100ms; }
-  .hero-copy > .hero-role { animation-delay: 190ms; }
   .hero-copy > .hero-actions { animation-delay: 650ms; }
   .signal-graphic { animation: signal-arrive 1000ms var(--ease-standard) both; }
 }
@@ -609,7 +608,7 @@ body { isolation: isolate; }
 .portfolio-intro { display: none; }
 html[data-intro], html[data-intro] body { overflow: hidden; }
 html[data-intro] :is(main, .site-header, footer, .skip-link, .auto-scrollbar) { visibility: hidden; }
-html[data-intro] .hero-copy > :not(.hero-narrative) { animation-play-state: paused; }
+html[data-intro] .hero-copy > :not(.hero-narrative):not(.hero-role) { animation-play-state: paused; }
 html[data-intro] .portfolio-intro {
   display: grid; position: fixed; inset: 0; z-index: 80; place-items: center;
   padding: 1.25rem; color: var(--foreground);
@@ -640,8 +639,10 @@ html[data-intro] .portfolio-intro {
 html[data-intro="revealing"] .intro-curtain { animation: intro-uncover 620ms var(--ease-standard) both; }
 html[data-intro="revealing"] .intro-terminal { animation: intro-terminal-disperse 460ms var(--ease-standard) both; }
 html[data-intro="revealing"] .intro-fragments > span { animation: intro-fragment 580ms var(--fragment-delay) var(--ease-standard) both; }
-html[data-intro] .hero-copy { opacity: 0; }
-.hero-copy { transition: opacity 450ms var(--ease-standard); }
+/* Keep the intro fade on animated siblings; education is visible at reveal.
+   Filter opacity composes with the heading’s existing entrance opacity. */
+html[data-intro] .hero-copy > :not(.hero-role) { filter: opacity(0); }
+.hero-copy > :not(.hero-role) { filter: opacity(1); transition: filter 450ms var(--ease-standard); }
 @keyframes intro-uncover { from { clip-path: inset(0); } to { clip-path: inset(0 100% 0 0); } }
 @keyframes intro-terminal-disperse { to { opacity: 0; transform: translateY(-10px) scale(0.97); filter: blur(3px); } }
 @keyframes intro-fragment {
@@ -661,10 +662,8 @@ html[data-intro] .hero-copy { opacity: 0; }
 .hero-phrase { grid-area: 1 / 1; min-width: 0; padding-right: 1ch; visibility: hidden; }
 .hero-phrase[data-initial] { visibility: visible; }
 .hero-character { position: relative; }
-.hero-role { transition: opacity 450ms var(--ease-standard); }
 @media(prefers-reduced-motion: no-preference) and (forced-colors: none) {
   html[data-hero-typing="waiting"] .hero-character { visibility: hidden; }
-  html[data-hero-typing="waiting"] .hero-role, .hero-copy[data-headline="typing"] .hero-role { opacity: 0 !important; }
   .hero-headline[data-typing="cycling"] .hero-phrase { visibility: hidden; }
   .hero-headline[data-typing="cycling"] .hero-phrase[data-active] { visibility: visible; }
   .hero-headline[data-typing="cycling"] .hero-phrase[data-active] .hero-character:not([data-typed]) { visibility: hidden; }

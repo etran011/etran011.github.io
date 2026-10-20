@@ -11,7 +11,6 @@ export function HeroHeadline() {
     const root = document.documentElement;
     if (!element || !("IntersectionObserver" in window)) { delete root.dataset.heroTyping; return; }
     const preference = matchMedia("(prefers-reduced-motion: reduce), (forced-colors: active)");
-    const copy = element.closest<HTMLElement>(".hero-copy");
     const layers = Array.from(element.querySelectorAll<HTMLElement>(".hero-phrase"));
     const characters = layers.map(layer => Array.from(layer.querySelectorAll<HTMLElement>(".hero-character")));
     const cycle = createHeroTypingCycle();
@@ -27,7 +26,6 @@ export function HeroHeadline() {
       disabled = true; pause(); clearTimeout(fontTimer);
       delete root.dataset.heroTyping;
       element.dataset.typing = "static";
-      if (copy) copy.dataset.headline = "ready";
       caret?.removeAttribute("data-caret");
     };
     const render = () => {
@@ -42,7 +40,6 @@ export function HeroHeadline() {
       caret.dataset.caret = count ? "after" : "before";
       element.dataset.phrase = String(phrase);
       element.dataset.phase = phase === "typing" && count === 0 ? "prompt" : phase;
-      if (phase === "hold" && copy) copy.dataset.headline = "ready";
     };
     const schedule = () => {
       if (timer !== undefined || !started || disabled || disposed || !active()) return;
@@ -66,7 +63,6 @@ export function HeroHeadline() {
         if (!active()) return;
         started = true;
         element.dataset.typing = "cycling";
-        if (copy) copy.dataset.headline = "typing";
         render();
         // The bootstrap only guards hydration; its watchdog must not stop a live loop.
         delete root.dataset.heroTyping;
@@ -98,7 +94,6 @@ export function HeroHeadline() {
       delete element.dataset.phase;
       delete element.dataset.phrase;
       delete element.dataset.paused;
-      if (copy) delete copy.dataset.headline;
     };
   }, []);
 
