@@ -61,7 +61,7 @@ export function ScreenshotGallery({ screenshots, title }: { screenshots: Project
         <figcaption aria-live="polite"><span key={shot.src}>{shot.caption}</span></figcaption>
         <div className="gallery-controls">
           <div className="gallery-selectors">
-            {screenshots.map((image, index) => <button key={image.src} aria-pressed={selected === index} aria-label={image.caption.split(" · ")[0]} onClick={() => select(index)}><span className="gallery-selector-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span className="gallery-selector-title">{image.caption.split(" · ")[0]}</span></button>)}
+            {screenshots.map((image, index) => <button key={image.src} aria-pressed={selected === index} aria-label={`${String(index + 1).padStart(2, "0")} ${image.caption.split(" · ")[0]}`} onClick={() => select(index)}><span className="gallery-selector-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span className="gallery-selector-title">{image.caption.split(" · ")[0]}</span></button>)}
           </div>
           {screenshots.length > 1 && <div className="gallery-arrows"><button aria-label="Previous screenshot" onClick={() => move(-1)}><ChevronLeft size={18} aria-hidden="true" /></button><span aria-hidden="true">{selected + 1} / {screenshots.length}</span><button aria-label="Next screenshot" onClick={() => move(1)}><ChevronRight size={18} aria-hidden="true" /></button></div>}
         </div>
