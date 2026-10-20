@@ -12,7 +12,10 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         <h3 id={`project-${project.slug}`}>{project.title}</h3>
         <p className="project-summary">{project.summary}</p>
         <p className="project-period">{project.period}</p>
+        <div className="hero-buttons">
         <Link className="case-link" href={`/projects/${project.slug}/`}>Read case study <ArrowUpRight size={17} aria-hidden="true" /><span className="sr-only">: {project.title}</span></Link>
+        {project.repositoryUrl && <a className="case-link" href={project.repositoryUrl} target="_blank" rel="noopener noreferrer">View Repo <ArrowUpRight size={17} aria-hidden="true" /><span className="sr-only">: {project.title} (opens in a new tab)</span></a>}
+        </div>
         </div>
         <div className="project-details">
         <ul className="project-highlights" aria-label={`${project.title} highlights`}>
