@@ -4,7 +4,6 @@ import { ScrollbarVisibility } from "@/components/interaction/scrollbar-visibili
 import { PortfolioIntro } from "@/components/intro/portfolio-intro";
 import { heroTypingBootstrap } from "@/lib/hero-typing";
 import { introBootstrap } from "@/lib/intro-bootstrap";
-import { CustomCursor } from "@/components/interaction/custom-cursor";
 import { pageMetadata, site } from "@/lib/site-metadata";
 import { Footer } from "@/components/footer";
 import { ScrollReveals } from "@/components/motion/scroll-reveals";
@@ -27,5 +26,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" data-scrollbar-state="idle" suppressHydrationWarning><head><script id="portfolio-intro-bootstrap" dangerouslySetInnerHTML={{ __html: introBootstrap }} /><script id="portfolio-typing-bootstrap" dangerouslySetInnerHTML={{ __html: heroTypingBootstrap }} /></head><body><PortfolioIntro /><AmbientBackground /><HoverEffects /><CustomCursor /><Navigation /><ScrollbarVisibility /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
+  return <html lang="en" data-scrollbar-state="idle" suppressHydrationWarning><head><script id="portfolio-intro-bootstrap" dangerouslySetInnerHTML={{ __html: introBootstrap }} /><script id="portfolio-typing-bootstrap" dangerouslySetInnerHTML={{ __html: heroTypingBootstrap }} /></head><body><PortfolioIntro /><AmbientBackground /><HoverEffects /><Navigation /><ScrollbarVisibility /><ScrollReveals>{children}</ScrollReveals><Footer /></body></html>;
 }

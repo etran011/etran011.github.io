@@ -32,7 +32,7 @@ try {
   await page.keyboard.press('Enter');
   await page.mouse.move(100, 100); await page.mouse.move(350, 600);
   assert.equal(await page.locator('#education a, #education button, #education [tabindex]').count(), 0, 'Academic facts must not masquerade as clickable controls');
-  assert.equal(await page.locator('.custom-cursor').count(), 1);
+  assert.equal(await page.locator('.custom-cursor').count(), 0);
   await page.screenshot({ path: 'tmp/education-desktop.png' });
   await page.locator('#contact').scrollIntoViewIfNeeded();
   await page.locator('#home').scrollIntoViewIfNeeded();

@@ -25,8 +25,8 @@ try {
   assert.equal(await page.locator('.experience-entry').first().getAttribute('data-timeline-state'),'current');
   await page.locator('.experience-entry h3').first().hover();
   await page.waitForTimeout(280);
-  assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'),'default','Timeline copy never impersonates a link');
-  assert.equal(await page.locator('.experience-entry').first().evaluate(e=>getComputedStyle(e).cursor),'none');
+  assert.equal(await page.locator('.custom-cursor').count(),0);
+  assert.equal(await page.locator('.experience-entry').first().evaluate(e=>getComputedStyle(e).cursor),'auto');
   await travel(3);await page.waitForTimeout(900);
   assert(await progress()>firstProgress+.4,'Rail illumination follows section travel');
   assert.equal(await page.locator('.experience-entry[data-timeline-state="completed"]').count(),3);

@@ -96,7 +96,7 @@ async function ready(page) {
     await page.mouse.move(1250, 350);
     await page.waitForTimeout(1200);
     assert((await inspect(page)).strength > 0.99);
-    assert.equal(await page.locator('html').getAttribute('data-custom-cursor'), 'true');
+    assert.equal(await page.locator('html').getAttribute('data-custom-cursor'), null);
     await page.evaluate(() => document.dispatchEvent(new Event('pointerleave')));
     await page.waitForTimeout(1200);
     assert((await inspect(page)).strength < 0.01);

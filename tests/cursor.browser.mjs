@@ -1,166 +1,43 @@
-/* Optional: PLAYWRIGHT_MODULE=/path/to/playwright node tests/cursor.browser.mjs [baseURL] */
+/* PLAYWRIGHT_MODULE=/path/to/playwright node tests/cursor.browser.mjs [baseURL] */
 import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
-const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const base = process.argv[2] || 'http://127.0.0.1:4173';
-const browser = await chromium.launch({ headless: true, channel: 'chrome' });
+import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const base=process.argv[2]||'http://127.0.0.1:4174';
+const browser=await chromium.launch({channel:'chrome',headless:true});
 try {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  await page.addInitScript(() => sessionStorage.setItem('portfolio:intro:v1', 'seen'));
-  await page.goto(base);
-  await page.waitForFunction(() => document.querySelector('.ambient-background').dataset.rendererReady === 'true');
-  await page.bringToFront();
-  await page.mouse.click(1100, 700);
-  await page.mouse.move(1100, 700);
-  await page.waitForFunction(() => document.documentElement.dataset.customCursor === 'true');
-  await page.waitForTimeout(300);
-  // Temporary semantic controls exercise the shared controller without adding site UI.
-  await page.evaluate(() => {
-    const fixture = document.createElement('div');
-    fixture.id = 'cursor-test-controls';
-    fixture.style.cssText = 'position:fixed;left:100px;top:180px;z-index:10000;display:flex;background:#111';
-    fixture.innerHTML = `<button><span>Nested</span><svg width="20" height="20"><rect width="20" height="20" /></svg></button><button disabled>Disabled</button><a>Decorative</a><a href="#about">Link</a><div role="button" tabindex="0">Role</div><div role="button" aria-disabled="true">Disabled role</div><details><summary>Disclosure</summary></details><fieldset disabled><button>Inherited disabled</button></fieldset><div aria-disabled="true"><button>Disabled group</button></div>`;
-    for (const child of fixture.children) child.style.cssText = 'display:block;padding:8px;width:100px;min-height:60px';
-    document.body.append(fixture);
-  });
-  const ringState = () => page.locator('.cursor-ring').evaluate(e => {
-    const s = getComputedStyle(e);
-    return { width: parseFloat(s.width), height: parseFloat(s.height), fill: s.backgroundColor, border: s.borderTopWidth, text: e.textContent, duration: s.transitionDuration, easing: s.transitionTimingFunction };
-  });
-  const hover = async (locator, active) => {
-    await locator.hover();
-    await page.waitForTimeout(320);
-    assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'), active ? 'link' : 'default');
-    const state = await ringState();
-    assert.equal(state.width, active ? 40 : 24);
-    assert.equal(state.height, state.width);
-    assert.equal(state.fill, 'rgba(0, 0, 0, 0)');
-    assert.equal(state.border, '1px');
-    assert.equal(state.text, '');
-    assert.equal(await page.locator('.cursor-dot').evaluate(e => getComputedStyle(e).width), '4px');
+ for(const width of [1440,390]) {
+  const page=await browser.newPage({viewport:{width,height:900},hasTouch:width===390,isMobile:width===390});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>sessionStorage.setItem('portfolio:intro:v1','seen'));
+  await page.goto(base);await page.locator('#hero-heading').waitFor();
+  const native=async()=>{
+   assert.equal(await page.locator('.custom-cursor,.cursor-ring,.cursor-dot,.cursor-position,[data-custom-cursor]').count(),0);
+   assert.equal(await page.evaluate(()=>[...document.querySelectorAll('*')].some(e=>getComputedStyle(e).cursor==='none')),false,'No element hides the native cursor');
   };
-  const fixture = page.locator('#cursor-test-controls');
-  await hover(fixture.locator('button').first(), true);
-  assert.match((await ringState()).duration, /0.24s/);
-  assert.match((await ringState()).easing, /ease-out/);
-  await hover(fixture.locator('svg rect'), true);
-  await hover(fixture.locator('button span'), true);
-  await hover(fixture.locator('button').nth(1), false);
-  await hover(fixture.locator('a').first(), false);
-  await hover(fixture.locator('a[href]'), true);
-  await hover(fixture.locator('[role="button"]').first(), true);
-  await hover(fixture.locator('[aria-disabled="true"][role]'), false);
-  await hover(fixture.locator('summary'), true);
-  await hover(fixture.locator('fieldset button'), false);
-  await hover(fixture.locator('div[aria-disabled] button'), false);
-  for (let i = 0; i < 6; i++) {
-    await fixture.locator('button').first().hover();
-    await fixture.locator('a').first().hover();
-  }
-  await hover(fixture.locator('a').first(), false);
-  await page.evaluate(() => document.getElementById('cursor-test-controls').remove());
-  await page.mouse.move(1100, 700);
-  await page.waitForTimeout(320);
-  await page.evaluate(() => {
-    window.cursorSamples = [];
-    window.stopCursorSamples = false;
-    const sample = () => {
-      const root = document.querySelector('.custom-cursor');
-      const ring = root.querySelector('.cursor-ring');
-      const position = root.querySelector('.cursor-position');
-      const r = ring.getBoundingClientRect();
-      const matrix = new DOMMatrix(getComputedStyle(position || ring).transform);
-      if (root.dataset.visible) window.cursorSamples.push({ x: r.x + r.width / 2, y: r.y + r.height / 2, expectedX: matrix.e, expectedY: matrix.f, scale: Number.parseFloat(getComputedStyle(ring).scale) || 1, pressed: !!root.dataset.pressed });
-      if (!window.stopCursorSamples) requestAnimationFrame(sample);
-    };
-    sample();
-    // Test contact links without opening external sites or a mail client.
-    document.addEventListener('click', event => {
-      const link = event.target.closest?.('a[href]');
-      if (link && new URL(link.href).origin !== location.origin) event.preventDefault();
-    }, true);
-  });
-  await page.mouse.down();
-  await page.waitForTimeout(220);
-  const first = await page.evaluate(() => window.cursorSamples.slice());
-  assert(Math.max(...first.map(s => Math.hypot(s.x - s.expectedX, s.y - s.expectedY))) < 1, 'Press scaling must never alter the ring viewport position');
-  assert(first.some(s => s.pressed && s.scale < .9), 'Existing press scale remains visible');
-  await page.mouse.up();
-  await page.waitForTimeout(200);
-  for (let i = 0; i < 5; i++) await page.mouse.click(1100, 700, { delay: 25 });
-  await page.mouse.dblclick(1100, 700);
-  await page.mouse.down();
-  await page.mouse.move(950, 550, { steps: 15 });
-  await page.mouse.up();
-  await page.waitForTimeout(250);
-  await page.mouse.wheel(0, 300);
-  await page.mouse.down();
-  await page.waitForTimeout(200);
-  await page.mouse.up();
-  await page.waitForTimeout(1100);
-  const click = async locator => {
-    await locator.scrollIntoViewIfNeeded();
-    const box = await locator.boundingBox();
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 8 });
-    await page.waitForTimeout(320);
-    assert.equal(await page.locator('.custom-cursor').getAttribute('data-mode'), 'link');
-    assert(Math.abs(await page.locator('.cursor-ring').evaluate(e => parseFloat(getComputedStyle(e).width)) - 40) < .1, 'All clickable targets share one ring size');
-    assert.equal(await page.locator('.cursor-ring').evaluate(e => e.childElementCount), 0, 'No cursor label renderer remains');
-    assert.equal(await page.locator('.cursor-ring').evaluate(e => getComputedStyle(e).backgroundColor), 'rgba(0, 0, 0, 0)', 'Hover ring stays hollow');
-    await page.mouse.down();
-    await page.waitForTimeout(170);
-    await page.mouse.up();
-    await page.waitForTimeout(350);
-  };
-  await click(page.locator('.desktop-nav a[href="/#about"]'));
-  await page.waitForFunction(() => document.activeElement.id === 'about');
-  await click(page.locator('.desktop-nav a[href="/#projects"]'));
-  await page.waitForFunction(() => document.activeElement.id === 'projects');
-  await click(page.getByRole('button', { name: 'Next screenshot', exact: true }));
-  await page.locator('#skills').scrollIntoViewIfNeeded();
-  await page.waitForTimeout(400);
-  await click(page.getByRole('button', { name: 'Python', exact: true }));
-  await page.keyboard.press('End');
-  await page.waitForTimeout(500);
-  await click(page.locator('.contact-email'));
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.mouse.move(1100, 650);
-  await page.waitForTimeout(300);
-  await page.mouse.click(1100, 650);
-  await page.waitForTimeout(300);
-  await page.locator('#projects').scrollIntoViewIfNeeded();
-  await page.waitForTimeout(400);
-  await click(page.locator('.case-link').first());
-  await page.waitForURL('**/projects/optionlab/');
-  await page.mouse.move(1000, 500);
-  await page.waitForTimeout(350);
-  await page.mouse.click(1000, 500);
-  await page.waitForTimeout(200);
-  const samples = await page.evaluate(() => { window.stopCursorSamples = true; return window.cursorSamples; });
-  assert(samples.length > 100);
-  const error = Math.max(...samples.map(s => Math.hypot(s.x - s.expectedX, s.y - s.expectedY)));
-  assert(error < 1, `Position and visual scaling stay independent during all interactions: ${error}px`);
-  assert.equal(await page.locator('.custom-cursor').count(), 1);
-  assert.equal(await page.locator('.cursor-ring').count(), 1);
-  assert.equal(await page.locator('.cursor-ring').evaluate(e => getComputedStyle(e).pointerEvents), 'none');
-  assert.equal(await page.locator('.cursor-position').evaluate(e => getComputedStyle(e).pointerEvents), 'none');
-  assert.equal(await page.evaluate(() => document.documentElement.dataset.customCursor), 'true');
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.waitForFunction(() => !document.documentElement.dataset.customCursor);
-  await page.emulateMedia({ reducedMotion: 'no-preference', forcedColors: 'active' });
-  await page.mouse.move(900, 450);
-  assert.equal(await page.evaluate(() => document.documentElement.dataset.customCursor), undefined);
-  const touch = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  const mobile = await touch.newPage();
-  await mobile.addInitScript(() => sessionStorage.setItem('portfolio:intro:v1', 'seen'));
-  await mobile.goto(base);
-  await mobile.waitForFunction(() => document.querySelector('.ambient-background').dataset.renderer === 'static');
-  await mobile.mouse.click(200, 400);
-  await mobile.mouse.move(220, 420);
-  assert.equal(await mobile.evaluate(() => document.documentElement.dataset.customCursor), undefined, 'Touch devices retain native cursor behavior');
-  await touch.close();
-  assert.deepEqual(errors, []);
-  console.log(`Cursor press/rapid/double/moving/scrolling clicks, navigation, gallery buttons, technology/contact/case links and resize passed; maximum center offset ${error.toFixed(3)}px.`);
-} finally { await browser.close(); }
+  await native();
+  const card=page.locator('.project-card').first();
+  await card.scrollIntoViewIfNeeded();
+  const link=card.locator('.case-link').first();await link.hover();
+  assert.equal(await link.evaluate(e=>getComputedStyle(e).cursor),'pointer');
+  if(width===1440)await page.waitForFunction(()=>document.querySelector('.project-card').dataset.pointerLight==='true');
+  const gallery=card.locator('.gallery-stage');await gallery.hover();
+  assert.equal(await gallery.evaluate(e=>getComputedStyle(e).cursor),'pointer');
+  await gallery.click();await page.locator('dialog[open]').waitFor();
+  const close=page.getByRole('button',{name:'Close screenshot viewer',exact:true});
+  assert.equal(await close.evaluate(e=>getComputedStyle(e).cursor),'pointer');
+  await close.click();await native();
+  const text=page.locator('#experience .section-heading > p');
+  await text.scrollIntoViewIfNeeded();
+  assert.notEqual(await text.evaluate(e=>getComputedStyle(e).userSelect),'none');
+  if(width===1440){await text.dblclick();assert((await page.evaluate(()=>getSelection().toString())).length>0);}
+  // Test native text-editing behavior without adding a permanent site control.
+  await page.evaluate(()=>{getSelection()?.removeAllRanges();const input=document.createElement('input');input.id='native-cursor-test';input.style.cssText='position:fixed;top:200px;left:20px;z-index:10000';document.body.append(input)});
+  const input=page.locator('#native-cursor-test');await input.fill('Native text editing');
+  assert.equal(await input.evaluate(e=>getComputedStyle(e).cursor),'text');
+  await input.evaluate(e=>e.remove());
+  await link.click();await page.getByRole('link',{name:'All projects',exact:true}).waitFor();await native();
+  await page.getByRole('link',{name:'All projects',exact:true}).click();await page.locator('#projects-heading').waitFor();await native();
+  assert.deepEqual(errors,[]);await page.close();
+  console.log('Native cursors, selection, controls, gallery, hover lighting and navigation passed',width);
+ }
+}finally{await browser.close()}

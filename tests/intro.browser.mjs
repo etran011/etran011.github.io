@@ -26,7 +26,7 @@ try {
   await page.waitForFunction(() => document.documentElement.dataset.intro === 'revealing');
   assert(await page.locator('.intro-ready').evaluate(e => Number(getComputedStyle(e).opacity) >= .95));
   assert.equal(await page.locator('.ambient-background').getAttribute('data-renderer-ready'), 'true');
-  assert.equal(await page.locator('.custom-cursor').count(), 1);
+  assert.equal(await page.locator('.custom-cursor').count(), 0);
   await settled(page);
   assert(await page.evaluate(start => performance.now() - start < 3000, start));
   assert.equal(await page.evaluate(() => scrollY), 0);
@@ -34,7 +34,7 @@ try {
   assert(await page.locator('.hero-copy').evaluate(e => Number(getComputedStyle(e).opacity) > .95));
   await page.mouse.click(60, 80);
   await page.mouse.move(850, 500);
-  await page.waitForFunction(() => document.documentElement.dataset.customCursor === 'true');
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.customCursor), undefined);
   await page.mouse.wheel(0, 240);
   await page.waitForTimeout(1000);
   assert(Math.abs(await page.evaluate(() => scrollY) - 240) < 2, 'Scroll distance remains unchanged after loading');
