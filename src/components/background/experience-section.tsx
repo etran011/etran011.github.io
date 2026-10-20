@@ -9,7 +9,7 @@ export function ExperienceSection() {
       <Container>
         <div className="section-heading">
           <div><p className="eyebrow">Experience / 03</p><h2 id="experience-heading">Working with people.<br />Solving technical problems.</h2></div>
-          <p>Roles in campus IT support, AI response evaluation, and construction data analysis.</p>
+          <p>From campus support to data analysis, my work connects technical detail with clear communication.</p>
         </div>
         <ExperienceTimeline>
           {experience.map((item) => (
