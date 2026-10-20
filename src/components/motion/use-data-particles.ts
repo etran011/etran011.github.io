@@ -47,7 +47,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       pointer.strength += (targetPointer.strength - pointer.strength) * follow;
       if (pose && basePose && targetPose) {
         resolveAtmospherePose(input.current, targetPose);
-        const sceneFollow = 1 - Math.exp(-delta / 0.85);
+        const sceneFollow = 1 - Math.exp(-delta / 0.12);
         for (const key of poseKeys) { basePose[key] += (targetPose[key] - basePose[key]) * sceneFollow; pose[key] = basePose[key]; }
         // A short settling move introduces the existing sculpture, never blocks input.
         if (input.current.scene === "hero") {

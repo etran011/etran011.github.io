@@ -33,7 +33,7 @@ export function AmbientBackground() {
       const scene: AtmosphereScene = current?.id === "home" ? "hero" : current?.id === "about" || current?.id === "projects" || current?.id === "skills" ? current.id : "quiet";
       input.current.scene = scene;
       // Continuous document travel, independent of content scenes or pinning.
-      input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, hero.offsetHeight * 1.2))) : 1;
+      input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, hero.offsetHeight * 0.85))) : 1;
       element.style.setProperty("--atmosphere-progress", input.current.heroProgress.toFixed(4));
       const section = current?.id ?? "home";
       if (element.dataset.section !== section) element.dataset.section = section;

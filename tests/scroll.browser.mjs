@@ -31,18 +31,18 @@ try {
   await page.waitForTimeout(150);
   assert(Math.abs(await page.evaluate(() => scrollY) - 120) < 2);
   const progress = await expansion();
-  assert(progress > .07 && progress < .15);
+  assert(progress > .12 && progress < .22);
   // Native document travel finishes immediately; only decorative expansion eases.
   await page.mouse.wheel(0, 900);
   await page.waitForTimeout(100);
   assert(Math.abs(await page.evaluate(()=>scrollY)-1020)<2,'Large wheel input has no artificial resistance');
-  assert(await expansion() < .4);
+  assert(await expansion() > progress && await expansion() < .85, "Large jumps still ease without freezing the visual");
   await page.waitForTimeout(1800);
   assert(Math.abs(await page.evaluate(() => scrollY) - 1020) < 2);
   await page.mouse.wheel(0, -420);
   await page.waitForTimeout(1500);
   assert(Math.abs(await page.evaluate(() => scrollY) - 600) < 2);
-  assert(Math.abs(await expansion() - 600 / ((await hero.boundingBox()).height * 1.2)) < .03);
+  assert(Math.abs(await expansion() - 600 / ((await hero.boundingBox()).height * 0.85)) < .03);
   // Keyboard keys and anchor focus are browser-owned, with no scroll engine.
   const beforeKeys=await page.evaluate(()=>scrollY);
   await page.keyboard.press('PageDown');await page.waitForTimeout(450);
