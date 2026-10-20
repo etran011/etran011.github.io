@@ -1,6 +1,6 @@
 /** Approved terminal copy with explicit line breaks; playback is independent of wording. */
 export const heroHeadlinePhrases = [
-  { lines: ["Studying data science.", "Writing Python."] },
+  { lines: ["Breaking down complex problems.", "Finding answers in data."] },
   { lines: ["Exploring AI &", "machine learning."] },
 ] as const;
 export const heroHeadlineText = heroHeadlinePhrases.map(phrase => phrase.lines.join(" ")).join(" ");
