@@ -2,6 +2,7 @@ import { ArrowDown } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { ContentIsland } from "@/components/ui/content-island";
 import { about } from "@/data/background";
+import { ProjectScrollLink } from "@/components/interaction/project-scroll-link";
 
 export function AboutSection() {
   return (
@@ -15,7 +16,7 @@ export function AboutSection() {
             </header>
             <div className="about-copy">
               {about.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
-              <a className="text-link about-story-next" href="#projects">See what I’m building <ArrowDown size={16} aria-hidden="true" /></a>
+              <ProjectScrollLink>See what I’m building <ArrowDown size={16} aria-hidden="true" /></ProjectScrollLink>
             </div>
           </div>
         </ContentIsland>
