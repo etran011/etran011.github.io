@@ -9,7 +9,7 @@ export function Hero() {
       <Container className="hero-scene">
         <div className="hero-grid hero-identity">
           <div className="hero-copy">
-            <h1 id="hero-heading">{profile.name}<span>.</span></h1>
+            <h1 id="hero-heading">{profile.name}</h1>
             <p className="hero-role">{profile.institution} <span aria-hidden="true">·</span> {profile.discipline} <span aria-hidden="true">·</span> Class of {profile.graduationYear}</p>
             <div className="hero-narrative">
               <HeroHeadline />
