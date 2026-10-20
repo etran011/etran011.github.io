@@ -42,7 +42,9 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       const delta = previous ? Math.min(50, now - previous) / 1000 : 1 / 60;
       expansion = advanceExpansion(expansion, input.current.heroProgress, delta);
       time += previous && !introPending() ? delta : 0; previous = now;
-      const follow = 1 - Math.exp(-delta / 0.18);
+      // Reach 90% of active pointer travel in ~80ms, independently of frame rate.
+      // Keep the existing gentle release when the pointer leaves or focus is lost.
+      const follow = 1 - Math.exp(-delta / (targetPointer.strength ? 0.035 : 0.18));
       pointer.x += (targetPointer.x - pointer.x) * follow; pointer.y += (targetPointer.y - pointer.y) * follow;
       pointer.strength += (targetPointer.strength - pointer.strength) * follow;
       if (pose && basePose && targetPose) {
