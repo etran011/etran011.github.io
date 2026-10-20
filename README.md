@@ -4,9 +4,11 @@ A personal portfolio connecting data science and software engineering.
 
 ## Status
 
-Phase 6: final sections complete. The portfolio includes a responsive contact section, a shared footer, page-specific search and sharing metadata, favicon variants, and accessibility improvements. Résumé downloads and the public PDF were removed at the user’s request. Deployment and further phases remain deferred until requested.
+The portfolio is configured for GitHub Pages deployment through GitHub Actions. Production checks cover TypeScript, ESLint, calculation and behavior tests, and static route/asset integrity. Résumé downloads and the public PDF remain removed.
 
-Target hosting: https://etran011.github.io/ (not deployed yet).
+Website: https://etran011.github.io/
+
+Pushes to `main` run [the deployment workflow](.github/workflows/pages.yml). A successful build publishes only `out/`, not the repository source. The same workflow can be run manually from GitHub Actions. See [deployment configuration](docs/github-pages-deployment.md).
 
 See [content audit](docs/content-audit.md) for verified source material and outstanding assets.
 
