@@ -5,7 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } f
 import { ChevronLeft, ChevronRight, Expand, X, ZoomIn, ZoomOut } from "lucide-react";
 import type { Project } from "@/types/portfolio";
 
-export function ScreenshotGallery({ screenshots, title }: { screenshots: Project["screenshots"]; title: string }) {
+export function ScreenshotGallery({ screenshots, title, sizes = "(max-width: 767px) 90vw, 1000px" }: { screenshots: Project["screenshots"]; title: string; sizes?: string }) {
   const [selected, setSelected] = useState(0);
   const selection = useRef(0);
   const [direction, setDirection] = useState(1);
@@ -55,7 +55,10 @@ export function ScreenshotGallery({ screenshots, title }: { screenshots: Project
             gesture.current = null;
             if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) { swiped.current = true; move(dx < 0 ? 1 : -1); }
           }}>
-          <Image key={shot.src} src={shot.src} alt={shot.alt} width={shot.width} height={shot.height} sizes="(max-width: 767px) 100vw, 1000px" />
+          <picture key={shot.src}>
+            {shot.previewSrcSet && <source type="image/webp" srcSet={shot.previewSrcSet} sizes={sizes} />}
+            <Image src={shot.src} alt={shot.alt} width={shot.width} height={shot.height} sizes={sizes} />
+          </picture>
           <span className="expand-label"><Expand size={15} aria-hidden="true" /> Enlarge</span>
         </button>
         <figcaption aria-live="polite"><span key={shot.src}>{shot.caption}</span></figcaption>

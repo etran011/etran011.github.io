@@ -26,7 +26,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         </ul>
         </div>
       </div>
-      <ScreenshotGallery screenshots={project.screenshots} title={project.title} />
+      <ScreenshotGallery screenshots={project.screenshots} title={project.title} sizes="(min-width: 1024px) 550px, 90vw" />
     </article>
   );
 }

@@ -24,7 +24,7 @@ export interface Project {
     outcome: string;
   };
   technologies: readonly string[];
-  screenshots: ReadonlyArray<{ src: `/${string}`; alt: string; width: number; height: number; caption: string }>;
+  screenshots: ReadonlyArray<{ src: `/${string}`; alt: string; width: number; height: number; caption: string; previewSrcSet?: string }>;
   repositoryUrl?: `https://${string}`;
   demoUrl?: `https://${string}`;
 }
