@@ -33,3 +33,15 @@ Near-black #0B0D12 background, charcoal #12151C surfaces, off-white #F5F5F7 text
 ## Phase 4 background integration
 
 `src/data/background.ts` holds the four résumé roles, William & Mary degree, expected 2028 graduation, overall GPA, all ten listed courses, and the résumé skill inventory grouped into six categories. Experience bullets are condensed without introducing new employers, dates, metrics, or responsibilities. The National Cyber League role remains explicitly labeled as competition experience. About copy draws on the user’s stated interests and the supplied professional/project materials; it adds no unsupported hobbies or credentials.
+
+## PlatePredict repository review — October 20, 2026
+
+Source: https://github.com/etran011/platepredict at `5f1f23760264d3f8eeacd8e0a2303aba7c533606`. This supersedes the notebook-only PlatePredict notes above. Reviewed README, package manifests, `src/platepredict/{data,regression,export}.py`, browser inference/comparison code, Estimator UI, and saved result artifacts.
+
+- Current app: React/TypeScript/Vite, static GitHub Pages; Python/pandas/scikit-learn run offline. The original EC2 deployment is retired. Source and demo links are now included.
+- Cleaning and seed-42 splits: 1,148 raw, 964 clean, 696 train, 123 validation, 145 test. Nine nutrition inputs exclude the calorie target. Six model families; training-only fits and validation-based selection.
+- `results/model-comparison.json`: selected degree-two polynomial validation RMSE 11.622651358267351 / R² 0.9974701649837109; test RMSE 10.033693711855085 / R² 0.9979089151412642. Portfolio values are rounded. Scores were checked against artifacts and evaluation code, not a new training run. Test scores were also recalculated from the saved 145 observation/prediction pairs.
+- Current code corrects the historical forest and split-labeling mistakes; the portfolio no longer describes them as unresolved.
+- Model export contains 54 terms plus intercept. The browser parity fixture covers 145 test records and 31 boundary cases. Review threshold is 56 kcal, an empirical heuristic, not independently validated detection.
+- Limitations retained: repeated profiles across random splits, unknown unseen-restaurant performance, unverified upstream dataset provenance/license, and no health-score or percentage-accuracy claim.
+- New user screenshots are pending; existing landing image remains unchanged until supplied.
