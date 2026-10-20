@@ -45,3 +45,7 @@ Source: https://github.com/etran011/platepredict at `5f1f23760264d3f8eeacd8e0a23
 - Model export contains 54 terms plus intercept. The browser parity fixture covers 145 test records and 31 boundary cases. Review threshold is 56 kcal, an empirical heuristic, not independently validated detection.
 - Limitations retained: repeated profiles across random splits, unknown unseen-restaurant performance, unverified upstream dataset provenance/license, and no health-score or percentage-accuracy claim.
 - Three supplied screenshots (2940 × 1668 each) show the updated landing page, the blank nutrition-entry form and model explanation, and pre-cleaning exploratory charts. Original PNGs are preserved; lossless WebP copies are used in the existing card/detail gallery. The form image does not show a completed estimate; the charts are not model evaluation results. The previous landing asset is retained but no longer displayed.
+
+## Portfolio copy review — October 20, 2026
+
+Reviewed hero, About, project cards/case studies, experience, education, tools, contact, footer, and social metadata. Replaced vague slogans with direct labels or concrete descriptions; retained résumé-backed achievements and the consulting interest. The first terminal phrase now reads “Studying data science. Writing Python.”; the AI/ML phrase and playback logic are unchanged. Removed decorative periods after Erik’s name in hero/footer and their unused color rules. Social-card source, raster output, and alt text now agree. No new professional claims or tools were added.

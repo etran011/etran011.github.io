@@ -23,7 +23,7 @@ export const projects = [
     featured: true,
     highlights: ["European calls & puts", "Analytical Greeks", "Implied volatility", "Sensitivity analysis"],
     caseStudy: {
-      overview: "OptionLab brings European option valuation, risk sensitivities, and implied volatility into one focused workspace. I developed the Python pricing backend and directed AI-assisted frontend development, reviewing component behavior, API integration, and visualization design.",
+      overview: "OptionLab calculates European option prices, risk sensitivities, and implied volatility. I developed the Python pricing backend and directed AI-assisted frontend development, reviewing component behavior, API integration, and visualization design.",
       problem: "An option price is only part of the picture. Understanding how the price responds to changes in the underlying asset, volatility, and time requires a way to explore the model’s assumptions and sensitivities together.",
       approach: "A Python/FastAPI backend computes Black–Scholes prices and analytical Greeks. Brent root finding estimates implied volatility from an observed premium. A Next.js interface presents those results alongside one-variable-at-a-time sensitivity charts.",
       architecture: ["Next.js and TypeScript provide the interface and same-origin API proxy.", "FastAPI validates inputs and serves pricing, Greeks, implied-volatility, and sensitivity endpoints.", "Python owns quantitative calculations; Recharts presents sampled results without duplicating the pricing model in the browser."],
@@ -32,7 +32,7 @@ export const projects = [
         { title: "Making financial units explicit", description: "The interface distinguishes per-share values, percentage-point changes, annualized volatility, and daily Theta so the outputs can be interpreted correctly." },
         { title: "Testing model behavior", description: "Pytest checks cover put-call parity, pricing bounds, numerical Greeks, implied-volatility recovery, and API edge cases." },
       ],
-      outcome: "The result is a workspace that connects a valuation to its assumptions and sensitivities. The implementation keeps numerical logic in one backend and makes loading, input validation, and partial request failures visible in the interface.",
+      outcome: "The dashboard and sensitivity charts share the same backend calculations. The interface displays loading states, input errors, and partial request failures so users can tell which results are available.",
     },
     technologies: ["Python", "FastAPI", "Next.js", "TypeScript", "Recharts", "Pytest"],
     screenshots: [

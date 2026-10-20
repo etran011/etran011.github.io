@@ -103,10 +103,10 @@ export interface About { heading: string; emphasis: string; paragraphs: readonly
 
 // Concise first-person introduction grounded in the supplied résumé and interests.
 export const about = {
-  heading: "Curiosity,",
-  emphasis: "put into practice.",
+  heading: "A little",
+  emphasis: "about me.",
   paragraphs: [
     "I’m Erik, a Data Science student at William & Mary. I enjoy programming, statistics, and the process of turning a question into working software.",
-    "I’m interested in AI, machine learning, software engineering, financial technology, and consulting. I enjoy combining technical skills with analytical problem-solving to understand real-world business challenges and build useful solutions.",
+    "I’m interested in AI, machine learning, software engineering, financial technology, and consulting. I like using code and data analysis to work through business questions, such as what a dataset can tell us and where its limits are.",
   ],
 } as const satisfies About;

@@ -6,8 +6,8 @@ export function ProjectShowcase() {
   const [leading, ...remaining] = projects;
   const heading = (
     <div className="section-heading project-scene-heading">
-      <div><p className="eyebrow">Selected work / 02</p><h2 id="projects-heading">Ideas, put to work.</h2></div>
-      <p>Exploring financial models and machine learning through software you can understand.</p>
+      <div><p className="eyebrow">Selected work / 02</p><h2 id="projects-heading">Software &amp; data projects.</h2></div>
+      <p>Interactive tools for option pricing and calorie estimation, with documented methods and results.</p>
     </div>
   );
   const introduction = <>{heading}{leading && <ProjectCard project={leading} index={0} />}</>;

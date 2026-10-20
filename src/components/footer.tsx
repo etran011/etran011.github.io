@@ -8,7 +8,7 @@ export function Footer() {
     <footer className="site-footer">
       <Container>
         <div className="footer-top">
-          <div><p className="footer-name">{profile.name}</p><p className="footer-description">Data, software, and thoughtful experiences.</p></div>
+          <div><p className="footer-name">{profile.name}</p><p className="footer-description">Data Science student at William &amp; Mary.</p></div>
           <nav className="footer-links" aria-label="Footer navigation">
             <Link href="/#contact">Contact</Link>
             {profile.links.map((link) => <a key={link.label} href={link.href}>{link.label}</a>)}

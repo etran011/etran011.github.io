@@ -36,7 +36,7 @@ export function EducationSection() {
               <div className="education-graduation"><dt>Expected graduation</dt><dd>{education.graduation.replace("Expected ", "")}</dd></div>
               <div className="education-gpa"><dt>Cumulative GPA</dt><dd>{education.gpa.split(" / ")[0]} <span>/ {education.gpa.split(" / ")[1]}</span></dd></div>
             </dl>
-            <p className="education-field eyebrow">Mathematics × Computing × Discovery</p>
+            <p className="education-field eyebrow">Statistics × Computing × Machine learning</p>
           </div>
         </div>
         <details className="education-coursework"><summary><span>Academic foundations</span><span className="education-coursework-hint">Explore coursework <span aria-hidden="true">+</span></span></summary><ul>{education.coursework.map((course, i) => <li key={course}><span aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>{course}</li>)}</ul></details>

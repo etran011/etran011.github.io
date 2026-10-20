@@ -7,7 +7,7 @@ export const site = {
 };
 
 export function pageMetadata({ title, description, path }: { title: string; description: string; path: string }): Metadata {
-  const image = { url: "/social-card.png", width: 1200, height: 630, alt: "Erik Tran — turning data into useful experiences. Data science and software engineering." };
+  const image = { url: "/social-card.png", width: 1200, height: 630, alt: "Erik Tran — Data science, Python, and web projects." };
   return {
     title,
     description,

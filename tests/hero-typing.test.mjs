@@ -33,7 +33,7 @@ test('typing is slower than backspacing, with natural timing and punctuation pau
 
 test('remaining hero phrases retain their exact wording and order',()=>{
   assert.deepEqual(heroHeadlinePhrases.map(p=>p.lines.join(' ')),[
-    'Building intelligent systems, one idea at a time.',
+    'Studying data science. Writing Python.',
     'Exploring AI & machine learning.',
   ]);
 });
