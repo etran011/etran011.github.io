@@ -95,7 +95,7 @@ export interface SkillCategory { id: "languages" | "libraries" | "tools"; name: 
 
 export const skillCategories = [
   { id: "languages", name: "Languages", items: ["Python", "R", "SQL", "Bash"] },
-  { id: "libraries", name: "Frameworks & libraries", items: ["FastAPI", "Next.js", "pandas", "NumPy", "scikit-learn", "PyTorch", "Matplotlib", "Seaborn", "Pytest"] },
+  { id: "libraries", name: "Frameworks & libraries", items: ["FastAPI", "Next.js", "pandas", "NumPy", "SciPy", "scikit-learn", "PyTorch", "Matplotlib", "Seaborn", "Pytest"] },
   { id: "tools", name: "Tools & environments", items: ["Git", "Linux", "AWS EC2", "Tableau", "Excel", "Stata"] },
 ] as const satisfies readonly SkillCategory[];
 
