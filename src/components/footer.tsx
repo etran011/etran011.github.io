@@ -1,3 +1,4 @@
+import { AnchorScrollLink } from "@/components/interaction/anchor-scroll-link";
 import Link from "next/link";
 import { ArrowUp } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -16,7 +17,7 @@ export function Footer() {
         </div>
         <div className="footer-bottom">
           <p>© {new Date().getFullYear()} {profile.name}</p>
-          <a className="footer-top-link" href="#main-content">Back to top <ArrowUp size={16} aria-hidden="true" /></a>
+          <AnchorScrollLink className="footer-top-link" href="#main-content" toTop>Back to top <ArrowUp size={16} aria-hidden="true" /></AnchorScrollLink>
         </div>
       </Container>
     </footer>

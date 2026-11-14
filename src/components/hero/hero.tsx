@@ -1,3 +1,4 @@
+import { AnchorScrollLink } from "@/components/interaction/anchor-scroll-link";
 import { ArrowDown, Mail } from "lucide-react";
 import { HeroHeadline } from "./hero-headline";
 import { Container } from "@/components/ui/container";
@@ -25,7 +26,7 @@ export function Hero() {
             </div>
           </div>
         </div>
-        <a className="hero-scroll-link text-link" href="#about"><span className="eyebrow">Scroll to discover</span><span className="hero-scroll-track" aria-hidden="true" /><ArrowDown size={16} aria-hidden="true" /><span className="sr-only">About Erik</span></a>
+        <AnchorScrollLink className="hero-scroll-link text-link" href="#about"><span className="eyebrow">Scroll to discover</span><span className="hero-scroll-track" aria-hidden="true" /><ArrowDown size={16} aria-hidden="true" /><span className="sr-only">About Erik</span></AnchorScrollLink>
       </Container>
     </section>
   );
