@@ -214,7 +214,10 @@ export function createAtmosphereRenderer(canvas: HTMLCanvasElement, initialQuali
       resize(w: number, h: number) {
         width = Math.max(1, w); height = Math.max(1, h);
         ratio = Math.min(devicePixelRatio || 1, atmosphereQuality[quality].pixelRatio, Math.sqrt(2_400_000 / (width * height)), 4096 / width, 4096 / height);
-        canvas.width = Math.max(1, Math.round(width * ratio)); canvas.height = Math.max(1, Math.round(height * ratio));
+        const pixelWidth = Math.max(1, Math.round(width * ratio)), pixelHeight = Math.max(1, Math.round(height * ratio));
+        // Assigning either dimension clears/reallocates the drawing buffer, even unchanged.
+        if (canvas.width === pixelWidth && canvas.height === pixelHeight) return;
+        canvas.width = pixelWidth; canvas.height = pixelHeight;
         gl.viewport(0, 0, canvas.width, canvas.height);
       },
       setQuality(next: AtmosphereQuality) {

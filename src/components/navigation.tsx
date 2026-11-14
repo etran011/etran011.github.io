@@ -24,28 +24,33 @@ export function Navigation() {
   const activeHref = pathname === "/" ? `/#${active}` : pathname.startsWith("/projects/") ? "/#projects" : undefined;
 
   useEffect(() => {
-    let frame = 0;
+    let frame = 0, dirty = true, maximum = 0;
+    let sections: { id: string; top: number }[] = [];
     let visible = pathname !== "/";
     const update = () => {
       frame = 0;
+      if (dirty) {
+        sections = Array.from(document.querySelectorAll<HTMLElement>("main > section[id]"), section => ({ id: section.id, top: section.getBoundingClientRect().top + scrollY }));
+        maximum = document.documentElement.scrollHeight - innerHeight;
+        dirty = false;
+      }
       // Separate thresholds keep small reversals from flickering the header.
       visible = pathname !== "/" || (visible ? window.scrollY > 48 : window.scrollY > 120);
       if (header.current && header.current.dataset.navVisible !== String(visible)) header.current.dataset.navVisible = String(visible);
-      const maximum = document.documentElement.scrollHeight - window.innerHeight;
       if (pathname !== "/") return;
-      const sections = links.filter((link) => link.href.startsWith("/#")).map((link) => document.getElementById(link.href.slice(2))).filter((section): section is HTMLElement => Boolean(section));
       let current = sections[0]?.id ?? "home";
-      for (const section of sections) if (section.getBoundingClientRect().top <= 170) current = section.id;
+      for (const section of sections) if (section.top <= scrollY + 170) current = section.id;
       if (maximum > 0 && window.scrollY >= maximum - 2) current = sections.at(-1)?.id ?? current;
       setActive(current);
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const invalidate = () => { dirty = true; schedule(); };
     schedule();
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    const observer = new ResizeObserver(schedule);
+    window.addEventListener("resize", invalidate);
+    const observer = new ResizeObserver(invalidate);
     observer.observe(document.body);
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", schedule); };
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener("scroll", schedule); window.removeEventListener("resize", invalidate); };
   }, [pathname]);
   const toggle = useRef<HTMLButtonElement>(null);
 

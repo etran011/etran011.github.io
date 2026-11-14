@@ -26,14 +26,14 @@ export function AmbientBackground() {
     const coarse = matchMedia("(any-pointer: coarse)");
     let frame = 0, y = scrollY, enabled = false;
     let sections: { id: string; top: number }[] = [];
-    let hero: HTMLElement | null = null;
+    let heroHeight = 0;
     const update = () => {
       const index = sections.findLastIndex((section) => section.top <= y + innerHeight * 0.4);
       const current = sections[index];
       const scene: AtmosphereScene = current?.id === "home" ? "hero" : current?.id === "about" || current?.id === "projects" || current?.id === "skills" ? current.id : "quiet";
       input.current.scene = scene;
       // Continuous document travel, independent of content scenes or pinning.
-      input.current.heroProgress = hero ? Math.max(0, Math.min(1, y / Math.max(1, hero.offsetHeight * 0.85))) : 1;
+      input.current.heroProgress = heroHeight ? Math.max(0, Math.min(1, y / (heroHeight * 0.85))) : 1;
       element.style.setProperty("--atmosphere-progress", input.current.heroProgress.toFixed(4));
       const section = current?.id ?? "home";
       if (element.dataset.section !== section) element.dataset.section = section;
@@ -43,7 +43,7 @@ export function AmbientBackground() {
     const measure = () => {
       frame = 0;
       sections = Array.from(document.querySelectorAll<HTMLElement>("main > section[id]"), (section) => ({ id: section.id, top: section.getBoundingClientRect().top + scrollY }));
-      hero = document.getElementById("home");
+      heroHeight = document.getElementById("home")?.offsetHeight ?? 0;
       y = scrollY; update();
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };

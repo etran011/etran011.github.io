@@ -2,7 +2,7 @@
 
 import { useEffect, type RefObject } from "react";
 import type { AtmospherePose, AtmosphereRenderer } from "@/lib/atmosphere-renderer";
-import { poseKeys, resolveAtmospherePose, type AtmosphereContext } from "@/lib/atmosphere-scene";
+import { resolveAtmospherePose, type AtmosphereContext } from "@/lib/atmosphere-scene";
 import { openingCameraWeight } from "@/lib/cinematic-motion";
 import { advanceExpansion } from "@/lib/particle-transition";
 import { chooseAtmosphereQuality, createAtmosphereBudget } from "@/lib/atmosphere-budget";
@@ -18,7 +18,8 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
     const forced = matchMedia("(forced-colors: active)");
     const coarse = matchMedia("(any-pointer: coarse)");
     let renderer: AtmosphereRenderer | undefined;
-    let pose: AtmospherePose | undefined, basePose: AtmospherePose | undefined, targetPose: AtmospherePose | undefined;
+    let pose: AtmospherePose | undefined;
+    const renderContext: AtmosphereContext = { scene: "hero", heroProgress: 0 };
     const pointer = { x: 0, y: 0, strength: 0 };
     const targetPointer = { x: 0, y: 0, strength: 0 };
     let frame = 0, generation = 0, previous = 0, previousFrame = 0, time = 0, expansion = 0;
@@ -47,10 +48,11 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
       const follow = 1 - Math.exp(-delta / (targetPointer.strength ? 0.035 : 0.18));
       pointer.x += (targetPointer.x - pointer.x) * follow; pointer.y += (targetPointer.y - pointer.y) * follow;
       pointer.strength += (targetPointer.strength - pointer.strength) * follow;
-      if (pose && basePose && targetPose) {
-        resolveAtmospherePose(input.current, targetPose);
-        const sceneFollow = 1 - Math.exp(-delta / 0.12);
-        for (const key of poseKeys) { basePose[key] += (targetPose[key] - basePose[key]) * sceneFollow; pose[key] = basePose[key]; }
+      if (pose) {
+        // Camera and geometry use the same bounded scroll response, not two lagging clocks.
+        renderContext.scene = input.current.scene;
+        renderContext.heroProgress = expansion;
+        resolveAtmospherePose(renderContext, pose);
         // A short settling move introduces the existing sculpture, never blocks input.
         if (input.current.scene === "hero") {
           const opening = openingCameraWeight(time) * (1 - expansion);
@@ -92,7 +94,7 @@ export function useDataParticles(canvasRef: RefObject<HTMLCanvasElement | null>,
         const quality = chooseAtmosphereQuality(navigator.hardwareConcurrency || 4, saveData);
         budget = createAtmosphereBudget(quality);
         renderer = createAtmosphereRenderer(canvas, quality, color); root.dataset.quality = quality;
-        basePose = { ...restingPose }; pose = { ...restingPose }; targetPose = { ...restingPose };
+        pose = { ...restingPose };
         needsResize = true; start();
       } catch { if (current === generation) fallback(); }
     };

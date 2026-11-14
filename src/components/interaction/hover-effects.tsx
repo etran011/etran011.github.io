@@ -39,7 +39,7 @@ export function HoverEffects() {
       if (nextButton !== button) { resetButton(); button = nextButton; dirty = true; }
       if (nextCard !== card) { resetCard(); card = nextCard; dirty = true; }
       x = event.clientX; y = event.clientY;
-      if (!frame) frame = requestAnimationFrame(write);
+      if ((button || card) && !frame) frame = requestAnimationFrame(write);
     };
     const move = (event: PointerEvent) => { keyboard = false; update(event); };
     const key = (event: KeyboardEvent) => { if (event.key === "Tab" || event.key === "Escape") { keyboard = true; reset(); } };
