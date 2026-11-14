@@ -3,6 +3,9 @@ export const cinematicMotion = {
   easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
   entrance: 640,
   quietEntrance: 520,
+  cardEntrance: 600,
+  cardDistance: 20,
+  cardStagger: 90,
 } as const;
 
 /** Active animation time pauses with the renderer. No separate intro loop or clock. */

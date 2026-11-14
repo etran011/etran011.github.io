@@ -17,8 +17,7 @@ export function ScrollReveals({ children }: { children: ReactNode }) {
     const animations = new Map<Element, Animation>();
     const seen = new WeakSet<Element>();
     const observer = new IntersectionObserver((entries) => {
-      const entering = entries.filter(entry => entry.isIntersecting && !seen.has(entry.target)
-        && entry.intersectionRatio >= Math.min(0.15, window.innerHeight * 0.15 / Math.max(1, entry.boundingClientRect.height)));
+      const entering = entries.filter(entry => entry.isIntersecting && !seen.has(entry.target));
       entering.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left);
       let rowTop = -Infinity;
       let rowIndex = 0;
@@ -27,31 +26,38 @@ export function ScrollReveals({ children }: { children: ReactNode }) {
           rowTop = entry.boundingClientRect.top;
           rowIndex = 0;
         }
-        const delay = Math.min(rowIndex++, 2) * 90;
+        const delay = Math.min(rowIndex++, 2) * cinematicMotion.cardStagger;
         if (!entry.isIntersecting || seen.has(entry.target)) continue;
         seen.add(entry.target);
         observer.unobserve(entry.target);
-        if (preference.matches || forced.matches || entry.target.contains(document.activeElement)) continue;
+        // Never fade content that the reader already sees (initial load, restored
+        // scroll position, anchor jump, or a fast fling). Start just offscreen instead.
+        if (preference.matches || forced.matches || document.hidden ||
+            entry.boundingClientRect.top < window.innerHeight - 24 ||
+            entry.target.contains(document.activeElement)) continue;
         const target = entry.target;
         // Islands rise once in document flow; reading never depends on scroll progress.
-        const frames = [{ opacity: 0, translate: "0 20px" }, { opacity: 1, translate: "0 0" }];
-        const animation = target.animate(frames, {
-          duration: 600,
+        const frames = [{ opacity: 0, translate: `0 ${cinematicMotion.cardDistance}px` }, { opacity: 1, translate: "0 0" }];
+        let animation: Animation;
+        try { animation = target.animate(frames, {
+          duration: cinematicMotion.cardEntrance,
           delay,
           fill: "backwards",
           easing: cinematicMotion.easing,
-        });
+        }); } catch { continue; }
         animations.set(target, animation);
         animation.onfinish = () => { animations.delete(target); };
         if (document.hidden) animation.pause();
       }
-    }, { threshold: Array.from({ length: 16 }, (_, index) => index / 100) });
+    }, { threshold: 0, rootMargin: "0px 0px 80px 0px" });
     element.querySelectorAll(".content-island, .case-content section").forEach((target) => { if (!target.closest("#skills, #experience")) observer.observe(target); });
     const cancelAll = () => { if (preference.matches || forced.matches) { animations.forEach((animation) => animation.cancel()); animations.clear(); } };
     const revealFocused = (event: FocusEvent) => {
       animations.forEach((animation, target) => { if (target.contains(event.target as Node)) { animation.cancel(); animations.delete(target); } });
     };
-    const visibility = () => animations.forEach(animation => document.hidden ? animation.pause() : animation.play());
+    const visibility = () => {
+      if (document.hidden) { animations.forEach(animation => animation.cancel()); animations.clear(); }
+    };
     preference.addEventListener("change", cancelAll);
     forced.addEventListener("change", cancelAll);
     document.addEventListener("visibilitychange", visibility);
