@@ -23,7 +23,7 @@ export function HeroHeadline() {
       element.dataset.paused = "true";
     };
     const staticText = () => {
-      disabled = true; pause(); clearTimeout(fontTimer);
+      disabled = true; pause(); started = false;
       delete root.dataset.heroTyping;
       element.dataset.typing = "static";
       caret?.removeAttribute("data-caret");
@@ -52,8 +52,9 @@ export function HeroHeadline() {
       }, remaining);
     };
     const sync = () => {
-      if (disposed || disabled) return;
+      if (disposed) return;
       if (preference.matches) { staticText(); return; }
+      disabled = false;
       if (started) { if (active()) schedule(); else pause(); return; }
       if (!active() || preparing) return;
       preparing = true;

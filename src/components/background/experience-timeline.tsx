@@ -8,7 +8,7 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
   const root = useRef<HTMLOListElement>(null);
   useEffect(() => {
     const element = root.current;
-    if (!element || !("IntersectionObserver" in window)) return;
+    if (!element || !("IntersectionObserver" in window) || !("animate" in Element.prototype)) return;
     const reduce = matchMedia("(prefers-reduced-motion: reduce)");
     const forced = matchMedia("(forced-colors: active)");
     const compact = matchMedia("(max-width: 767px)");
@@ -17,7 +17,8 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
     const seen = new WeakSet<Element>();
     let visible = false, frame = 0, start = 0, length = 1;
     let positions: number[] = [];
-    const permitted = () => !reduce.matches && !forced.matches;
+    let motionAllowed = !reduce.matches && !forced.matches;
+    const permitted = () => motionAllowed;
     const update = () => {
       frame = 0;
       if (!visible || document.hidden || !permitted()) return;
@@ -48,10 +49,11 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
         element.style.removeProperty("--timeline-progress");
         entries.forEach(entry => delete entry.dataset.timelineState);
       } else {
-        animations.forEach(animation => document.hidden || !visible ? animation.pause() : animation.play());
+        animations.forEach(animation => document.hidden ? animation.pause() : animation.play());
         measure();
       }
     };
+    const preferences = () => { motionAllowed = !reduce.matches && !forced.matches; sync(); };
     const visibility = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); });
     visibility.observe(element);
     const entrances = new IntersectionObserver(records => {
@@ -59,7 +61,7 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
         if (!record.isIntersecting || seen.has(record.target)) continue;
         seen.add(record.target); entrances.unobserve(record.target);
         if (!permitted() || record.target.contains(document.activeElement)) continue;
-        const layers = record.target.querySelectorAll("article, .experience-date, .experience-highlights li");
+        const layers = record.target.querySelectorAll("article, .experience-date");
         layers.forEach((layer, index) => {
           const animation = layer.animate([
             { opacity: .92, translate: `0 ${compact.matches ? 4 : 8}px` },
@@ -67,7 +69,7 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
           ], { duration: compact.matches ? 320 : cinematicMotion.quietEntrance, delay: Math.min(index * 35, 140), easing: cinematicMotion.easing });
           animations.set(layer, animation);
           animation.onfinish = () => animations.delete(layer);
-          if (document.hidden || !visible) animation.pause();
+          if (document.hidden) animation.pause();
         });
       }
     }, { threshold: .08, rootMargin: "0px 0px -24px 0px" });
@@ -79,14 +81,14 @@ export function ExperienceTimeline({ children }: { children: ReactNode }) {
     window.addEventListener("resize", measure);
     document.addEventListener("visibilitychange", sync);
     element.addEventListener("focusin", focus);
-    reduce.addEventListener("change", sync); forced.addEventListener("change", sync);
+    reduce.addEventListener("change", preferences); forced.addEventListener("change", preferences);
     measure();
     return () => {
       cancelAnimationFrame(frame); animations.forEach(animation => animation.cancel());
       observer.disconnect(); visibility.disconnect(); entrances.disconnect();
       window.removeEventListener("scroll", schedule); window.removeEventListener("resize", measure);
       document.removeEventListener("visibilitychange", sync); element.removeEventListener("focusin", focus);
-      reduce.removeEventListener("change", sync); forced.removeEventListener("change", sync);
+      reduce.removeEventListener("change", preferences); forced.removeEventListener("change", preferences);
     };
   }, []);
   return <ol ref={root} className="experience-list">{children}</ol>;
