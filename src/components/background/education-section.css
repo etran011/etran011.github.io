@@ -23,7 +23,7 @@
 .education-metrics dt { font-family: var(--font-code); font-size: .625rem; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); }
 .education-graduation dd { font-size: clamp(5rem, 10.5vw, 9rem); letter-spacing: -.07em; font-weight: 350; line-height: 1.15; font-variant-numeric: tabular-nums; }
 .education-gpa { display: inline-block; margin-top: 2rem; }
-.education-gpa dd { margin-top: .4rem; font-size: 2rem; font-weight: 400; letter-spacing: -.04em; line-height: 1.25; }
+.education-gpa dd { margin-top: .4rem; font-size: 2.375rem; font-weight: 400; letter-spacing: -.04em; line-height: 1.25; }
 .education-gpa dd span { font-family: var(--font-code); color: var(--muted); font-size: .75rem; letter-spacing: 0; }
 .education-field { color: var(--muted); font-size: .55rem; letter-spacing: .08em; margin-top: 2.75rem; }
 .education-coursework { margin-top: clamp(1.5rem, 3vw, 2.5rem); border-block: 1px solid var(--border); }
@@ -46,7 +46,7 @@
   .education-metrics { display: flex; gap: 2rem; align-items: end; flex-wrap: wrap; }
   .education-graduation dd { font-size: clamp(4.5rem, 17vw, 6.5rem); }
   .education-gpa { margin-top: 0; padding-bottom: .75rem; }
-  .education-gpa dd { font-size: 1.75rem; }
+  .education-gpa dd { font-size: 2.0625rem; }
   .education-field { margin-top: 1.75rem; }
   .education-coursework ul { grid-template-columns: 1fr; }
   .education-coursework summary { font-size: .8rem; }
