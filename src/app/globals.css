@@ -359,9 +359,7 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .technology-button:hover { background: color-mix(in srgb, var(--brand-color, var(--accent)) 5%, transparent); }
  .technology-button:hover .technology-glyph::before { opacity: 0.7; }
 }
-.technology-stack[data-active-group="languages"] [data-collection="languages"] .stack-collection-heading h3,
-.technology-stack[data-active-group="libraries"] [data-collection="libraries"] .stack-collection-heading h3,
-.technology-stack[data-active-group="tools"] [data-collection="tools"] .stack-collection-heading h3 { color: var(--accent); }
+.stack-collection:has(.technology-button[aria-pressed="true"]) .stack-collection-heading h3 { color: var(--accent); }
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
  .technology-button .technology-glyph, .technology-button::after, .technology-name { transition: none; }
  .technology-button:hover .technology-glyph { transform: none; }
