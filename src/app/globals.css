@@ -386,6 +386,14 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .technology-icon { width: 2.25rem; height: 2.25rem; }
  .technology-glyph { width: 3rem; height: 3rem; }
 }
+/* Give the dense library row room without reducing the established icon sizes. */
+@media(min-width: 1024px) {
+ .skills-container { max-width: 90rem; padding-inline: clamp(1.25rem, 3vw, 3rem); }
+ .stack-collection { grid-template-columns: 8rem minmax(0, 1fr); column-gap: 1rem; }
+ .stack-technologies { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: .25rem; }
+ .technology-node { max-width: none; }
+ .technology-name { white-space: nowrap; }
+}
 @media(max-width: 479px) { .stack-introduction { display: block; } .stack-summary { margin-top: 1rem; } }
 
 /* Floating surfaces share one palette and a consistent underlying grid. */

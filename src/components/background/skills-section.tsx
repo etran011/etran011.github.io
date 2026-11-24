@@ -10,7 +10,7 @@ import { SkillsReveal } from "./skills-reveal";
 export function SkillsSection() {
   return (
     <section id="skills" tabIndex={-1} className="background-section skills-section" aria-labelledby="skills-heading">
-      <Container>
+      <Container className="skills-container">
         <TechnologyStack>
         <header className="stack-header">
           <div><p className="eyebrow">Technical stack / 04</p><h2 id="skills-heading">The tools behind<br /><span>the work.</span></h2></div>

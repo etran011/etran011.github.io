@@ -91,15 +91,12 @@ export const education = {
   ],
 } as const satisfies Education;
 
-export interface SkillCategory { id: "languages" | "web" | "ai" | "data" | "visualization" | "tools"; name: string; items: readonly string[]; }
+export interface SkillCategory { id: "languages" | "libraries" | "tools"; name: string; items: readonly string[]; }
 
 export const skillCategories = [
-  { id: "languages", name: "Programming languages", items: ["Python", "R", "SQL", "Bash"] },
-  { id: "web", name: "Web & APIs", items: ["Next.js", "FastAPI"] },
-  { id: "ai", name: "AI & Machine Learning", items: ["TensorFlow", "PyTorch", "scikit-learn"] },
-  { id: "data", name: "Data & analysis", items: ["pandas", "NumPy", "SciPy", "Excel", "Stata"] },
-  { id: "visualization", name: "Visualization", items: ["Matplotlib", "Seaborn", "Tableau"] },
-  { id: "tools", name: "Tools & infrastructure", items: ["Git", "Linux", "AWS EC2", "Pytest"] },
+  { id: "languages", name: "Languages", items: ["Python", "R", "SQL", "Bash"] },
+  { id: "libraries", name: "Frameworks & libraries", items: ["Next.js", "FastAPI", "TensorFlow", "PyTorch", "scikit-learn", "pandas", "NumPy", "SciPy", "Matplotlib", "Seaborn", "Pytest"] },
+  { id: "tools", name: "Tools & platforms", items: ["Git", "Linux", "AWS EC2", "Tableau", "Excel", "Stata"] },
 ] as const satisfies readonly SkillCategory[];
 
 export interface About { heading: string; emphasis: string; paragraphs: readonly string[]; }
