@@ -386,14 +386,6 @@ body { background-image: radial-gradient(ellipse at 80% 0%, #19233866, transpare
  .technology-icon { width: 2.25rem; height: 2.25rem; }
  .technology-glyph { width: 3rem; height: 3rem; }
 }
-/* Fit the shared content width; wrap when a readable label cell cannot fit. */
-@media(min-width: 1024px) {
- .stack-collection { grid-template-columns: 7rem minmax(0, 1fr); column-gap: .75rem; }
- .stack-technologies { display: grid; grid-template-columns: repeat(auto-fit, minmax(4.25rem, 1fr)); gap: .25rem; }
- .technology-node { max-width: none; }
- .technology-button { padding-inline: .125rem; }
- .technology-name { white-space: nowrap; }
-}
 @media(max-width: 479px) { .stack-introduction { display: block; } .stack-summary { margin-top: 1rem; } }
 
 /* Floating surfaces share one palette and a consistent underlying grid. */
